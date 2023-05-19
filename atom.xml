@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://shenshen6666.GitHub.io</id>
+    <title>申申丫的</title>
+    <updated>2023-05-19T09:23:39.693Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://shenshen6666.GitHub.io"/>
+    <link rel="self" href="https://shenshen6666.GitHub.io/atom.xml"/>
+    <subtitle>温故而知新</subtitle>
+    <logo>https://shenshen6666.GitHub.io/images/avatar.png</logo>
+    <icon>https://shenshen6666.GitHub.io/favicon.ico</icon>
+    <rights>All rights reserved 2023, 申申丫的</rights>
+    <entry>
+        <title type="html"><![CDATA[评论测试]]></title>
+        <id>https://shenshen6666.GitHub.io/post/ping-lun-ce-shi/</id>
+        <link href="https://shenshen6666.GitHub.io/post/ping-lun-ce-shi/">
+        </link>
+        <updated>2023-05-19T08:07:32.000Z</updated>
+        <content type="html"><![CDATA[<p>测试一下评论功能</p>
+]]></content>
+    </entry>
+</feed>
