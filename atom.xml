@@ -1,0 +1,2144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://shenshen6666.GitHub.io</id>
+    <title>申申丫的</title>
+    <updated>2024-01-16T07:06:05.361Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://shenshen6666.GitHub.io"/>
+    <link rel="self" href="https://shenshen6666.GitHub.io/atom.xml"/>
+    <subtitle>温故而知新</subtitle>
+    <logo>https://shenshen6666.GitHub.io/images/avatar.png</logo>
+    <icon>https://shenshen6666.GitHub.io/favicon.ico</icon>
+    <rights>All rights reserved 2024, 申申丫的</rights>
+    <entry>
+        <title type="html"><![CDATA[一些常见Java集合类的详细比较]]></title>
+        <id>https://shenshen6666.GitHub.io/post/yi-xie-chang-jian-java-ji-he-lei-de-xiang-xi-bi-jiao/</id>
+        <link href="https://shenshen6666.GitHub.io/post/yi-xie-chang-jian-java-ji-he-lei-de-xiang-xi-bi-jiao/">
+        </link>
+        <updated>2024-01-16T06:36:15.000Z</updated>
+        <content type="html"><![CDATA[<p>以下是Java集合框架中一些常见类和它们之间的详细比较：</p>
+<h2 id="目录">目录</h2>
+<ol>
+<li><a href="#java%E9%9B%86%E5%90%88%E6%A1%86%E6%9E%B6">Java集合框架</a><br>
+1.1 <a href="#list-%E6%8E%A5%E5%8F%A3">List 接口</a><br>
+1.1.1 <a href="#arraylist">ArrayList</a><br>
+1.1.2 <a href="#linkedlist">LinkedList</a><br>
+1.1.3 <a href="#vector">Vector</a><br>
+1.2 <a href="#set-%E6%8E%A5%E5%8F%A3">Set 接口</a><br>
+1.2.1 <a href="#hashset">HashSet</a><br>
+1.2.2 <a href="#linkedhashset">LinkedHashSet</a><br>
+1.2.3 <a href="#treeset">TreeSet</a><br>
+1.3 <a href="#queue-%E6%8E%A5%E5%8F%A3">Queue 接口</a><br>
+1.3.1 <a href="#linkedlist-1">LinkedList</a><br>
+1.3.2 <a href="#priorityqueue">PriorityQueue</a><br>
+1.4 <a href="#map-%E6%8E%A5%E5%8F%A3">Map 接口</a><br>
+1.4.1 <a href="#hashmap">HashMap</a><br>
+1.4.2 <a href="#linkedhashmap">LinkedHashMap</a><br>
+1.4.3 <a href="#treemap">TreeMap</a></li>
+<li><a href="#stringstringbuffer%E5%92%8Cstringbuilder%E5%8C%BA%E5%88%AB">String、StringBuffer和StringBuilder区别</a></li>
+<li><a href="#arraylist%E5%92%8Clinkedlist%E5%8C%BA%E5%88%AB">ArrayList和LinkedList区别</a></li>
+<li><a href="#arraylist%E5%92%8Cvector%E7%9A%84%E5%8C%BA%E5%88%AB">ArrayList和Vector的区别</a></li>
+<li><a href="#hashmap%E5%92%8Chashtable%E7%9A%84%E5%8C%BA%E5%88%AB">HashMap和Hashtable的区别</a></li>
+<li><a href="#arraylist%E5%92%8Clinkedlist%E7%9A%84%E5%8C%BA%E5%88%AB">ArrayList和LinkedList的区别</a></li>
+<li><a href="#arraylist%E5%92%8Carray%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB">ArrayList和Array有什么区别</a></li>
+<li><a href="#comparator%E5%92%8Ccomparable%E7%9A%84%E5%8C%BA%E5%88%AB">Comparator和Comparable的区别</a></li>
+</ol>
+<h2 id="1-list-接口">1. List 接口：</h2>
+<h4 id="arraylist">ArrayList:</h4>
+<ul>
+<li><strong>实现机制：</strong>
+<ul>
+<li>基于动态数组实现。</li>
+</ul>
+</li>
+<li><strong>性能特点：</strong>
+<ul>
+<li>随机访问速度快，适合读取操作较多的场景。</li>
+<li>插入和删除元素可能较慢，因为需要移动元素。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li>非线程安全。</li>
+</ul>
+</li>
+</ul>
+<h4 id="linkedlist">LinkedList:</h4>
+<ul>
+<li><strong>实现机制：</strong>
+<ul>
+<li>基于双向链表实现。</li>
+</ul>
+</li>
+<li><strong>性能特点：</strong>
+<ul>
+<li>插入和删除操作较快，适合频繁插入和删除的场景。</li>
+<li>访问速度较慢。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li>非线程安全。</li>
+</ul>
+</li>
+</ul>
+<h4 id="vector">Vector:</h4>
+<ul>
+<li><strong>实现机制：</strong>
+<ul>
+<li>与ArrayList类似，但是线程安全。</li>
+</ul>
+</li>
+<li><strong>性能特点：</strong>
+<ul>
+<li>同步操作会影响性能。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li>线程安全，但通常不推荐在大多数情况下使用。</li>
+</ul>
+</li>
+</ul>
+<p><strong>对比：</strong></p>
+<ul>
+<li>ArrayList和LinkedList适用于不同的使用场景。ArrayList对于随机访问较快，而LinkedList对于频繁插入和删除较快。</li>
+</ul>
+<h3 id="2-set-接口">2. Set 接口：</h3>
+<h4 id="hashset">HashSet:</h4>
+<ul>
+<li><strong>实现机制：</strong>
+<ul>
+<li>基于哈希表实现。</li>
+</ul>
+</li>
+<li><strong>性能特点：</strong>
+<ul>
+<li>不保证元素的顺序。</li>
+<li>查找元素速度快。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li>非线程安全。</li>
+</ul>
+</li>
+</ul>
+<h4 id="linkedhashset">LinkedHashSet:</h4>
+<ul>
+<li><strong>实现机制：</strong>
+<ul>
+<li>基于哈希表和链表实现。</li>
+</ul>
+</li>
+<li><strong>性能特点：</strong>
+<ul>
+<li>以插入顺序维护元素。</li>
+<li>查找元素速度较快。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li>非线程安全。</li>
+</ul>
+</li>
+</ul>
+<h4 id="treeset">TreeSet:</h4>
+<ul>
+<li><strong>实现机制：</strong>
+<ul>
+<li>基于红黑树实现。</li>
+</ul>
+</li>
+<li><strong>性能特点：</strong>
+<ul>
+<li>元素按照自然排序或者指定比较器排序。</li>
+<li>查找元素速度较慢。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li>非线程安全。</li>
+</ul>
+</li>
+</ul>
+<p><strong>对比：</strong></p>
+<ul>
+<li>HashSet适用于快速查找元素，LinkedHashSet适用于保持插入顺序，TreeSet适用于有序的元素。</li>
+</ul>
+<h3 id="3-queue-接口">3. Queue 接口：</h3>
+<h4 id="linkedlist-2">LinkedList:</h4>
+<ul>
+<li><strong>实现机制：</strong>
+<ul>
+<li>基于链表实现。</li>
+</ul>
+</li>
+<li><strong>性能特点：</strong>
+<ul>
+<li>可用作队列或双端队列。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li>非线程安全。</li>
+</ul>
+</li>
+</ul>
+<h4 id="priorityqueue">PriorityQueue:</h4>
+<ul>
+<li><strong>实现机制：</strong>
+<ul>
+<li>基于堆实现的优先队列。</li>
+</ul>
+</li>
+<li><strong>性能特点：</strong>
+<ul>
+<li>元素按照优先级检索。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li>非线程安全。</li>
+</ul>
+</li>
+</ul>
+<p><strong>对比：</strong></p>
+<ul>
+<li>LinkedList可以用作队列或双端队列，而PriorityQueue适用于按照优先级检索元素的场景。</li>
+</ul>
+<h3 id="4-map-接口">4. Map 接口：</h3>
+<h4 id="hashmap">HashMap:</h4>
+<ul>
+<li><strong>实现机制：</strong>
+<ul>
+<li>基于哈希表实现。</li>
+</ul>
+</li>
+<li><strong>性能特点：</strong>
+<ul>
+<li>不保证元素的顺序。</li>
+<li>查找键值对速度快。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li>非线程安全。</li>
+</ul>
+</li>
+</ul>
+<h4 id="linkedhashmap">LinkedHashMap:</h4>
+<ul>
+<li><strong>实现机制：</strong>
+<ul>
+<li>基于哈希表和链表实现。</li>
+</ul>
+</li>
+<li><strong>性能特点：</strong>
+<ul>
+<li>以插入顺序维护元素。</li>
+<li>查找键值对速度较快。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li>非线程安全。</li>
+</ul>
+</li>
+</ul>
+<h4 id="treemap">TreeMap:</h4>
+<ul>
+<li><strong>实现机制：</strong>
+<ul>
+<li>基于红黑树实现。</li>
+</ul>
+</li>
+<li><strong>性能特点：</strong>
+<ul>
+<li>键按照自然排序或者指定比较器排序。</li>
+<li>查找键值对速度较慢。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li>非线程安全。</li>
+</ul>
+</li>
+</ul>
+<h2 id="string-stringbuffer-和-stringbuilder-是-java-中字符串处理的三个主要类它们有以下区别"><code>String</code>、<code>StringBuffer</code> 和 <code>StringBuilder</code> 是 Java 中字符串处理的三个主要类，它们有以下区别：</h2>
+<h2 id="1-string不可变字符串">1. String（不可变字符串）：</h2>
+<ul>
+<li><strong>不可变性：</strong>
+<ul>
+<li><code>String</code> 对象一旦创建就是不可变的。任何对字符串的修改都会创建一个新的字符串对象。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li>由于不可变性，<code>String</code> 是线程安全的。</li>
+</ul>
+</li>
+<li><strong>性能：</strong>
+<ul>
+<li>拼接字符串时会创建新的字符串对象，性能可能受到影响。</li>
+</ul>
+</li>
+<li><strong>适用场景：</strong>
+<ul>
+<li>当字符串内容不经常变化，且需要线程安全时，使用 <code>String</code>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-stringbuffer可变字符串线程安全">2. StringBuffer（可变字符串，线程安全）：</h3>
+<ul>
+<li><strong>可变性：</strong>
+<ul>
+<li><code>StringBuffer</code> 对象是可变的，可以进行修改而不创建新对象。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li><code>StringBuffer</code> 是线程安全的，内部的方法都使用了 <code>synchronized</code> 关键字进行同步。</li>
+</ul>
+</li>
+<li><strong>性能：</strong>
+<ul>
+<li>由于同步机制，相对于 <code>StringBuilder</code> 性能较低。</li>
+</ul>
+</li>
+<li><strong>适用场景：</strong>
+<ul>
+<li>在多线程环境下需要进行字符串拼接或修改时，使用 <code>StringBuffer</code>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-stringbuilder可变字符串非线程安全">3. StringBuilder（可变字符串，非线程安全）：</h3>
+<ul>
+<li><strong>可变性：</strong>
+<ul>
+<li><code>StringBuilder</code> 对象是可变的，可以进行修改而不创建新对象。</li>
+</ul>
+</li>
+<li><strong>线程安全：</strong>
+<ul>
+<li><code>StringBuilder</code> 不是线程安全的，不使用同步机制。</li>
+</ul>
+</li>
+<li><strong>性能：</strong>
+<ul>
+<li>由于不使用同步机制，相对于 <code>StringBuffer</code> 性能较高。</li>
+</ul>
+</li>
+<li><strong>适用场景：</strong>
+<ul>
+<li>在单线程环境下需要进行字符串拼接或修改时，使用 <code>StringBuilder</code>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="总结">总结：</h3>
+<ul>
+<li>如果字符串内容不经常变化，且需要线程安全，使用 <code>String</code>。</li>
+<li>如果在多线程环境下需要进行字符串拼接或修改，使用 <code>StringBuffer</code>。</li>
+<li>如果在单线程环境下需要进行字符串拼接或修改，使用 <code>StringBuilder</code>。</li>
+</ul>
+<h2 id="arraylist-和-linkedlist-是-java-中-list-接口的两个不同实现它们有以下主要区别"><code>ArrayList</code> 和 <code>LinkedList</code> 是 Java 中 <code>List</code> 接口的两个不同实现，它们有以下主要区别：</h2>
+<h3 id="1-底层数据结构">1. 底层数据结构：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>基于动态数组实现。</li>
+<li>通过数组实现，可以快速随机访问元素，时间复杂度为 O(1)。</li>
+<li>适合读取操作较多的场景。</li>
+</ul>
+</li>
+<li>
+<p><strong>LinkedList：</strong></p>
+<ul>
+<li>基于双向链表实现。</li>
+<li>链表结构使得在任意位置插入或删除元素的操作更快，时间复杂度为 O(1)。</li>
+<li>适合频繁插入和删除的场景。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-访问速度">2. 访问速度：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>支持快速随机访问，因为可以通过索引直接访问数组元素。</li>
+<li>get 操作的时间复杂度为 O(1)。</li>
+</ul>
+</li>
+<li>
+<p><strong>LinkedList：</strong></p>
+<ul>
+<li>需要从头或尾遍历链表来访问元素，访问速度相对较慢。</li>
+<li>get 操作的时间复杂度为 O(n)，其中 n 为链表长度的一半。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-插入和删除操作">3. 插入和删除操作：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>插入和删除元素可能较慢，因为需要移动元素。</li>
+<li>时间复杂度为 O(n)，其中 n 为数组的长度。</li>
+</ul>
+</li>
+<li>
+<p><strong>LinkedList：</strong></p>
+<ul>
+<li>插入和删除操作较快，因为只需改变相邻节点的引用。</li>
+<li>时间复杂度为 O(1)。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-空间复杂度">4. 空间复杂度：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>每个元素都需要固定的空间，因此占用的空间相对较小。</li>
+</ul>
+</li>
+<li>
+<p><strong>LinkedList：</strong></p>
+<ul>
+<li>每个元素除了存储数据外，还需要存储两个引用，占用的空间相对较大。</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-适用场景">5. 适用场景：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>适合读取操作较多的场景，需要快速随机访问元素的情况。</li>
+</ul>
+</li>
+<li>
+<p><strong>LinkedList：</strong></p>
+<ul>
+<li>适合频繁插入和删除操作的场景，以及需要在中间位置插入或删除元素的情况。</li>
+</ul>
+</li>
+</ul>
+<h3 id="总结-2">总结：</h3>
+<ul>
+<li>使用 <code>ArrayList</code> 时，如果主要是读取操作较多，而不涉及频繁的插入和删除，是一个较好的选择。</li>
+<li>使用 <code>LinkedList</code> 时，如果需要频繁进行插入和删除操作，特别是在列表的中间位置，是一个更为合适的选择。</li>
+</ul>
+<h2 id="arraylist-和-vector-是-java-中-list-接口的两个实现类它们有一些区别主要涉及到同步性和性能方面"><code>ArrayList</code> 和 <code>Vector</code> 是 Java 中 <code>List</code> 接口的两个实现类，它们有一些区别，主要涉及到同步性和性能方面：</h2>
+<h3 id="1-线程安全性">1. 线程安全性：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li><code>ArrayList</code> 是非线程安全的。</li>
+<li>在多线程环境下，如果多个线程同时修改 <code>ArrayList</code>，可能导致不可预测的结果。</li>
+</ul>
+</li>
+<li>
+<p><strong>Vector：</strong></p>
+<ul>
+<li><code>Vector</code> 是线程安全的。</li>
+<li>所有的方法都是同步的，通过在方法上使用 <code>synchronized</code> 关键字来保证线程安全。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-同步机制">2. 同步机制：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>由于不是线程安全的，因此没有同步开销，适用于单线程环境。</li>
+</ul>
+</li>
+<li>
+<p><strong>Vector：</strong></p>
+<ul>
+<li>由于是线程安全的，所有方法都使用了同步机制，会引入额外的开销。</li>
+<li>在单线程环境下性能可能较差。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-扩容机制">3. 扩容机制：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>默认情况下，<code>ArrayList</code> 的初始容量是10，每次扩容会增加当前容量的一半。</li>
+<li>扩容时需要重新创建一个更大的数组，并将原数组中的元素复制到新数组。</li>
+</ul>
+</li>
+<li>
+<p><strong>Vector：</strong></p>
+<ul>
+<li>默认情况下，<code>Vector</code> 的初始容量是10，每次扩容会翻倍当前容量。</li>
+<li>扩容时需要重新创建一个更大的数组，并将原数组中的元素复制到新数组。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-性能比较">4. 性能比较：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>在单线程环境下，由于没有同步机制，性能相对较好。</li>
+<li>在多线程环境下，由于非线程安全，性能可能较差。</li>
+</ul>
+</li>
+<li>
+<p><strong>Vector：</strong></p>
+<ul>
+<li>在单线程环境下，由于同步机制的存在，性能相对较差。</li>
+<li>在多线程环境下，由于线程安全，性能相对较好。</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-推荐使用">5. 推荐使用：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>推荐在单线程环境或者是明确知道不会涉及到多线程并发修改的情况下使用。</li>
+</ul>
+</li>
+<li>
+<p><strong>Vector：</strong></p>
+<ul>
+<li>推荐在多线程环境下或者需要保证线程安全的情况下使用。然而，由于现代 Java 中有更好的线程安全的替代方案，通常建议使用 <code>ArrayList</code> 配合 <code>Collections.synchronizedList()</code> 或者使用 <code>CopyOnWriteArrayList</code> 来代替 <code>Vector</code>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="总结-3">总结：</h3>
+<ul>
+<li>如果不需要考虑线程安全，并且在单线程环境下使用，一般选择 <code>ArrayList</code>。</li>
+<li>如果需要考虑线程安全，或者在多线程环境下使用，可以选择 <code>Vector</code> 或者更现代的线程安全集合替代方案。</li>
+</ul>
+<h2 id="hashmap-和-hashtable-是-java-中用于存储键值对的两个类它们之间有一些区别"><code>HashMap</code> 和 <code>Hashtable</code> 是 Java 中用于存储键值对的两个类，它们之间有一些区别：</h2>
+<h3 id="1-线程安全性-2">1. 线程安全性：</h3>
+<ul>
+<li>
+<p><strong>HashMap：</strong></p>
+<ul>
+<li><code>HashMap</code> 是非线程安全的，不进行同步操作。</li>
+<li>在多线程环境下，需要使用外部同步手段来保证线程安全，或者使用 <code>Collections.synchronizedMap()</code> 方法将其包装成线程安全的 <code>Map</code>。</li>
+</ul>
+</li>
+<li>
+<p><strong>Hashtable：</strong></p>
+<ul>
+<li><code>Hashtable</code> 是线程安全的，所有的方法都使用了同步机制。</li>
+<li>在多线程环境下可以直接使用，但由于同步开销，性能可能相对较低。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-null-键值的处理">2. Null 键值的处理：</h3>
+<ul>
+<li>
+<p><strong>HashMap：</strong></p>
+<ul>
+<li>允许键和值都为 <code>null</code>。</li>
+<li>允许有一个 <code>null</code> 键和多个 <code>null</code> 值。</li>
+</ul>
+</li>
+<li>
+<p><strong>Hashtable：</strong></p>
+<ul>
+<li>不允许键和值为 <code>null</code>，会抛出 <code>NullPointerException</code>。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-继承关系">3. 继承关系：</h3>
+<ul>
+<li>
+<p><strong>HashMap：</strong></p>
+<ul>
+<li>继承自 <code>AbstractMap</code>，实现了 <code>Map</code> 接口。</li>
+</ul>
+</li>
+<li>
+<p><strong>Hashtable：</strong></p>
+<ul>
+<li>继承自 <code>Dictionary</code> 类，实现了 <code>Map</code> 接口。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-初始容量和扩容机制">4. 初始容量和扩容机制：</h3>
+<ul>
+<li>
+<p><strong>HashMap：</strong></p>
+<ul>
+<li>默认初始容量为16，扩容时每次增加当前容量的一倍。</li>
+<li>可以通过构造函数指定初始容量和负载因子。</li>
+</ul>
+</li>
+<li>
+<p><strong>Hashtable：</strong></p>
+<ul>
+<li>默认初始容量为11，扩容时每次增加当前容量的两倍加一。</li>
+<li>不提供直接设置负载因子的方法。</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-遍历方式">5. 遍历方式：</h3>
+<ul>
+<li>
+<p><strong>HashMap：</strong></p>
+<ul>
+<li>迭代器遍历或者使用增强的 <code>for-each</code> 循环。</li>
+</ul>
+</li>
+<li>
+<p><strong>Hashtable：</strong></p>
+<ul>
+<li>迭代器遍历或者使用增强的 <code>for-each</code> 循环。</li>
+</ul>
+</li>
+</ul>
+<h3 id="6-性能比较">6. 性能比较：</h3>
+<ul>
+<li>
+<p><strong>HashMap：</strong></p>
+<ul>
+<li>由于不进行同步操作，相对于 <code>Hashtable</code> 在多线程环境下性能较好。</li>
+</ul>
+</li>
+<li>
+<p><strong>Hashtable：</strong></p>
+<ul>
+<li>由于同步机制的存在，性能相对较差，不推荐在单线程环境中使用。</li>
+</ul>
+</li>
+</ul>
+<h3 id="总结-4">总结：</h3>
+<ul>
+<li>如果不考虑线程安全，并且在单线程环境下使用，一般选择 <code>HashMap</code>。</li>
+<li>如果需要线程安全，可以选择 <code>Hashtable</code>，但在现代 Java 中，更推荐使用 <code>ConcurrentHashMap</code> 或者通过 <code>Collections.synchronizedMap()</code> 包装 <code>HashMap</code> 来实现线程安全。</li>
+</ul>
+<h2 id="arraylist-和-linkedlist-是-java-中-list-接口的两个实现类它们之间有一些关键区别"><code>ArrayList</code> 和 <code>LinkedList</code> 是 Java 中 <code>List</code> 接口的两个实现类，它们之间有一些关键区别：</h2>
+<h3 id="1-底层数据结构-2">1. 底层数据结构：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>基于动态数组实现。</li>
+<li>支持快速随机访问，时间复杂度为 O(1)。</li>
+<li>适用于读取操作较多的场景。</li>
+</ul>
+</li>
+<li>
+<p><strong>LinkedList：</strong></p>
+<ul>
+<li>基于双向链表实现。</li>
+<li>支持高效的插入和删除操作，时间复杂度为 O(1)。</li>
+<li>适用于频繁插入和删除的场景。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-访问速度-2">2. 访问速度：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>由于支持快速随机访问，get 操作的时间复杂度为 O(1)。</li>
+</ul>
+</li>
+<li>
+<p><strong>LinkedList：</strong></p>
+<ul>
+<li>需要从头或尾遍历链表来访问元素，访问速度相对较慢。get 操作的时间复杂度为 O(n)，其中 n 为链表长度的一半。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-插入和删除操作-2">3. 插入和删除操作：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>插入和删除元素可能较慢，因为需要移动元素。时间复杂度为 O(n)，其中 n 为数组的长度。</li>
+</ul>
+</li>
+<li>
+<p><strong>LinkedList：</strong></p>
+<ul>
+<li>插入和删除操作较快，因为只需改变相邻节点的引用。时间复杂度为 O(1)。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-空间复杂度-2">4. 空间复杂度：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>每个元素都需要固定的空间，占用的空间相对较小。</li>
+</ul>
+</li>
+<li>
+<p><strong>LinkedList：</strong></p>
+<ul>
+<li>每个元素需要存储数据和两个引用，占用的空间相对较大。</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-适用场景-2">5. 适用场景：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>适合读取操作较多的场景，需要快速随机访问元素的情况。</li>
+</ul>
+</li>
+<li>
+<p><strong>LinkedList：</strong></p>
+<ul>
+<li>适合频繁插入和删除操作的场景，以及需要在中间位置插入或删除元素的情况。</li>
+</ul>
+</li>
+</ul>
+<h3 id="总结-5">总结：</h3>
+<ul>
+<li>使用 <code>ArrayList</code> 时，如果主要是读取操作较多，而不涉及频繁的插入和删除，是一个较好的选择。</li>
+<li>使用 <code>LinkedList</code> 时，如果需要频繁进行插入和删除操作，特别是在列表的中间位置，是一个更为合适的选择。</li>
+</ul>
+<h2 id="arraylist-和数组-array-是两种不同的数据结构它们之间有一些关键区别"><code>ArrayList</code> 和数组 (<code>Array</code>) 是两种不同的数据结构，它们之间有一些关键区别：</h2>
+<h3 id="1-动态性">1. 动态性：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li><code>ArrayList</code> 是 Java 中的集合类，基于动态数组实现。</li>
+<li>具有动态性，可以根据需要动态调整容量，不需要提前指定数组大小。</li>
+</ul>
+</li>
+<li>
+<p><strong>数组 (<code>Array</code>)：</strong></p>
+<ul>
+<li>数组是一种静态数据结构，一旦创建后，大小就是固定的，不能动态改变。</li>
+<li>需要在创建时指定数组的大小。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-长度变化">2. 长度变化：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li><code>ArrayList</code> 可以动态增长或缩小，可以方便地进行元素的添加、删除等操作。</li>
+</ul>
+</li>
+<li>
+<p><strong>数组 (<code>Array</code>)：</strong></p>
+<ul>
+<li>数组的长度是固定的，一旦创建后，不能改变。如果需要更改大小，需要创建一个新的数组。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-类型灵活性">3. 类型灵活性：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li><code>ArrayList</code> 可以存储对象，可以存储不同类型的元素。</li>
+</ul>
+</li>
+<li>
+<p><strong>数组 (<code>Array</code>)：</strong></p>
+<ul>
+<li>数组可以存储基本数据类型和对象，但一旦创建时确定了类型，不能存储其他类型的元素。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-内置方法">4. 内置方法：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li><code>ArrayList</code> 提供了丰富的方法，例如 <code>add</code>、<code>remove</code>、<code>get</code> 等，方便对元素进行操作。</li>
+</ul>
+</li>
+<li>
+<p><strong>数组 (<code>Array</code>)：</strong></p>
+<ul>
+<li>数组提供了一些基本的方法，如数组的拷贝、排序等，但没有像 <code>ArrayList</code> 那样的丰富方法。</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-自动装箱与拆箱">5. 自动装箱与拆箱：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li><code>ArrayList</code> 中可以直接存储对象，自动进行装箱（将基本数据类型转换为对应的包装类）和拆箱（将包装类转换为基本数据类型）。</li>
+</ul>
+</li>
+<li>
+<p><strong>数组 (<code>Array</code>)：</strong></p>
+<ul>
+<li>数组可以存储基本数据类型，但不能直接存储对象。如果需要存储对象，需要使用对象数组。</li>
+</ul>
+</li>
+</ul>
+<h3 id="6-遍历方式">6. 遍历方式：</h3>
+<ul>
+<li>
+<p><strong>ArrayList：</strong></p>
+<ul>
+<li>可以使用增强的 <code>for-each</code> 循环或迭代器进行遍历。</li>
+</ul>
+</li>
+<li>
+<p><strong>数组 (<code>Array</code>)：</strong></p>
+<ul>
+<li>可以使用普通的 <code>for</code> 循环进行遍历。</li>
+</ul>
+</li>
+</ul>
+<h3 id="总结-6">总结：</h3>
+<ul>
+<li>使用 <code>ArrayList</code> 更加灵活，适用于需要动态调整大小并进行频繁操作的场景。</li>
+<li>数组更适合在创建时确定大小，并且不需要频繁改变的场景，或者在需要直接访问内存中元素的情况。</li>
+</ul>
+<p><code>Comparator</code> 和 <code>Comparable</code> 是 Java 中用于对象比较的两个接口，它们之间有一些关键区别：</p>
+<h2 id="comparable和comparator的区别">Comparable和Comparator的区别</h2>
+<h3 id="comparable-接口">Comparable 接口：</h3>
+<ol>
+<li>
+<p><strong>位置：</strong></p>
+<ul>
+<li><code>Comparable</code> 接口位于 <code>java.lang</code> 包中。</li>
+<li>类实现了 <code>Comparable</code> 接口后，可以通过实现 <code>compareTo</code> 方法来定义对象之间的自然排序规则。</li>
+</ul>
+</li>
+<li>
+<p><strong>自然排序：</strong></p>
+<ul>
+<li><code>Comparable</code> 提供对象的自然排序（自然顺序），即在对象本身的类中定义的排序方式。</li>
+<li>实现了 <code>Comparable</code> 接口的类可以直接使用 <code>Arrays.sort()</code> 或 <code>Collections.sort()</code> 进行排序。</li>
+</ul>
+</li>
+<li>
+<p><strong>实现方式：</strong></p>
+<ul>
+<li>实现 <code>Comparable</code> 的类需要重写 <code>compareTo</code> 方法，该方法返回负数、零或正数，分别表示当前对象小于、等于或大于指定对象。</li>
+</ul>
+</li>
+</ol>
+<h3 id="comparator-接口">Comparator 接口：</h3>
+<ol>
+<li>
+<p><strong>位置：</strong></p>
+<ul>
+<li><code>Comparator</code> 接口位于 <code>java.util</code> 包中。</li>
+<li>类实现了 <code>Comparator</code> 接口后，可以通过实现 <code>compare</code> 方法定义对象之间的定制排序规则。</li>
+</ul>
+</li>
+<li>
+<p><strong>定制排序：</strong></p>
+<ul>
+<li><code>Comparator</code> 提供定制排序的能力，允许在不改变对象本身的情况下定义多种不同的比较规则。</li>
+<li>定制排序可以在对象本身之外的地方定义。</li>
+</ul>
+</li>
+<li>
+<p><strong>实现方式：</strong></p>
+<ul>
+<li>实现 <code>Comparator</code> 的类需要重写 <code>compare</code> 方法，该方法返回负数、零或正数，分别表示第一个对象小于、等于或大于第二个对象。</li>
+</ul>
+</li>
+</ol>
+<h3 id="使用场景">使用场景：</h3>
+<ul>
+<li>
+<p>使用 <code>Comparable</code>：</p>
+<ul>
+<li>当对类的自然排序顺序有明确定义，并且不需要在不同的地方进行不同的排序时，可以实现 <code>Comparable</code> 接口。</li>
+</ul>
+</li>
+<li>
+<p>使用 <code>Comparator</code>：</p>
+<ul>
+<li>当需要在不同的地方使用不同的排序规则，或者对已有的类进行定制排序时，可以实现 <code>Comparator</code> 接口。</li>
+</ul>
+</li>
+</ul>
+<h3 id="总结-7">总结：</h3>
+<ul>
+<li><code>Comparable</code> 用于定义对象的自然排序规则，直接影响对象在集合中的排序。</li>
+<li><code>Comparator</code> 用于定义定制排序规则，可以在不改变对象本身的情况下实现多种排序方式。</li>
+</ul>
+<p>以上是一些常见Java集合类的详细比较。在选择集合类时，应根据具体需求、性能特点和线程安全性来做出合适的选择。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[分布式搜索引擎]]></title>
+        <id>https://shenshen6666.GitHub.io/post/fen-bu-shi-sou-suo-yin-qing/</id>
+        <link href="https://shenshen6666.GitHub.io/post/fen-bu-shi-sou-suo-yin-qing/">
+        </link>
+        <updated>2023-11-29T04:11:07.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="分布式搜索引擎01">分布式搜索引擎01</h1>
+<p>-- elasticsearch基础</p>
+<h1 id="0学习目标">0.学习目标</h1>
+<h1 id="1初识elasticsearch">1.初识elasticsearch</h1>
+<h2 id="11了解es">1.1.了解ES</h2>
+<h3 id="111elasticsearch的作用">1.1.1.elasticsearch的作用</h3>
+<p>elasticsearch是一款非常强大的开源搜索引擎，具备非常多强大功能，可以帮助我们从海量数据中快速找到需要的内容</p>
+<p>例如：</p>
+<ul>
+<li>
+<p>在GitHub搜索代码</p>
+<figure data-type="image" tabindex="1"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720193623245.png" alt="image-20210720193623245" loading="lazy"></figure>
+</li>
+<li>
+<p>在电商网站搜索商品</p>
+<figure data-type="image" tabindex="2"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720193633483.png" alt="image-20210720193633483" loading="lazy"></figure>
+</li>
+<li>
+<p>在百度搜索答案</p>
+<figure data-type="image" tabindex="3"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720193641907.png" alt="image-20210720193641907" loading="lazy"></figure>
+</li>
+<li>
+<p>在打车软件搜索附近的车</p>
+<figure data-type="image" tabindex="4"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720193648044.png" alt="image-20210720193648044" loading="lazy"></figure>
+</li>
+</ul>
+<h3 id="112elk技术栈">1.1.2.ELK技术栈</h3>
+<p>elasticsearch结合kibana、Logstash、Beats，也就是elastic stack（ELK）。被广泛应用在日志数据分析、实时监控等领域：</p>
+<figure data-type="image" tabindex="5"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720194008781.png" alt="image-20210720194008781" loading="lazy"></figure>
+<p>而elasticsearch是elastic stack的核心，负责存储、搜索、分析数据。</p>
+<figure data-type="image" tabindex="6"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720194230265.png" alt="image-20210720194230265" loading="lazy"></figure>
+<h3 id="113elasticsearch和lucene">1.1.3.elasticsearch和lucene</h3>
+<p>elasticsearch底层是基于<strong>lucene</strong>来实现的。</p>
+<p><strong>Lucene</strong>是一个Java语言的搜索引擎类库，是Apache公司的顶级项目，由DougCutting于1999年研发。官网地址：https://lucene.apache.org/ 。</p>
+<figure data-type="image" tabindex="7"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720194547780.png" alt="image-20210720194547780" loading="lazy"></figure>
+<p><strong>elasticsearch</strong>的发展历史：</p>
+<ul>
+<li>2004年Shay Banon基于Lucene开发了Compass</li>
+<li>2010年Shay Banon 重写了Compass，取名为Elasticsearch。</li>
+</ul>
+<figure data-type="image" tabindex="8"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720195001221.png" alt="image-20210720195001221" loading="lazy"></figure>
+<h3 id="114为什么不是其他搜索技术">1.1.4.为什么不是其他搜索技术？</h3>
+<p>目前比较知名的搜索引擎技术排名：</p>
+<figure data-type="image" tabindex="9"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720195142535.png" alt="image-20210720195142535" loading="lazy"></figure>
+<p>虽然在早期，Apache Solr是最主要的搜索引擎技术，但随着发展elasticsearch已经渐渐超越了Solr，独占鳌头：</p>
+<figure data-type="image" tabindex="10"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720195306484.png" alt="image-20210720195306484" loading="lazy"></figure>
+<h3 id="115总结">1.1.5.总结</h3>
+<p>什么是elasticsearch？</p>
+<ul>
+<li>一个开源的分布式搜索引擎，可以用来实现搜索、日志统计、分析、系统监控等功能</li>
+</ul>
+<p>什么是elastic stack（ELK）？</p>
+<ul>
+<li>是以elasticsearch为核心的技术栈，包括beats、Logstash、kibana、elasticsearch</li>
+</ul>
+<p>什么是Lucene？</p>
+<ul>
+<li>是Apache的开源搜索引擎类库，提供了搜索引擎的核心API</li>
+</ul>
+<h2 id="12倒排索引">1.2.倒排索引</h2>
+<p>倒排索引的概念是基于MySQL这样的正向索引而言的。</p>
+<h3 id="121正向索引">1.2.1.正向索引</h3>
+<p>那么什么是正向索引呢？例如给下表（tb_goods）中的id创建索引：</p>
+<figure data-type="image" tabindex="11"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720195531539.png" alt="image-20210720195531539" loading="lazy"></figure>
+<p>如果是根据id查询，那么直接走索引，查询速度非常快。</p>
+<p>但如果是基于title做模糊查询，只能是逐行扫描数据，流程如下：</p>
+<p>1）用户搜索数据，条件是title符合<code>&quot;%手机%&quot;</code></p>
+<p>2）逐行获取数据，比如id为1的数据</p>
+<p>3）判断数据中的title是否符合用户搜索条件</p>
+<p>4）如果符合则放入结果集，不符合则丢弃。回到步骤1</p>
+<p>逐行扫描，也就是全表扫描，随着数据量增加，其查询效率也会越来越低。当数据量达到数百万时，就是一场灾难。</p>
+<h3 id="122倒排索引">1.2.2.倒排索引</h3>
+<p>倒排索引中有两个非常重要的概念：</p>
+<ul>
+<li>文档（<code>Document</code>）：用来搜索的数据，其中的每一条数据就是一个文档。例如一个网页、一个商品信息</li>
+<li>词条（<code>Term</code>）：对文档数据或用户搜索数据，利用某种算法分词，得到的具备含义的词语就是词条。例如：我是中国人，就可以分为：我、是、中国人、中国、国人这样的几个词条</li>
+</ul>
+<p><strong>创建倒排索引</strong>是对正向索引的一种特殊处理，流程如下：</p>
+<ul>
+<li>将每一个文档的数据利用算法分词，得到一个个词条</li>
+<li>创建表，每行数据包括词条、词条所在文档id、位置等信息</li>
+<li>因为词条唯一性，可以给词条创建索引，例如hash表结构索引</li>
+</ul>
+<p>如图：</p>
+<figure data-type="image" tabindex="12"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720200457207.png" alt="image-20210720200457207" loading="lazy"></figure>
+<p>倒排索引的<strong>搜索流程</strong>如下（以搜索&quot;华为手机&quot;为例）：</p>
+<p>1）用户输入条件<code>&quot;华为手机&quot;</code>进行搜索。</p>
+<p>2）对用户输入内容<strong>分词</strong>，得到词条：<code>华为</code>、<code>手机</code>。</p>
+<p>3）拿着词条在倒排索引中查找，可以得到包含词条的文档id：1、2、3。</p>
+<p>4）拿着文档id到正向索引中查找具体文档。</p>
+<p>如图：</p>
+<figure data-type="image" tabindex="13"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720201115192.png" alt="image-20210720201115192" loading="lazy"></figure>
+<p>虽然要先查询倒排索引，再查询倒排索引，但是无论是词条、还是文档id都建立了索引，查询速度非常快！无需全表扫描。</p>
+<h3 id="123正向和倒排">1.2.3.正向和倒排</h3>
+<p>那么为什么一个叫做正向索引，一个叫做倒排索引呢？</p>
+<ul>
+<li>
+<p><strong>正向索引</strong>是最传统的，根据id索引的方式。但根据词条查询时，必须先逐条获取每个文档，然后判断文档中是否包含所需要的词条，是<strong>根据文档找词条的过程</strong>。</p>
+</li>
+<li>
+<p>而<strong>倒排索引</strong>则相反，是先找到用户要搜索的词条，根据词条得到保护词条的文档的id，然后根据id获取文档。是<strong>根据词条找文档的过程</strong>。</p>
+</li>
+</ul>
+<p>是不是恰好反过来了？</p>
+<p>那么两者方式的优缺点是什么呢？</p>
+<p><strong>正向索引</strong>：</p>
+<ul>
+<li>优点：
+<ul>
+<li>可以给多个字段创建索引</li>
+<li>根据索引字段搜索、排序速度非常快</li>
+</ul>
+</li>
+<li>缺点：
+<ul>
+<li>根据非索引字段，或者索引字段中的部分词条查找时，只能全表扫描。</li>
+</ul>
+</li>
+</ul>
+<p><strong>倒排索引</strong>：</p>
+<ul>
+<li>优点：
+<ul>
+<li>根据词条搜索、模糊搜索时，速度非常快</li>
+</ul>
+</li>
+<li>缺点：
+<ul>
+<li>只能给词条创建索引，而不是字段</li>
+<li>无法根据字段做排序</li>
+</ul>
+</li>
+</ul>
+<h2 id="13es的一些概念">1.3.es的一些概念</h2>
+<p>elasticsearch中有很多独有的概念，与mysql中略有差别，但也有相似之处。</p>
+<h3 id="131文档和字段">1.3.1.文档和字段</h3>
+<p>elasticsearch是面向**文档（Document）**存储的，可以是数据库中的一条商品数据，一个订单信息。文档数据会被序列化为json格式后存储在elasticsearch中：</p>
+<figure data-type="image" tabindex="14"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720202707797.png" alt="image-20210720202707797" loading="lazy"></figure>
+<p>而Json文档中往往包含很多的<strong>字段（Field）</strong>，类似于数据库中的列。</p>
+<h3 id="132索引和映射">1.3.2.索引和映射</h3>
+<p><strong>索引（Index）</strong>，就是相同类型的文档的集合。</p>
+<p>例如：</p>
+<ul>
+<li>所有用户文档，就可以组织在一起，称为用户的索引；</li>
+<li>所有商品的文档，可以组织在一起，称为商品的索引；</li>
+<li>所有订单的文档，可以组织在一起，称为订单的索引；</li>
+</ul>
+<figure data-type="image" tabindex="15"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720203022172.png" alt="image-20210720203022172" loading="lazy"></figure>
+<p>因此，我们可以把索引当做是数据库中的表。</p>
+<p>数据库的表会有约束信息，用来定义表的结构、字段的名称、类型等信息。因此，索引库中就有<strong>映射（mapping）</strong>，是索引中文档的字段约束信息，类似表的结构约束。</p>
+<h3 id="133mysql与elasticsearch">1.3.3.mysql与elasticsearch</h3>
+<p>我们统一的把mysql与elasticsearch的概念做一下对比：</p>
+<table>
+<thead>
+<tr>
+<th><strong>MySQL</strong></th>
+<th><strong>Elasticsearch</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Table</td>
+<td>Index</td>
+<td>索引(index)，就是文档的集合，类似数据库的表(table)</td>
+</tr>
+<tr>
+<td>Row</td>
+<td>Document</td>
+<td>文档（Document），就是一条条的数据，类似数据库中的行（Row），文档都是JSON格式</td>
+</tr>
+<tr>
+<td>Column</td>
+<td>Field</td>
+<td>字段（Field），就是JSON文档中的字段，类似数据库中的列（Column）</td>
+</tr>
+<tr>
+<td>Schema</td>
+<td>Mapping</td>
+<td>Mapping（映射）是索引中文档的约束，例如字段类型约束。类似数据库的表结构（Schema）</td>
+</tr>
+<tr>
+<td>SQL</td>
+<td>DSL</td>
+<td>DSL是elasticsearch提供的JSON风格的请求语句，用来操作elasticsearch，实现CRUD</td>
+</tr>
+</tbody>
+</table>
+<p>是不是说，我们学习了elasticsearch就不再需要mysql了呢？</p>
+<p>并不是如此，两者各自有自己的擅长支出：</p>
+<ul>
+<li>
+<p>Mysql：擅长事务类型操作，可以确保数据的安全和一致性</p>
+</li>
+<li>
+<p>Elasticsearch：擅长海量数据的搜索、分析、计算</p>
+</li>
+</ul>
+<p>因此在企业中，往往是两者结合使用：</p>
+<ul>
+<li>对安全性要求较高的写操作，使用mysql实现</li>
+<li>对查询性能要求较高的搜索需求，使用elasticsearch实现</li>
+<li>两者再基于某种方式，实现数据的同步，保证一致性</li>
+</ul>
+<figure data-type="image" tabindex="16"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720203534945.png" alt="image-20210720203534945" loading="lazy"></figure>
+<h2 id="14安装es-kibana">1.4.安装es、kibana</h2>
+<h3 id="141安装">1.4.1.安装</h3>
+<p>参考课前资料：</p>
+<figure data-type="image" tabindex="17"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720203805350.png" alt="image-20210720203805350" loading="lazy"></figure>
+<h3 id="142分词器">1.4.2.分词器</h3>
+<p>参考课前资料：</p>
+<figure data-type="image" tabindex="18"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720203805350.png" alt="image-20210720203805350" loading="lazy"></figure>
+<h3 id="143总结">1.4.3.总结</h3>
+<p>分词器的作用是什么？</p>
+<ul>
+<li>创建倒排索引时对文档分词</li>
+<li>用户搜索时，对输入的内容分词</li>
+</ul>
+<p>IK分词器有几种模式？</p>
+<ul>
+<li>ik_smart：智能切分，粗粒度</li>
+<li>ik_max_word：最细切分，细粒度</li>
+</ul>
+<p>IK分词器如何拓展词条？如何停用词条？</p>
+<ul>
+<li>利用config目录的IkAnalyzer.cfg.xml文件添加拓展词典和停用词典</li>
+<li>在词典中添加拓展词条或者停用词条</li>
+</ul>
+<h1 id="2索引库操作">2.索引库操作</h1>
+<p>索引库就类似数据库表，mapping映射就类似表的结构。</p>
+<p>我们要向es中存储数据，必须先创建“库”和“表”。</p>
+<h2 id="21mapping映射属性">2.1.mapping映射属性</h2>
+<p>mapping是对索引库中文档的约束，常见的mapping属性包括：</p>
+<ul>
+<li>type：字段数据类型，常见的简单类型有：
+<ul>
+<li>字符串：text（可分词的文本）、keyword（精确值，例如：品牌、国家、ip地址）</li>
+<li>数值：long、integer、short、byte、double、float、</li>
+<li>布尔：boolean</li>
+<li>日期：date</li>
+<li>对象：object</li>
+</ul>
+</li>
+<li>index：是否创建索引，默认为true</li>
+<li>analyzer：使用哪种分词器</li>
+<li>properties：该字段的子字段</li>
+</ul>
+<p>例如下面的json文档：</p>
+<pre><code class="language-json">{
+    &quot;age&quot;: 21,
+    &quot;weight&quot;: 52.1,
+    &quot;isMarried&quot;: false,
+    &quot;info&quot;: &quot;黑马程序员Java讲师&quot;,
+    &quot;email&quot;: &quot;zy@itcast.cn&quot;,
+    &quot;score&quot;: [99.1, 99.5, 98.9],
+    &quot;name&quot;: {
+        &quot;firstName&quot;: &quot;云&quot;,
+        &quot;lastName&quot;: &quot;赵&quot;
+    }
+}
+</code></pre>
+<p>对应的每个字段映射（mapping）：</p>
+<ul>
+<li>age：类型为 integer；参与搜索，因此需要index为true；无需分词器</li>
+<li>weight：类型为float；参与搜索，因此需要index为true；无需分词器</li>
+<li>isMarried：类型为boolean；参与搜索，因此需要index为true；无需分词器</li>
+<li>info：类型为字符串，需要分词，因此是text；参与搜索，因此需要index为true；分词器可以用ik_smart</li>
+<li>email：类型为字符串，但是不需要分词，因此是keyword；不参与搜索，因此需要index为false；无需分词器</li>
+<li>score：虽然是数组，但是我们只看元素的类型，类型为float；参与搜索，因此需要index为true；无需分词器</li>
+<li>name：类型为object，需要定义多个子属性
+<ul>
+<li>name.firstName；类型为字符串，但是不需要分词，因此是keyword；参与搜索，因此需要index为true；无需分词器</li>
+<li>name.lastName；类型为字符串，但是不需要分词，因此是keyword；参与搜索，因此需要index为true；无需分词器</li>
+</ul>
+</li>
+</ul>
+<h2 id="22索引库的crud">2.2.索引库的CRUD</h2>
+<p>这里我们统一使用Kibana编写DSL的方式来演示。</p>
+<h3 id="221创建索引库和映射">2.2.1.创建索引库和映射</h3>
+<h4 id="基本语法">基本语法：</h4>
+<ul>
+<li>请求方式：PUT</li>
+<li>请求路径：/索引库名，可以自定义</li>
+<li>请求参数：mapping映射</li>
+</ul>
+<p>格式：</p>
+<pre><code class="language-json">PUT /索引库名称
+{
+  &quot;mappings&quot;: {
+    &quot;properties&quot;: {
+      &quot;字段名&quot;:{
+        &quot;type&quot;: &quot;text&quot;,
+        &quot;analyzer&quot;: &quot;ik_smart&quot;
+      },
+      &quot;字段名2&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;,
+        &quot;index&quot;: &quot;false&quot;
+      },
+      &quot;字段名3&quot;:{
+        &quot;properties&quot;: {
+          &quot;子字段&quot;: {
+            &quot;type&quot;: &quot;keyword&quot;
+          }
+        }
+      },
+      // ...略
+    }
+  }
+}
+</code></pre>
+<h4 id="示例">示例：</h4>
+<pre><code class="language-sh">PUT /heima
+{
+  &quot;mappings&quot;: {
+    &quot;properties&quot;: {
+      &quot;info&quot;:{
+        &quot;type&quot;: &quot;text&quot;,
+        &quot;analyzer&quot;: &quot;ik_smart&quot;
+      },
+      &quot;email&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;,
+        &quot;index&quot;: &quot;falsae&quot;
+      },
+      &quot;name&quot;:{
+        &quot;properties&quot;: {
+          &quot;firstName&quot;: {
+            &quot;type&quot;: &quot;keyword&quot;
+          }
+        }
+      },
+      // ... 略
+    }
+  }
+}
+</code></pre>
+<h3 id="222查询索引库">2.2.2.查询索引库</h3>
+<p><strong>基本语法</strong>：</p>
+<ul>
+<li>
+<p>请求方式：GET</p>
+</li>
+<li>
+<p>请求路径：/索引库名</p>
+</li>
+<li>
+<p>请求参数：无</p>
+</li>
+</ul>
+<p><strong>格式</strong>：</p>
+<pre><code>GET /索引库名
+</code></pre>
+<p><strong>示例</strong>：</p>
+<figure data-type="image" tabindex="19"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720211019329.png" alt="image-20210720211019329" loading="lazy"></figure>
+<h3 id="223修改索引库">2.2.3.修改索引库</h3>
+<p>倒排索引结构虽然不复杂，但是一旦数据结构改变（比如改变了分词器），就需要重新创建倒排索引，这简直是灾难。因此索引库<strong>一旦创建，无法修改mapping</strong>。</p>
+<p>虽然无法修改mapping中已有的字段，但是却允许添加新的字段到mapping中，因为不会对倒排索引产生影响。</p>
+<p><strong>语法说明</strong>：</p>
+<pre><code class="language-json">PUT /索引库名/_mapping
+{
+  &quot;properties&quot;: {
+    &quot;新字段名&quot;:{
+      &quot;type&quot;: &quot;integer&quot;
+    }
+  }
+}
+</code></pre>
+<p><strong>示例</strong>：</p>
+<figure data-type="image" tabindex="20"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720212357390.png" alt="image-20210720212357390" loading="lazy"></figure>
+<h3 id="224删除索引库">2.2.4.删除索引库</h3>
+<p><strong>语法：</strong></p>
+<ul>
+<li>
+<p>请求方式：DELETE</p>
+</li>
+<li>
+<p>请求路径：/索引库名</p>
+</li>
+<li>
+<p>请求参数：无</p>
+</li>
+</ul>
+<p><strong>格式：</strong></p>
+<pre><code>DELETE /索引库名
+</code></pre>
+<p>在kibana中测试：</p>
+<figure data-type="image" tabindex="21"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720212123420.png" alt="image-20210720212123420" loading="lazy"></figure>
+<h3 id="225总结">2.2.5.总结</h3>
+<p>索引库操作有哪些？</p>
+<ul>
+<li>创建索引库：PUT /索引库名</li>
+<li>查询索引库：GET /索引库名</li>
+<li>删除索引库：DELETE /索引库名</li>
+<li>添加字段：PUT /索引库名/_mapping</li>
+</ul>
+<h1 id="3文档操作">3.文档操作</h1>
+<h2 id="31新增文档">3.1.新增文档</h2>
+<p><strong>语法：</strong></p>
+<pre><code class="language-json">POST /索引库名/_doc/文档id
+{
+    &quot;字段1&quot;: &quot;值1&quot;,
+    &quot;字段2&quot;: &quot;值2&quot;,
+    &quot;字段3&quot;: {
+        &quot;子属性1&quot;: &quot;值3&quot;,
+        &quot;子属性2&quot;: &quot;值4&quot;
+    },
+    // ...
+}
+</code></pre>
+<p><strong>示例：</strong></p>
+<pre><code class="language-json">POST /heima/_doc/1
+{
+    &quot;info&quot;: &quot;黑马程序员Java讲师&quot;,
+    &quot;email&quot;: &quot;zy@itcast.cn&quot;,
+    &quot;name&quot;: {
+        &quot;firstName&quot;: &quot;云&quot;,
+        &quot;lastName&quot;: &quot;赵&quot;
+    }
+}
+</code></pre>
+<p><strong>响应：</strong></p>
+<figure data-type="image" tabindex="22"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720212933362.png" alt="image-20210720212933362" loading="lazy"></figure>
+<h2 id="32查询文档">3.2.查询文档</h2>
+<p>根据rest风格，新增是post，查询应该是get，不过查询一般都需要条件，这里我们把文档id带上。</p>
+<p><strong>语法：</strong></p>
+<pre><code class="language-json">GET /{索引库名称}/_doc/{id}
+</code></pre>
+<p><strong>通过kibana查看数据：</strong></p>
+<pre><code class="language-js">GET /heima/_doc/1
+</code></pre>
+<p><strong>查看结果：</strong></p>
+<figure data-type="image" tabindex="23"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720213345003.png" alt="image-20210720213345003" loading="lazy"></figure>
+<h2 id="33删除文档">3.3.删除文档</h2>
+<p>删除使用DELETE请求，同样，需要根据id进行删除：</p>
+<p><strong>语法：</strong></p>
+<pre><code class="language-js">DELETE /{索引库名}/_doc/id值
+</code></pre>
+<p><strong>示例：</strong></p>
+<pre><code class="language-json"># 根据id删除数据
+DELETE /heima/_doc/1
+</code></pre>
+<p><strong>结果：</strong></p>
+<figure data-type="image" tabindex="24"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720213634918.png" alt="image-20210720213634918" loading="lazy"></figure>
+<h2 id="34修改文档">3.4.修改文档</h2>
+<p>修改有两种方式：</p>
+<ul>
+<li>全量修改：直接覆盖原来的文档</li>
+<li>增量修改：修改文档中的部分字段</li>
+</ul>
+<h3 id="341全量修改">3.4.1.全量修改</h3>
+<p>全量修改是覆盖原来的文档，其本质是：</p>
+<ul>
+<li>根据指定的id删除文档</li>
+<li>新增一个相同id的文档</li>
+</ul>
+<p><strong>注意</strong>：如果根据id删除时，id不存在，第二步的新增也会执行，也就从修改变成了新增操作了。</p>
+<p><strong>语法：</strong></p>
+<pre><code class="language-json">PUT /{索引库名}/_doc/文档id
+{
+    &quot;字段1&quot;: &quot;值1&quot;,
+    &quot;字段2&quot;: &quot;值2&quot;,
+    // ... 略
+}
+
+</code></pre>
+<p><strong>示例：</strong></p>
+<pre><code class="language-json">PUT /heima/_doc/1
+{
+    &quot;info&quot;: &quot;黑马程序员高级Java讲师&quot;,
+    &quot;email&quot;: &quot;zy@itcast.cn&quot;,
+    &quot;name&quot;: {
+        &quot;firstName&quot;: &quot;云&quot;,
+        &quot;lastName&quot;: &quot;赵&quot;
+    }
+}
+</code></pre>
+<h3 id="342增量修改">3.4.2.增量修改</h3>
+<p>增量修改是只修改指定id匹配的文档中的部分字段。</p>
+<p><strong>语法：</strong></p>
+<pre><code class="language-json">POST /{索引库名}/_update/文档id
+{
+    &quot;doc&quot;: {
+         &quot;字段名&quot;: &quot;新的值&quot;,
+    }
+}
+</code></pre>
+<p><strong>示例：</strong></p>
+<pre><code class="language-json">POST /heima/_update/1
+{
+  &quot;doc&quot;: {
+    &quot;email&quot;: &quot;ZhaoYun@itcast.cn&quot;
+  }
+}
+</code></pre>
+<h2 id="35总结">3.5.总结</h2>
+<p>文档操作有哪些？</p>
+<ul>
+<li>创建文档：POST /{索引库名}/_doc/文档id   { json文档 }</li>
+<li>查询文档：GET /{索引库名}/_doc/文档id</li>
+<li>删除文档：DELETE /{索引库名}/_doc/文档id</li>
+<li>修改文档：
+<ul>
+<li>全量修改：PUT /{索引库名}/_doc/文档id { json文档 }</li>
+<li>增量修改：POST /{索引库名}/_update/文档id { &quot;doc&quot;: {字段}}</li>
+</ul>
+</li>
+</ul>
+<h1 id="4restapi">4.RestAPI</h1>
+<p>ES官方提供了各种不同语言的客户端，用来操作ES。这些客户端的本质就是组装DSL语句，通过http请求发送给ES。官方文档地址：https://www.elastic.co/guide/en/elasticsearch/client/index.html</p>
+<p>其中的Java Rest Client又包括两种：</p>
+<ul>
+<li>Java Low Level Rest Client</li>
+<li>Java High Level Rest Client</li>
+</ul>
+<figure data-type="image" tabindex="25"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720214555863.png" alt="image-20210720214555863" loading="lazy"></figure>
+<p>我们学习的是Java HighLevel Rest Client客户端API</p>
+<h2 id="40导入demo工程">4.0.导入Demo工程</h2>
+<h3 id="401导入数据">4.0.1.导入数据</h3>
+<p>首先导入课前资料提供的数据库数据：</p>
+<figure data-type="image" tabindex="26"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720220400297.png" alt="image-20210720220400297" loading="lazy"></figure>
+<p>数据结构如下：</p>
+<pre><code class="language-sql">CREATE TABLE `tb_hotel` (
+  `id` bigint(20) NOT NULL COMMENT '酒店id',
+  `name` varchar(255) NOT NULL COMMENT '酒店名称；例：7天酒店',
+  `address` varchar(255) NOT NULL COMMENT '酒店地址；例：航头路',
+  `price` int(10) NOT NULL COMMENT '酒店价格；例：329',
+  `score` int(2) NOT NULL COMMENT '酒店评分；例：45，就是4.5分',
+  `brand` varchar(32) NOT NULL COMMENT '酒店品牌；例：如家',
+  `city` varchar(32) NOT NULL COMMENT '所在城市；例：上海',
+  `star_name` varchar(16) DEFAULT NULL COMMENT '酒店星级，从低到高分别是：1星到5星，1钻到5钻',
+  `business` varchar(255) DEFAULT NULL COMMENT '商圈；例：虹桥',
+  `latitude` varchar(32) NOT NULL COMMENT '纬度；例：31.2497',
+  `longitude` varchar(32) NOT NULL COMMENT '经度；例：120.3925',
+  `pic` varchar(255) DEFAULT NULL COMMENT '酒店图片；例:/img/1.jpg',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+</code></pre>
+<h3 id="402导入项目">4.0.2.导入项目</h3>
+<p>然后导入课前资料提供的项目:</p>
+<figure data-type="image" tabindex="27"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720220503411.png" alt="image-20210720220503411" loading="lazy"></figure>
+<p>项目结构如图：</p>
+<figure data-type="image" tabindex="28"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720220647541.png" alt="image-20210720220647541" loading="lazy"></figure>
+<h3 id="403mapping映射分析">4.0.3.mapping映射分析</h3>
+<p>创建索引库，最关键的是mapping映射，而mapping映射要考虑的信息包括：</p>
+<ul>
+<li>字段名</li>
+<li>字段数据类型</li>
+<li>是否参与搜索</li>
+<li>是否需要分词</li>
+<li>如果分词，分词器是什么？</li>
+</ul>
+<p>其中：</p>
+<ul>
+<li>字段名、字段数据类型，可以参考数据表结构的名称和类型</li>
+<li>是否参与搜索要分析业务来判断，例如图片地址，就无需参与搜索</li>
+<li>是否分词呢要看内容，内容如果是一个整体就无需分词，反之则要分词</li>
+<li>分词器，我们可以统一使用ik_max_word</li>
+</ul>
+<p>来看下酒店数据的索引库结构:</p>
+<pre><code class="language-json">PUT /hotel
+{
+  &quot;mappings&quot;: {
+    &quot;properties&quot;: {
+      &quot;id&quot;: {
+        &quot;type&quot;: &quot;keyword&quot;
+      },
+      &quot;name&quot;:{
+        &quot;type&quot;: &quot;text&quot;,
+        &quot;analyzer&quot;: &quot;ik_max_word&quot;,
+        &quot;copy_to&quot;: &quot;all&quot;
+      },
+      &quot;address&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;,
+        &quot;index&quot;: false
+      },
+      &quot;price&quot;:{
+        &quot;type&quot;: &quot;integer&quot;
+      },
+      &quot;score&quot;:{
+        &quot;type&quot;: &quot;integer&quot;
+      },
+      &quot;brand&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;,
+        &quot;copy_to&quot;: &quot;all&quot;
+      },
+      &quot;city&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;,
+        &quot;copy_to&quot;: &quot;all&quot;
+      },
+      &quot;starName&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;
+      },
+      &quot;business&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;
+      },
+      &quot;location&quot;:{
+        &quot;type&quot;: &quot;geo_point&quot;
+      },
+      &quot;pic&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;,
+        &quot;index&quot;: false
+      },
+      &quot;all&quot;:{
+        &quot;type&quot;: &quot;text&quot;,
+        &quot;analyzer&quot;: &quot;ik_max_word&quot;
+      }
+    }
+  }
+}
+
+</code></pre>
+<p>几个特殊字段说明：</p>
+<ul>
+<li>location：地理坐标，里面包含精度、纬度</li>
+<li>all：一个组合字段，其目的是将多字段的值 利用copy_to合并，提供给用户搜索</li>
+</ul>
+<p>地理坐标说明：</p>
+<figure data-type="image" tabindex="29"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720222110126.png" alt="image-20210720222110126" loading="lazy"></figure>
+<p>copy_to说明：</p>
+<figure data-type="image" tabindex="30"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720222221516.png" alt="image-20210720222221516" loading="lazy"></figure>
+<h3 id="404初始化restclient">4.0.4.初始化RestClient</h3>
+<p>在elasticsearch提供的API中，与elasticsearch一切交互都封装在一个名为RestHighLevelClient的类中，必须先完成这个对象的初始化，建立与elasticsearch的连接。</p>
+<p>分为三步：</p>
+<p>1）引入es的RestHighLevelClient依赖：</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.elasticsearch.client&lt;/groupId&gt;
+    &lt;artifactId&gt;elasticsearch-rest-high-level-client&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+</code></pre>
+<p>2）因为SpringBoot默认的ES版本是7.6.2，所以我们需要覆盖默认的ES版本：</p>
+<pre><code class="language-xml">&lt;properties&gt;
+    &lt;java.version&gt;1.8&lt;/java.version&gt;
+    &lt;elasticsearch.version&gt;7.12.1&lt;/elasticsearch.version&gt;
+&lt;/properties&gt;
+
+</code></pre>
+<p>3）初始化RestHighLevelClient：</p>
+<p>初始化的代码如下：</p>
+<pre><code class="language-java">RestHighLevelClient client = new RestHighLevelClient(RestClient.builder(
+        HttpHost.create(&quot;http://192.168.150.101:9200&quot;)
+));
+
+</code></pre>
+<p>这里为了单元测试方便，我们创建一个测试类HotelIndexTest，然后将初始化的代码编写在@BeforeEach方法中：</p>
+<pre><code class="language-java">package cn.itcast.hotel;
+
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+
+public class HotelIndexTest {
+    private RestHighLevelClient client;
+
+    @BeforeEach
+    void setUp() {
+        this.client = new RestHighLevelClient(RestClient.builder(
+                HttpHost.create(&quot;http://192.168.150.101:9200&quot;)
+        ));
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        this.client.close();
+    }
+}
+
+</code></pre>
+<h2 id="41创建索引库">4.1.创建索引库</h2>
+<h3 id="411代码解读">4.1.1.代码解读</h3>
+<p>创建索引库的API如下：</p>
+<figure data-type="image" tabindex="31"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720223049408.png" alt="image-20210720223049408" loading="lazy"></figure>
+<p>代码分为三步：</p>
+<ul>
+<li>1）创建Request对象。因为是创建索引库的操作，因此Request是CreateIndexRequest。</li>
+<li>2）添加请求参数，其实就是DSL的JSON参数部分。因为json字符串很长，这里是定义了静态字符串常量MAPPING_TEMPLATE，让代码看起来更加优雅。</li>
+<li>3）发送请求，client.indices()方法的返回值是IndicesClient类型，封装了所有与索引库操作有关的方法。</li>
+</ul>
+<h3 id="412完整示例">4.1.2.完整示例</h3>
+<p>在hotel-demo的cn.itcast.hotel.constants包下，创建一个类，定义mapping映射的JSON字符串常量：</p>
+<pre><code class="language-java">package cn.itcast.hotel.constants;
+
+public class HotelConstants {
+    public static final String MAPPING_TEMPLATE = &quot;{\n&quot; +
+            &quot;  \&quot;mappings\&quot;: {\n&quot; +
+            &quot;    \&quot;properties\&quot;: {\n&quot; +
+            &quot;      \&quot;id\&quot;: {\n&quot; +
+            &quot;        \&quot;type\&quot;: \&quot;keyword\&quot;\n&quot; +
+            &quot;      },\n&quot; +
+            &quot;      \&quot;name\&quot;:{\n&quot; +
+            &quot;        \&quot;type\&quot;: \&quot;text\&quot;,\n&quot; +
+            &quot;        \&quot;analyzer\&quot;: \&quot;ik_max_word\&quot;,\n&quot; +
+            &quot;        \&quot;copy_to\&quot;: \&quot;all\&quot;\n&quot; +
+            &quot;      },\n&quot; +
+            &quot;      \&quot;address\&quot;:{\n&quot; +
+            &quot;        \&quot;type\&quot;: \&quot;keyword\&quot;,\n&quot; +
+            &quot;        \&quot;index\&quot;: false\n&quot; +
+            &quot;      },\n&quot; +
+            &quot;      \&quot;price\&quot;:{\n&quot; +
+            &quot;        \&quot;type\&quot;: \&quot;integer\&quot;\n&quot; +
+            &quot;      },\n&quot; +
+            &quot;      \&quot;score\&quot;:{\n&quot; +
+            &quot;        \&quot;type\&quot;: \&quot;integer\&quot;\n&quot; +
+            &quot;      },\n&quot; +
+            &quot;      \&quot;brand\&quot;:{\n&quot; +
+            &quot;        \&quot;type\&quot;: \&quot;keyword\&quot;,\n&quot; +
+            &quot;        \&quot;copy_to\&quot;: \&quot;all\&quot;\n&quot; +
+            &quot;      },\n&quot; +
+            &quot;      \&quot;city\&quot;:{\n&quot; +
+            &quot;        \&quot;type\&quot;: \&quot;keyword\&quot;,\n&quot; +
+            &quot;        \&quot;copy_to\&quot;: \&quot;all\&quot;\n&quot; +
+            &quot;      },\n&quot; +
+            &quot;      \&quot;starName\&quot;:{\n&quot; +
+            &quot;        \&quot;type\&quot;: \&quot;keyword\&quot;\n&quot; +
+            &quot;      },\n&quot; +
+            &quot;      \&quot;business\&quot;:{\n&quot; +
+            &quot;        \&quot;type\&quot;: \&quot;keyword\&quot;\n&quot; +
+            &quot;      },\n&quot; +
+            &quot;      \&quot;location\&quot;:{\n&quot; +
+            &quot;        \&quot;type\&quot;: \&quot;geo_point\&quot;\n&quot; +
+            &quot;      },\n&quot; +
+            &quot;      \&quot;pic\&quot;:{\n&quot; +
+            &quot;        \&quot;type\&quot;: \&quot;keyword\&quot;,\n&quot; +
+            &quot;        \&quot;index\&quot;: false\n&quot; +
+            &quot;      },\n&quot; +
+            &quot;      \&quot;all\&quot;:{\n&quot; +
+            &quot;        \&quot;type\&quot;: \&quot;text\&quot;,\n&quot; +
+            &quot;        \&quot;analyzer\&quot;: \&quot;ik_max_word\&quot;\n&quot; +
+            &quot;      }\n&quot; +
+            &quot;    }\n&quot; +
+            &quot;  }\n&quot; +
+            &quot;}&quot;;
+}
+
+</code></pre>
+<p>在hotel-demo中的HotelIndexTest测试类中，编写单元测试，实现创建索引：</p>
+<pre><code class="language-java">@Test
+void createHotelIndex() throws IOException {
+    // 1.创建Request对象
+    CreateIndexRequest request = new CreateIndexRequest(&quot;hotel&quot;);
+    // 2.准备请求的参数：DSL语句
+    request.source(MAPPING_TEMPLATE, XContentType.JSON);
+    // 3.发送请求
+    client.indices().create(request, RequestOptions.DEFAULT);
+}
+
+</code></pre>
+<h2 id="42删除索引库">4.2.删除索引库</h2>
+<p>删除索引库的DSL语句非常简单：</p>
+<pre><code class="language-json">DELETE /hotel
+
+</code></pre>
+<p>与创建索引库相比：</p>
+<ul>
+<li>请求方式从PUT变为DELTE</li>
+<li>请求路径不变</li>
+<li>无请求参数</li>
+</ul>
+<p>所以代码的差异，注意体现在Request对象上。依然是三步走：</p>
+<ul>
+<li>1）创建Request对象。这次是DeleteIndexRequest对象</li>
+<li>2）准备参数。这里是无参</li>
+<li>3）发送请求。改用delete方法</li>
+</ul>
+<p>在hotel-demo中的HotelIndexTest测试类中，编写单元测试，实现删除索引：</p>
+<pre><code class="language-java">@Test
+void testDeleteHotelIndex() throws IOException {
+    // 1.创建Request对象
+    DeleteIndexRequest request = new DeleteIndexRequest(&quot;hotel&quot;);
+    // 2.发送请求
+    client.indices().delete(request, RequestOptions.DEFAULT);
+}
+
+</code></pre>
+<h2 id="43判断索引库是否存在">4.3.判断索引库是否存在</h2>
+<p>判断索引库是否存在，本质就是查询，对应的DSL是：</p>
+<pre><code class="language-json">GET /hotel
+
+</code></pre>
+<p>因此与删除的Java代码流程是类似的。依然是三步走：</p>
+<ul>
+<li>1）创建Request对象。这次是GetIndexRequest对象</li>
+<li>2）准备参数。这里是无参</li>
+<li>3）发送请求。改用exists方法</li>
+</ul>
+<pre><code class="language-java">@Test
+void testExistsHotelIndex() throws IOException {
+    // 1.创建Request对象
+    GetIndexRequest request = new GetIndexRequest(&quot;hotel&quot;);
+    // 2.发送请求
+    boolean exists = client.indices().exists(request, RequestOptions.DEFAULT);
+    // 3.输出
+    System.err.println(exists ? &quot;索引库已经存在！&quot; : &quot;索引库不存在！&quot;);
+}
+
+</code></pre>
+<h2 id="44总结">4.4.总结</h2>
+<p>JavaRestClient操作elasticsearch的流程基本类似。核心是client.indices()方法来获取索引库的操作对象。</p>
+<p>索引库操作的基本步骤：</p>
+<ul>
+<li>初始化RestHighLevelClient</li>
+<li>创建XxxIndexRequest。XXX是Create、Get、Delete</li>
+<li>准备DSL（ Create时需要，其它是无参）</li>
+<li>发送请求。调用RestHighLevelClient#indices().xxx()方法，xxx是create、exists、delete</li>
+</ul>
+<h1 id="5restclient操作文档">5.RestClient操作文档</h1>
+<p>为了与索引库操作分离，我们再次参加一个测试类，做两件事情：</p>
+<ul>
+<li>初始化RestHighLevelClient</li>
+<li>我们的酒店数据在数据库，需要利用IHotelService去查询，所以注入这个接口</li>
+</ul>
+<pre><code class="language-java">package cn.itcast.hotel;
+
+import cn.itcast.hotel.pojo.Hotel;
+import cn.itcast.hotel.service.IHotelService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.io.IOException;
+import java.util.List;
+
+@SpringBootTest
+public class HotelDocumentTest {
+    @Autowired
+    private IHotelService hotelService;
+
+    private RestHighLevelClient client;
+
+    @BeforeEach
+    void setUp() {
+        this.client = new RestHighLevelClient(RestClient.builder(
+                HttpHost.create(&quot;http://192.168.150.101:9200&quot;)
+        ));
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        this.client.close();
+    }
+}
+
+
+</code></pre>
+<h2 id="51新增文档">5.1.新增文档</h2>
+<p>我们要将数据库的酒店数据查询出来，写入elasticsearch中。</p>
+<h3 id="511索引库实体类">5.1.1.索引库实体类</h3>
+<p>数据库查询后的结果是一个Hotel类型的对象。结构如下：</p>
+<pre><code class="language-java">@Data
+@TableName(&quot;tb_hotel&quot;)
+public class Hotel {
+    @TableId(type = IdType.INPUT)
+    private Long id;
+    private String name;
+    private String address;
+    private Integer price;
+    private Integer score;
+    private String brand;
+    private String city;
+    private String starName;
+    private String business;
+    private String longitude;
+    private String latitude;
+    private String pic;
+}
+
+</code></pre>
+<p>与我们的索引库结构存在差异：</p>
+<ul>
+<li>longitude和latitude需要合并为location</li>
+</ul>
+<p>因此，我们需要定义一个新的类型，与索引库结构吻合：</p>
+<pre><code class="language-java">package cn.itcast.hotel.pojo;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+public class HotelDoc {
+    private Long id;
+    private String name;
+    private String address;
+    private Integer price;
+    private Integer score;
+    private String brand;
+    private String city;
+    private String starName;
+    private String business;
+    private String location;
+    private String pic;
+
+    public HotelDoc(Hotel hotel) {
+        this.id = hotel.getId();
+        this.name = hotel.getName();
+        this.address = hotel.getAddress();
+        this.price = hotel.getPrice();
+        this.score = hotel.getScore();
+        this.brand = hotel.getBrand();
+        this.city = hotel.getCity();
+        this.starName = hotel.getStarName();
+        this.business = hotel.getBusiness();
+        this.location = hotel.getLatitude() + &quot;, &quot; + hotel.getLongitude();
+        this.pic = hotel.getPic();
+    }
+}
+
+
+</code></pre>
+<h3 id="512语法说明">5.1.2.语法说明</h3>
+<p>新增文档的DSL语句如下：</p>
+<pre><code class="language-json">POST /{索引库名}/_doc/1
+{
+    &quot;name&quot;: &quot;Jack&quot;,
+    &quot;age&quot;: 21
+}
+
+</code></pre>
+<p>对应的java代码如图：</p>
+<figure data-type="image" tabindex="32"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720230027240.png" alt="image-20210720230027240" loading="lazy"></figure>
+<p>可以看到与创建索引库类似，同样是三步走：</p>
+<ul>
+<li>1）创建Request对象</li>
+<li>2）准备请求参数，也就是DSL中的JSON文档</li>
+<li>3）发送请求</li>
+</ul>
+<p>变化的地方在于，这里直接使用client.xxx()的API，不再需要client.indices()了。</p>
+<h3 id="513完整代码">5.1.3.完整代码</h3>
+<p>我们导入酒店数据，基本流程一致，但是需要考虑几点变化：</p>
+<ul>
+<li>酒店数据来自于数据库，我们需要先查询出来，得到hotel对象</li>
+<li>hotel对象需要转为HotelDoc对象</li>
+<li>HotelDoc需要序列化为json格式</li>
+</ul>
+<p>因此，代码整体步骤如下：</p>
+<ul>
+<li>1）根据id查询酒店数据Hotel</li>
+<li>2）将Hotel封装为HotelDoc</li>
+<li>3）将HotelDoc序列化为JSON</li>
+<li>4）创建IndexRequest，指定索引库名和id</li>
+<li>5）准备请求参数，也就是JSON文档</li>
+<li>6）发送请求</li>
+</ul>
+<p>在hotel-demo的HotelDocumentTest测试类中，编写单元测试：</p>
+<pre><code class="language-java">@Test
+void testAddDocument() throws IOException {
+    // 1.根据id查询酒店数据
+    Hotel hotel = hotelService.getById(61083L);
+    // 2.转换为文档类型
+    HotelDoc hotelDoc = new HotelDoc(hotel);
+    // 3.将HotelDoc转json
+    String json = JSON.toJSONString(hotelDoc);
+
+    // 1.准备Request对象
+    IndexRequest request = new IndexRequest(&quot;hotel&quot;).id(hotelDoc.getId().toString());
+    // 2.准备Json文档
+    request.source(json, XContentType.JSON);
+    // 3.发送请求
+    client.index(request, RequestOptions.DEFAULT);
+}
+
+</code></pre>
+<h2 id="52查询文档">5.2.查询文档</h2>
+<h3 id="521语法说明">5.2.1.语法说明</h3>
+<p>查询的DSL语句如下：</p>
+<pre><code class="language-json">GET /hotel/_doc/{id}
+
+</code></pre>
+<p>非常简单，因此代码大概分两步：</p>
+<ul>
+<li>准备Request对象</li>
+<li>发送请求</li>
+</ul>
+<p>不过查询的目的是得到结果，解析为HotelDoc，因此难点是结果的解析。完整代码如下：</p>
+<figure data-type="image" tabindex="33"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720230811674.png" alt="image-20210720230811674" loading="lazy"></figure>
+<p>可以看到，结果是一个JSON，其中文档放在一个<code>_source</code>属性中，因此解析就是拿到<code>_source</code>，反序列化为Java对象即可。</p>
+<p>与之前类似，也是三步走：</p>
+<ul>
+<li>1）准备Request对象。这次是查询，所以是GetRequest</li>
+<li>2）发送请求，得到结果。因为是查询，这里调用client.get()方法</li>
+<li>3）解析结果，就是对JSON做反序列化</li>
+</ul>
+<h3 id="522完整代码">5.2.2.完整代码</h3>
+<p>在hotel-demo的HotelDocumentTest测试类中，编写单元测试：</p>
+<pre><code class="language-java">@Test
+void testGetDocumentById() throws IOException {
+    // 1.准备Request
+    GetRequest request = new GetRequest(&quot;hotel&quot;, &quot;61082&quot;);
+    // 2.发送请求，得到响应
+    GetResponse response = client.get(request, RequestOptions.DEFAULT);
+    // 3.解析响应结果
+    String json = response.getSourceAsString();
+
+    HotelDoc hotelDoc = JSON.parseObject(json, HotelDoc.class);
+    System.out.println(hotelDoc);
+}
+
+</code></pre>
+<h2 id="53删除文档">5.3.删除文档</h2>
+<p>删除的DSL为是这样的：</p>
+<pre><code class="language-json">DELETE /hotel/_doc/{id}
+
+</code></pre>
+<p>与查询相比，仅仅是请求方式从DELETE变成GET，可以想象Java代码应该依然是三步走：</p>
+<ul>
+<li>1）准备Request对象，因为是删除，这次是DeleteRequest对象。要指定索引库名和id</li>
+<li>2）准备参数，无参</li>
+<li>3）发送请求。因为是删除，所以是client.delete()方法</li>
+</ul>
+<p>在hotel-demo的HotelDocumentTest测试类中，编写单元测试：</p>
+<pre><code class="language-java">@Test
+void testDeleteDocument() throws IOException {
+    // 1.准备Request
+    DeleteRequest request = new DeleteRequest(&quot;hotel&quot;, &quot;61083&quot;);
+    // 2.发送请求
+    client.delete(request, RequestOptions.DEFAULT);
+}
+
+</code></pre>
+<h2 id="54修改文档">5.4.修改文档</h2>
+<h3 id="541语法说明">5.4.1.语法说明</h3>
+<p>修改我们讲过两种方式：</p>
+<ul>
+<li>全量修改：本质是先根据id删除，再新增</li>
+<li>增量修改：修改文档中的指定字段值</li>
+</ul>
+<p>在RestClient的API中，全量修改与新增的API完全一致，判断依据是ID：</p>
+<ul>
+<li>如果新增时，ID已经存在，则修改</li>
+<li>如果新增时，ID不存在，则新增</li>
+</ul>
+<p>这里不再赘述，我们主要关注增量修改。</p>
+<p>代码示例如图：</p>
+<figure data-type="image" tabindex="34"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720231040875.png" alt="image-20210720231040875" loading="lazy"></figure>
+<p>与之前类似，也是三步走：</p>
+<ul>
+<li>1）准备Request对象。这次是修改，所以是UpdateRequest</li>
+<li>2）准备参数。也就是JSON文档，里面包含要修改的字段</li>
+<li>3）更新文档。这里调用client.update()方法</li>
+</ul>
+<h3 id="542完整代码">5.4.2.完整代码</h3>
+<p>在hotel-demo的HotelDocumentTest测试类中，编写单元测试：</p>
+<pre><code class="language-java">@Test
+void testUpdateDocument() throws IOException {
+    // 1.准备Request
+    UpdateRequest request = new UpdateRequest(&quot;hotel&quot;, &quot;61083&quot;);
+    // 2.准备请求参数
+    request.doc(
+        &quot;price&quot;, &quot;952&quot;,
+        &quot;starName&quot;, &quot;四钻&quot;
+    );
+    // 3.发送请求
+    client.update(request, RequestOptions.DEFAULT);
+}
+
+</code></pre>
+<h2 id="55批量导入文档">5.5.批量导入文档</h2>
+<p>案例需求：利用BulkRequest批量将数据库数据导入到索引库中。</p>
+<p>步骤如下：</p>
+<ul>
+<li>
+<p>利用mybatis-plus查询酒店数据</p>
+</li>
+<li>
+<p>将查询到的酒店数据（Hotel）转换为文档类型数据（HotelDoc）</p>
+</li>
+<li>
+<p>利用JavaRestClient中的BulkRequest批处理，实现批量新增文档</p>
+</li>
+</ul>
+<h3 id="551语法说明">5.5.1.语法说明</h3>
+<p>批量处理BulkRequest，其本质就是将多个普通的CRUD请求组合在一起发送。</p>
+<p>其中提供了一个add方法，用来添加其他请求：</p>
+<figure data-type="image" tabindex="35"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720232105943.png" alt="image-20210720232105943" loading="lazy"></figure>
+<p>可以看到，能添加的请求包括：</p>
+<ul>
+<li>IndexRequest，也就是新增</li>
+<li>UpdateRequest，也就是修改</li>
+<li>DeleteRequest，也就是删除</li>
+</ul>
+<p>因此Bulk中添加了多个IndexRequest，就是批量新增功能了。示例：</p>
+<figure data-type="image" tabindex="36"><img src="https://shenshen6666.GitHub.io/post-images/image-20210720232431383.png" alt="image-20210720232431383" loading="lazy"></figure>
+<p>其实还是三步走：</p>
+<ul>
+<li>1）创建Request对象。这里是BulkRequest</li>
+<li>2）准备参数。批处理的参数，就是其它Request对象，这里就是多个IndexRequest</li>
+<li>3）发起请求。这里是批处理，调用的方法为client.bulk()方法</li>
+</ul>
+<p>我们在导入酒店数据时，将上述代码改造成for循环处理即可。</p>
+<h3 id="552完整代码">5.5.2.完整代码</h3>
+<p>在hotel-demo的HotelDocumentTest测试类中，编写单元测试：</p>
+<pre><code class="language-java">@Test
+void testBulkRequest() throws IOException {
+    // 批量查询酒店数据
+    List&lt;Hotel&gt; hotels = hotelService.list();
+
+    // 1.创建Request
+    BulkRequest request = new BulkRequest();
+    // 2.准备参数，添加多个新增的Request
+    for (Hotel hotel : hotels) {
+        // 2.1.转换为文档类型HotelDoc
+        HotelDoc hotelDoc = new HotelDoc(hotel);
+        // 2.2.创建新增文档的Request对象
+        request.add(new IndexRequest(&quot;hotel&quot;)
+                    .id(hotelDoc.getId().toString())
+                    .source(JSON.toJSONString(hotelDoc), XContentType.JSON));
+    }
+    // 3.发送请求
+    client.bulk(request, RequestOptions.DEFAULT);
+}
+
+</code></pre>
+<h2 id="56小结">5.6.小结</h2>
+<p>文档操作的基本步骤：</p>
+<ul>
+<li>初始化RestHighLevelClient</li>
+<li>创建XxxRequest。XXX是Index、Get、Update、Delete、Bulk</li>
+<li>准备参数（Index、Update、Bulk时需要）</li>
+<li>发送请求。调用RestHighLevelClient#.xxx()方法，xxx是index、get、update、delete、bulk</li>
+<li>解析结果（Get时需要）</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[深入剖析 Java Stream 的 Collect 操作：解锁高级玩法]]></title>
+        <id>https://shenshen6666.GitHub.io/post/jiang-tou-java-stream-de-collect-yong-fa-yu-yuan-li-yuan-bi-ni-xiang-xiang-de-geng-qiang-da/</id>
+        <link href="https://shenshen6666.GitHub.io/post/jiang-tou-java-stream-de-collect-yong-fa-yu-yuan-li-yuan-bi-ni-xiang-xiang-de-geng-qiang-da/">
+        </link>
+        <updated>2023-11-13T07:12:26.000Z</updated>
+        <content type="html"><![CDATA[<p>大家好，又见面了。在我前面的文章《吃透 JAVA 的 Stream 流操作，多年实践总结》中，对 Stream 的整体情况进行了细致全面的讲解，也大概介绍了下结果收集器 Collectors 的常见用法 —— 但远不是全部。</p>
+<p>本篇文章就来专门剖析 <code>collect</code> 操作，一起解锁更多高级玩法，让 Stream 操作真正成为我们编码中的神兵利器。</p>
+<h2 id="初识-collector">初识 Collector</h2>
+<p>先看一个简单的场景：现有集团内所有人员列表，需要从中筛选出上海子公司的全部人员。假定人员信息数据如下：</p>
+<pre><code class="language-java">姓名       子公司      部门      年龄      工资
+大壮       上海公司    研发一部   28       3000
+二牛       上海公司    研发一部   24       2000
+铁柱       上海公司    研发二部   34       5000
+翠花       南京公司    测试一部   27       3000
+玲玲       南京公司    测试二部   31       4000
+</code></pre>
+<p>如果你曾经用过 Stream 流，或者你看过我前面关于 Stream 用法介绍的文章，那么借助 Stream 可以很轻松地实现上述诉求：</p>
+<pre><code class="language-java">public void filterEmployeesByCompany() {
+    List&lt;Employee&gt; employees = getAllEmployees().stream()
+            .filter(employee -&gt; &quot;上海公司&quot;.equals(employee.getSubCompany()))
+            .collect(Collectors.toList());
+    System.out.println(employees);
+}
+</code></pre>
+<p>上述代码中，先创建流，然后通过一系列中间流操作（filter 方法）进行业务层面的处理，然后经由终止操作（collect 方法）将处理后的结果输出为 List 对象。</p>
+<p>但我们实际面对的需求场景中，往往会有一些更复杂的诉求，比如说：现有集团内所有人员列表，需要从中筛选出上海子公司的全部人员，并按照部门进行分组。其实也就是加了个新的分组诉求，那就是先按照前面的代码实现逻辑基础上，再对结果进行分组处理就好：</p>
+<pre><code class="language-java">public void filterEmployeesThenGroupByStream() {
+    Map&lt;String, List&lt;Employee&gt;&gt; resultMap = getAllEmployees().stream()
+            .filter(employee -&gt; &quot;上海公司&quot;.equals(employee.getSubCompany()))
+            .collect(Collectors.groupingBy(Employee::getDepartment));
+    System.out.println(resultMap);
+}
+</code></pre>
+<p>两种写法都可以得到相同的结果：<br>
+{<br>
+研发二部=[Employee(subCompany=上海公司, department=研发二部, name=铁柱, age=34, salary=5000)],<br>
+研发一部=[Employee(subCompany=上海公司, department=研发一部, name=大壮, age=28, salary=3000),<br>
+Employee(subCompany=上海公司, department=研发一部, name=二牛, age=24, salary=2000)]<br>
+}<br>
+上述两种写法相比而言，第二种是不是代码上要简洁很多？而且是不是有种自注释的味道了？通过 collect 方法的合理恰当利用，可以让 Stream 适应更多实际的使用场景，大大提升我们的开发编码效率。下面就一起来全面认识下 collect，解锁更多高级操作吧。</p>
+<p>collect、Collector、Collectors 区别与关联<br>
+刚接触 Stream 收集器的时候，很多同学都会被 collect、Collector、Collectors 这几个概念搞的晕头转向，甚至还有很多人即使已经使用 Stream 好多年，也只是知道 collect 里面需要传入类似 Collectors.toList() 这种简单的用法，对其背后的细节也不甚了解。</p>
+<p>这里以一个 collect 收集器最简单的使用场景来剖析说明下其中的关系：</p>
+<p>概括来说：</p>
+<p>collect 是 Stream 流的一个终止方法，会使用传入的收集器（入参）对结果执行相关的操作，这个收集器必须是 Collector 接口的某个具体实现类。<br>
+Collector 是一个接口，collect 方法的收集器是 Collector 接口的具体实现类。<br>
+Collectors 是一个工具类，提供了很多的静态工厂方法，提供了很多 Collector 接口的具体实现类，是为了方便程序员使用而预置的一些较为通用的收集器（如果不使用 Collectors 类，而是自己去实现 Collector 接口，也可以）。<br>
+Collector 使用与剖析<br>
+到这里我们可以看出，Stream 结果收集操作的本质，其实就是将 Stream 中的元素通过收集器定义的函数处理逻辑进行加工，然后输出加工后的结果。</p>
+<p>根据其执行的操作类型来划分，又可将收集器分为几种不同的大类。下面分别阐述下。</p>
+<h2 id="恒等处理-collector">恒等处理 Collector</h2>
+<p>所谓恒等处理，指的就是 Stream 的元素在经过 Collector 函数处理前后完全不变，例如 <code>toList()</code> 操作，只是最终将结果从 Stream 中取出放入到 <code>List</code> 对象中，并没有对元素本身做任何的更改处理。</p>
+<p>恒等处理类型的 Collector 是实际编码中最常被使用的一种，比如：</p>
+<pre><code class="language-java">list.stream().collect(Collectors.toList());
+list.stream().collect(Collectors.toSet());
+list.stream().collect(Collectors.toCollection());
+</code></pre>
+<h2 id="归约汇总-collector">归约汇总 Collector</h2>
+<p>对于归约汇总类的操作，Stream 流中的元素逐个遍历，进入到 Collector 处理函数中，然后会与上一个元素的处理结果进行合并处理，并得到一个新的结果，以此类推，直到遍历完成后，输出最终的结果。比如 Collectors.summingInt() 方法的处理逻辑如下：</p>
+<p>例如，如果需要计算上海子公司每个月需要支付的员工总工资，使用 Collectors.summingInt() 可以这么实现</p>
+<pre><code class="language-java">public void calculateSum() {
+    Integer salarySum = getAllEmployees().stream()
+            .filter(employee -&gt; &quot;上海公司&quot;.equals(employee.getSubCompany()))
+            .collect(Collectors.summingInt(Employee::getSalary));
+    System.out.println(salarySum);
+}
+</code></pre>
+<p>需要注意的是，这里的汇总计算不仅仅是数学层面的累加汇总，而是一个广义上的汇总概念，即将多个元素进行处理操作，最终生成 1 个结果的操作，比如计算 Stream 中最大值的操作，最终也是多个元素中，得到一个结果：</p>
+<p>使用 max 方法来简化，即上述代码与下面的写法等价：</p>
+<pre><code class="language-java">public void findHighestSalaryEmployee2() {
+    Optional&lt;Employee&gt; highestSalaryEmployee = getAllEmployees().stream()
+            .filter(employee -&gt; &quot;上海公司&quot;.equals(employee.getSubCompany()))
+            .max(Comparator.comparingInt(Employee::getSalary));
+    System.out.println(highestSalaryEmployee.get());
+}
+</code></pre>
+<h2 id="分组分区-collector">分组分区 Collector</h2>
+<p>Collectors 工具类中提供了 groupingBy 方法用来得到一个分组操作 Collector，其内部处理逻辑可以参见下图的说明：</p>
+<p>groupingBy() 操作需要指定两个关键输入，即分组函数和值收集器：</p>
+<p>分组函数：一个处理函数，用于基于指定的元素进行处理，返回一个用于分组的值（即分组结果 HashMap 的 Key 值），对于经过此函数处理后返回值相同的元素，将被分配到同一个组里。<br>
+值收集器：对于分组后的数据元素的进一步处理转换逻辑，此处还是一个常规的 Collector 收集器，和 collect() 方法中传入的收集器完全等同。<br>
+对于 groupingBy 分组操作而言，分组函数与值收集器二者必不可少。为了方便使用，在 Collectors 工具类中，提供了两个 groupingBy 重载实现，其中有一个方法只需要传入一个分组函数即可，这是因为其默认使用了 toList() 作为值收集器：</p>
+<p>例如：仅仅是做一个常规的数据分组操作时，可以仅传入一个分组函数即可：</p>
+<pre><code class="language-Java">public void groupBySubCompany() {
+    // 按照子公司维度将员工分组
+    ```java
+    Map&lt;String, List&lt;Employee&gt;&gt; resultMap =
+            getAllEmployees().stream()
+                    .collect(Collectors.groupingBy(Employee::getSubCompany));
+    System.out.println(resultMap);
+}
+</code></pre>
+<p>这样 collect 返回的结果就是一个 HashMap，其每一个 HashValue 的值为一个 List 类型。</p>
+<p>而如果不仅需要分组，还需要对分组后的数据进行处理的时候，则需要同时给定分组函数以及值收集器：</p>
+<pre><code class="language-java">public void groupAndCaculate() {
+    // 按照子公司分组，并统计每个子公司的员工数
+    Map&lt;String, Long&gt; resultMap = getAllEmployees().stream()
+            .collect(Collectors.groupingBy(Employee::getSubCompany,
+                    Collectors.counting()));
+    System.out.println(resultMap);
+}
+</code></pre>
+<p>这样就同时实现了分组与组内数据的处理操作：<br>
+{南京公司=2, 上海公司=3}<br>
+上面的代码中 Collectors.groupingBy() 是一个分组 Collector，而其内又传入了一个归约汇总 Collector Collectors.counting()，也就是一个收集器中嵌套了另一个收集器。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Java项目的代码如何实现]]></title>
+        <id>https://shenshen6666.GitHub.io/post/ping-lun-ce-shi/</id>
+        <link href="https://shenshen6666.GitHub.io/post/ping-lun-ce-shi/">
+        </link>
+        <updated>2023-05-19T08:07:32.000Z</updated>
+        <content type="html"><![CDATA[<p>Java项目的代码实现基本是使用Java语言进行编写，Java代码的编写遵循一定的规范和约定。本文将介绍Java项目代码实现的主要概念和技术。</p>
+<p>1.类和对象<br>
+Java是一种面向对象的语言，类是创建Java对象的模板，而对象则是类的一个实例。在Java中，类具有属性和方法。属性是类的特征，而方法是执行的操作。在Java中使用关键字“class”声明一个类。类的属性和方法都可以由访问修饰符控制访问级别，包括public、private、protected和default。</p>
+<p>2.继承<br>
+Java中可以使用继承概念来实现代码的复用。子类可以继承父类的属性和方法，并可以添加自己的属性和方法。使用关键字“extends”来实现继承。在Java中，子类只能继承一个父类。</p>
+<p>3.接口<br>
+Java中的接口表示一组方法的声明，但是这些方法没有实现。通过实现接口，类可以具有接口的功能。在Java中使用关键字“interface”声明一个接口。类实现一个接口，并通过关键字“implements”来进行声明。</p>
+<p>4.包<br>
+Java中的包是一种组织代码的方式。它提供了一种将相关类和接口组合在一起的方式，以便开发人员可以更好地组织代码，使代码更具可读性。Java中使用关键字“package”来声明一个包。</p>
+<p>5.异常处理<br>
+Java中的异常处理是一个非常重要的概念。当代码出现异常时，可以使用异常处理来捕获和处理异常。异常处理的基础是Java中的try-catch块。try块中包含可能会产生异常的代码，而catch块则用于处理捕获到的异常。</p>
+<p>6.注解<br>
+Java中的注解是用于定义和标记代码元素的一种机制。注解可以在代码的类、方法、参数、变量等位置使用。在Java中使用@符号来表示一个注解，可以包含一些参数。注解可以帮助防止代码错误、增强代码可读性和更好地管理代码。</p>
+<p>7.泛型<br>
+Java中的泛型是一种允许在代码中使用类型参数的语言特性。类型参数允许开发人员编写通用代码，该代码可以与多种类型一起使用。在Java中，泛型由尖括号“&lt;&gt;”表示，其中包含类型参数。</p>
+<p>8.多线程<br>
+Java中的多线程允许同时执行多个线程，以提高程序的性能。Java中的多线程是基于线程类Thread实现的。线程的状态包括新建状态、运行状态、阻塞状态、等待状态和死亡状态。使用synchronized关键字可以控制线程之间的并发性和同步性。</p>
+]]></content>
+    </entry>
+</feed>
