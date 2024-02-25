@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+  <!-- 包含 head 部分，动态设置页面标题 -->
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>一篇看懂MQ | 申申丫的</title>
+<link rel="stylesheet" href="https://shenshen6666.GitHub.io/styles/main.css">
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  <script src="https://shenshen6666.GitHub.io/media/js/page.js"></script>
+
+    
+
+  <!-- 页面描述信息 -->
+  <meta name="description" content="RabbitMQ
+1.初识MQ
+1.1.同步和异步通讯
+微服务间通讯有同步和异步两种方式：
+同步通讯：就像打电话，需要实时响应。
+异步通讯：就像发邮件，不需要马上回复。
+
+两种方式各有优劣，打电话可以立即得到响应，但是你却不能跟多个人同时通...">
+  <!-- 引入 jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <!-- 代码高亮库 Prism.js -->
+  <script src="https://shenshen6666.GitHub.io/media/js/prism.js"></script>
+  <!-- KaTeX数学公式样式 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+  <!-- Gitalk评论样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <!-- 引入 Gitalk评论功能脚本 -->
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  <!-- 页面样式 -->
+  <style>
+    /* 网址模块样式 */
+    .zhihu-iframe {
+      position: fixed;
+      top: 5px; /* 初始状态悬浮在页面上方 */
+      left: 75%; /* 距离左边界75%的位置 */
+      transform: translateX(-50%);
+      z-index: 999;
+      display: none; /* 初始状态隐藏网址模块 */
+    }
+
+    /* 按钮样式 */
+    #toggleButton, #moveUpButton, #moveDownButton {
+      cursor: pointer;
+      position: fixed;
+      bottom: 20px;
+      right: 50px; /* 按钮距离右边界50px的位置 */
+      padding: 10px;
+      background-color: transparent;
+      color: #000000;
+      border: none;
+      border-radius: 5px;
+      margin: 5px;
+    }
+
+    /* 修复按钮样式 */
+    #moveUpButton, #moveDownButton {
+      bottom: 70px; /* 上移、下移按钮的位置 */
+    }
+
+    #moveDownButton {
+      bottom: 120px; /* 下移按钮的位置 */
+    }
+  </style>
+</head>
+<body>
+  <div class="antialiased">
+    <div class="body-width mx-auto px-6 md:px-8">
+      <!-- 包含页面头部 -->
+      
+<div class="flex justify-between items-center mt-10">
+  <h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-900 font-medium md:font-normal leading-none">
+    <div class="glitch-wrapper">
+      <div class="glitch" data-text="申申丫的">
+        <a href="https://shenshen6666.GitHub.io">申申丫的</a>
+      </div>
+    </div>
+  </h1>
+  <div class="block lg:hidden" id="thumb-menu">
+    <button id="thumb-open" type="button" class="block">
+      <i class="icon icon-menu-close"></i>
+    </button>
+    <button id="thumb-close" type="button" class="hidden">
+      <i class="icon icon-menu-open"></i>
+    </button>
+  </div>
+</div>
+<div id="nav-list" class="lg:block hidden">
+  <div class="w-full block lg:flex lg:justify-between border-external-bottom lg:border-gray-400 mt-10 text-gray-700 lg:text-lg">
+    <div class="lg:flex -mb-px">
+      
+        
+          <div class="pb-4">
+            <a href="/" class="nav-link">
+              <i class="icon icon-home"></i> 
+              首页
+            </a>
+          </div>
+        
+      
+        
+          <div class="pb-4">
+            <a href="/archives" class="nav-link">
+              <i class="icon icon-archive"></i> 
+              归档
+            </a>
+          </div>
+        
+      
+        
+          <div class="pb-4">
+            <a href="/tags" class="nav-link">
+              <i class="icon icon-tags"></i> 
+              标签
+            </a>
+          </div>
+        
+      
+        
+          <div class="pb-4">
+            <a href="/post/about" class="nav-link">
+              <i class="icon icon-user"></i> 
+              关于
+            </a>
+          </div>
+        
+      
+        
+          <div class="pb-4">
+            <a href="/essays" class="nav-link">
+              <i class="icon icon-"></i> 
+              测试菜单
+            </a>
+          </div>
+        
+      
+      <div class="search-frame pb-4">
+        <i class="icon icon-search"></i>
+        <form id="search-form" action="https://shenshen6666.GitHub.io/search/">
+          <input name="searchContent" type="text" placeholder="Search..." />
+        </form>
+      </div>
+    </div>
+    <div class="lg:flex">
+      <ul>
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+      <a href="https://shenshen6666.GitHub.io/atom.xml" class="block mt-4 lg:mt-0 lg:ml-8 align-center hover:text-gray-900" target="_blank">
+        <i class="icon icon-rss"></i>
+        RSS
+      </a>
+    </div>
+  </div>
+</div>
+      <!-- 页面主体 -->
+      <div class="mb-20 md:flex mt-10 lg:mt-6 md:border-internal md:border-gray-400 md:pt-2 lg:border-t-0 lg:pt-0">
+        <!-- 左侧内容 -->
+        <div class="w-full md:w-2/3 mt-6">
+          <!-- 文章标题 -->
+          <h1 class="post-title text-3xl">一篇看懂MQ</h1>
+          <!-- 如果有特色图片，则显示 -->
+          
+          <!-- 文章内容 -->
+          <div class="mt-6 lg:mt-10 post-content">
+            <h1 id="rabbitmq">RabbitMQ</h1>
+<h1 id="1初识mq">1.初识MQ</h1>
+<h2 id="11同步和异步通讯">1.1.同步和异步通讯</h2>
+<p>微服务间通讯有同步和异步两种方式：</p>
+<p>同步通讯：就像打电话，需要实时响应。</p>
+<p>异步通讯：就像发邮件，不需要马上回复。</p>
+<figure data-type="image" tabindex="1"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717161939695.png" alt="image-20210717161939695" loading="lazy"></figure>
+<p>两种方式各有优劣，打电话可以立即得到响应，但是你却不能跟多个人同时通话。发送邮件可以同时与多个人收发邮件，但是往往响应会有延迟。</p>
+<h3 id="111同步通讯">1.1.1.同步通讯</h3>
+<p>我们之前学习的Feign调用就属于同步方式，虽然调用可以实时得到结果，但存在下面的问题：</p>
+<figure data-type="image" tabindex="2"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717162004285.png" alt="image-20210717162004285" loading="lazy"></figure>
+<p>总结：</p>
+<p>同步调用的优点：</p>
+<ul>
+<li>时效性较强，可以立即得到结果</li>
+</ul>
+<p>同步调用的问题：</p>
+<ul>
+<li>耦合度高</li>
+<li>性能和吞吐能力下降</li>
+<li>有额外的资源消耗</li>
+<li>有级联失败问题</li>
+</ul>
+<h3 id="112异步通讯">1.1.2.异步通讯</h3>
+<p>异步调用则可以避免上述问题：</p>
+<p>我们以购买商品为例，用户支付后需要调用订单服务完成订单状态修改，调用物流服务，从仓库分配响应的库存并准备发货。</p>
+<p>在事件模式中，支付服务是事件发布者（publisher），在支付完成后只需要发布一个支付成功的事件（event），事件中带上订单id。</p>
+<p>订单服务和物流服务是事件订阅者（Consumer），订阅支付成功的事件，监听到事件后完成自己业务即可。</p>
+<p>为了解除事件发布者与订阅者之间的耦合，两者并不是直接通信，而是有一个中间人（Broker）。发布者发布事件到Broker，不关心谁来订阅事件。订阅者从Broker订阅事件，不关心谁发来的消息。</p>
+<figure data-type="image" tabindex="3"><img src="https://shenshen6666.GitHub.io/post-images/image-20210422095356088.png" alt="image-20210422095356088" loading="lazy"></figure>
+<p>Broker 是一个像数据总线一样的东西，所有的服务要接收数据和发送数据都发到这个总线上，这个总线就像协议一样，让服务间的通讯变得标准和可控。</p>
+<p>好处：</p>
+<ul>
+<li>
+<p>吞吐量提升：无需等待订阅者处理完成，响应更快速</p>
+</li>
+<li>
+<p>故障隔离：服务没有直接调用，不存在级联失败问题</p>
+</li>
+<li>
+<p>调用间没有阻塞，不会造成无效的资源占用</p>
+</li>
+<li>
+<p>耦合度极低，每个服务都可以灵活插拔，可替换</p>
+</li>
+<li>
+<p>流量削峰：不管发布事件的流量波动多大，都由Broker接收，订阅者可以按照自己的速度去处理事件</p>
+</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>架构复杂了，业务没有明显的流程线，不好管理</li>
+<li>需要依赖于Broker的可靠、安全、性能</li>
+</ul>
+<p>好在现在开源软件或云平台上 Broker 的软件是非常成熟的，比较常见的一种就是我们今天要学习的MQ技术。</p>
+<h2 id="12技术对比">1.2.技术对比：</h2>
+<p>MQ，中文是消息队列（MessageQueue），字面来看就是存放消息的队列。也就是事件驱动架构中的Broker。</p>
+<p>比较常见的MQ实现：</p>
+<ul>
+<li>ActiveMQ</li>
+<li>RabbitMQ</li>
+<li>RocketMQ</li>
+<li>Kafka</li>
+</ul>
+<p>几种常见MQ的对比：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>RabbitMQ</strong></th>
+<th><strong>ActiveMQ</strong></th>
+<th><strong>RocketMQ</strong></th>
+<th><strong>Kafka</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>公司/社区</td>
+<td>Rabbit</td>
+<td>Apache</td>
+<td>阿里</td>
+<td>Apache</td>
+</tr>
+<tr>
+<td>开发语言</td>
+<td>Erlang</td>
+<td>Java</td>
+<td>Java</td>
+<td>Scala&amp;Java</td>
+</tr>
+<tr>
+<td>协议支持</td>
+<td>AMQP，XMPP，SMTP，STOMP</td>
+<td>OpenWire,STOMP，REST,XMPP,AMQP</td>
+<td>自定义协议</td>
+<td>自定义协议</td>
+</tr>
+<tr>
+<td>可用性</td>
+<td>高</td>
+<td>一般</td>
+<td>高</td>
+<td>高</td>
+</tr>
+<tr>
+<td>单机吞吐量</td>
+<td>一般</td>
+<td>差</td>
+<td>高</td>
+<td>非常高</td>
+</tr>
+<tr>
+<td>消息延迟</td>
+<td>微秒级</td>
+<td>毫秒级</td>
+<td>毫秒级</td>
+<td>毫秒以内</td>
+</tr>
+<tr>
+<td>消息可靠性</td>
+<td>高</td>
+<td>一般</td>
+<td>高</td>
+<td>一般</td>
+</tr>
+</tbody>
+</table>
+<p>追求可用性：Kafka、 RocketMQ 、RabbitMQ</p>
+<p>追求可靠性：RabbitMQ、RocketMQ</p>
+<p>追求吞吐能力：RocketMQ、Kafka</p>
+<p>追求消息低延迟：RabbitMQ、Kafka</p>
+<h1 id="2快速入门">2.快速入门</h1>
+<h2 id="21安装rabbitmq">2.1.安装RabbitMQ</h2>
+<p>安装RabbitMQ，参考课前资料：</p>
+<figure data-type="image" tabindex="4"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717162628635.png" alt="image-20210717162628635" loading="lazy"></figure>
+<p>MQ的基本结构：</p>
+<figure data-type="image" tabindex="5"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717162752376.png" alt="image-20210717162752376" loading="lazy"></figure>
+<p>RabbitMQ中的一些角色：</p>
+<ul>
+<li>publisher：生产者</li>
+<li>consumer：消费者</li>
+<li>exchange个：交换机，负责消息路由</li>
+<li>queue：队列，存储消息</li>
+<li>virtualHost：虚拟主机，隔离不同租户的exchange、queue、消息的隔离</li>
+</ul>
+<h2 id="22rabbitmq消息模型">2.2.RabbitMQ消息模型</h2>
+<p>RabbitMQ官方提供了5个不同的Demo示例，对应了不同的消息模型：</p>
+<figure data-type="image" tabindex="6"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717163332646.png" alt="image-20210717163332646" loading="lazy"></figure>
+<h2 id="23导入demo工程">2.3.导入Demo工程</h2>
+<p>课前资料提供了一个Demo工程，mq-demo:</p>
+<figure data-type="image" tabindex="7"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717163253264.png" alt="image-20210717163253264" loading="lazy"></figure>
+<p>导入后可以看到结构如下：</p>
+<figure data-type="image" tabindex="8"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717163604330.png" alt="image-20210717163604330" loading="lazy"></figure>
+<p>包括三部分：</p>
+<ul>
+<li>mq-demo：父工程，管理项目依赖</li>
+<li>publisher：消息的发送者</li>
+<li>consumer：消息的消费者</li>
+</ul>
+<h2 id="24入门案例">2.4.入门案例</h2>
+<p>简单队列模式的模型图：</p>
+<figure data-type="image" tabindex="9"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717163434647.png" alt="image-20210717163434647" loading="lazy"></figure>
+<p>官方的HelloWorld是基于最基础的消息队列模型来实现的，只包括三个角色：</p>
+<ul>
+<li>publisher：消息发布者，将消息发送到队列queue</li>
+<li>queue：消息队列，负责接受并缓存消息</li>
+<li>consumer：订阅队列，处理队列中的消息</li>
+</ul>
+<h3 id="241publisher实现">2.4.1.publisher实现</h3>
+<p>思路：</p>
+<ul>
+<li>建立连接</li>
+<li>创建Channel</li>
+<li>声明队列</li>
+<li>发送消息</li>
+<li>关闭连接和channel</li>
+</ul>
+<p>代码实现：</p>
+<pre><code class="language-java">package cn.itcast.mq.helloworld;
+
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+public class PublisherTest {
+    @Test
+    public void testSendMessage() throws IOException, TimeoutException {
+        // 1.建立连接
+        ConnectionFactory factory = new ConnectionFactory();
+        // 1.1.设置连接参数，分别是：主机名、端口号、vhost、用户名、密码
+        factory.setHost(&quot;192.168.150.101&quot;);
+        factory.setPort(5672);
+        factory.setVirtualHost(&quot;/&quot;);
+        factory.setUsername(&quot;itcast&quot;);
+        factory.setPassword(&quot;123321&quot;);
+        // 1.2.建立连接
+        Connection connection = factory.newConnection();
+
+        // 2.创建通道Channel
+        Channel channel = connection.createChannel();
+
+        // 3.创建队列
+        String queueName = &quot;simple.queue&quot;;
+        channel.queueDeclare(queueName, false, false, false, null);
+
+        // 4.发送消息
+        String message = &quot;hello, rabbitmq!&quot;;
+        channel.basicPublish(&quot;&quot;, queueName, null, message.getBytes());
+        System.out.println(&quot;发送消息成功：【&quot; + message + &quot;】&quot;);
+
+        // 5.关闭通道和连接
+        channel.close();
+        connection.close();
+
+    }
+}
+</code></pre>
+<h3 id="242consumer实现">2.4.2.consumer实现</h3>
+<p>代码思路：</p>
+<ul>
+<li>建立连接</li>
+<li>创建Channel</li>
+<li>声明队列</li>
+<li>订阅消息</li>
+</ul>
+<p>代码实现：</p>
+<pre><code class="language-java">package cn.itcast.mq.helloworld;
+
+import com.rabbitmq.client.*;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+public class ConsumerTest {
+
+    public static void main(String[] args) throws IOException, TimeoutException {
+        // 1.建立连接
+        ConnectionFactory factory = new ConnectionFactory();
+        // 1.1.设置连接参数，分别是：主机名、端口号、vhost、用户名、密码
+        factory.setHost(&quot;192.168.150.101&quot;);
+        factory.setPort(5672);
+        factory.setVirtualHost(&quot;/&quot;);
+        factory.setUsername(&quot;itcast&quot;);
+        factory.setPassword(&quot;123321&quot;);
+        // 1.2.建立连接
+        Connection connection = factory.newConnection();
+
+        // 2.创建通道Channel
+        Channel channel = connection.createChannel();
+
+        // 3.创建队列
+        String queueName = &quot;simple.queue&quot;;
+        channel.queueDeclare(queueName, false, false, false, null);
+
+        // 4.订阅消息
+        channel.basicConsume(queueName, true, new DefaultConsumer(channel){
+            @Override
+            public void handleDelivery(String consumerTag, Envelope envelope,
+                                       AMQP.BasicProperties properties, byte[] body) throws IOException {
+                // 5.处理消息
+                String message = new String(body);
+                System.out.println(&quot;接收到消息：【&quot; + message + &quot;】&quot;);
+            }
+        });
+        System.out.println(&quot;等待接收消息。。。。&quot;);
+    }
+}
+</code></pre>
+<h2 id="25总结">2.5.总结</h2>
+<p>基本消息队列的消息发送流程：</p>
+<ol>
+<li>
+<p>建立connection</p>
+</li>
+<li>
+<p>创建channel</p>
+</li>
+<li>
+<p>利用channel声明队列</p>
+</li>
+<li>
+<p>利用channel向队列发送消息</p>
+</li>
+</ol>
+<p>基本消息队列的消息接收流程：</p>
+<ol>
+<li>
+<p>建立connection</p>
+</li>
+<li>
+<p>创建channel</p>
+</li>
+<li>
+<p>利用channel声明队列</p>
+</li>
+<li>
+<p>定义consumer的消费行为handleDelivery()</p>
+</li>
+<li>
+<p>利用channel将消费者与队列绑定</p>
+</li>
+</ol>
+<h1 id="3springamqp">3.SpringAMQP</h1>
+<p>SpringAMQP是基于RabbitMQ封装的一套模板，并且还利用SpringBoot对其实现了自动装配，使用起来非常方便。</p>
+<p>SpringAmqp的官方地址：https://spring.io/projects/spring-amqp</p>
+<figure data-type="image" tabindex="10"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717164024967.png" alt="image-20210717164024967" loading="lazy"></figure>
+<figure data-type="image" tabindex="11"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717164038678.png" alt="image-20210717164038678" loading="lazy"></figure>
+<p>SpringAMQP提供了三个功能：</p>
+<ul>
+<li>自动声明队列、交换机及其绑定关系</li>
+<li>基于注解的监听器模式，异步接收消息</li>
+<li>封装了RabbitTemplate工具，用于发送消息</li>
+</ul>
+<h2 id="31basic-queue-简单队列模型">3.1.Basic Queue 简单队列模型</h2>
+<p>在父工程mq-demo中引入依赖</p>
+<pre><code class="language-xml">&lt;!--AMQP依赖，包含RabbitMQ--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-amqp&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="311消息发送">3.1.1.消息发送</h3>
+<p>首先配置MQ地址，在publisher服务的application.yml中添加配置：</p>
+<pre><code class="language-yaml">spring:
+  rabbitmq:
+    host: 192.168.150.101 # 主机名
+    port: 5672 # 端口
+    virtual-host: / # 虚拟主机
+    username: itcast # 用户名
+    password: 123321 # 密码
+</code></pre>
+<p>然后在publisher服务中编写测试类SpringAmqpTest，并利用RabbitTemplate实现消息发送：</p>
+<pre><code class="language-java">package cn.itcast.mq.spring;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class SpringAmqpTest {
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Test
+    public void testSimpleQueue() {
+        // 队列名称
+        String queueName = &quot;simple.queue&quot;;
+        // 消息
+        String message = &quot;hello, spring amqp!&quot;;
+        // 发送消息
+        rabbitTemplate.convertAndSend(queueName, message);
+    }
+}
+</code></pre>
+<h3 id="312消息接收">3.1.2.消息接收</h3>
+<p>首先配置MQ地址，在consumer服务的application.yml中添加配置：</p>
+<pre><code class="language-yaml">spring:
+  rabbitmq:
+    host: 192.168.150.101 # 主机名
+    port: 5672 # 端口
+    virtual-host: / # 虚拟主机
+    username: itcast # 用户名
+    password: 123321 # 密码
+</code></pre>
+<p>然后在consumer服务的<code>cn.itcast.mq.listener</code>包中新建一个类SpringRabbitListener，代码如下：</p>
+<pre><code class="language-java">package cn.itcast.mq.listener;
+
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
+
+@Component
+public class SpringRabbitListener {
+
+    @RabbitListener(queues = &quot;simple.queue&quot;)
+    public void listenSimpleQueueMessage(String msg) throws InterruptedException {
+        System.out.println(&quot;spring 消费者接收到消息：【&quot; + msg + &quot;】&quot;);
+    }
+}
+</code></pre>
+<h3 id="313测试">3.1.3.测试</h3>
+<p>启动consumer服务，然后在publisher服务中运行测试代码，发送MQ消息</p>
+<h2 id="32workqueue">3.2.WorkQueue</h2>
+<p>Work queues，也被称为（Task queues），任务模型。简单来说就是<strong>让多个消费者绑定到一个队列，共同消费队列中的消息</strong>。</p>
+<figure data-type="image" tabindex="12"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717164238910.png" alt="image-20210717164238910" loading="lazy"></figure>
+<p>当消息处理比较耗时的时候，可能生产消息的速度会远远大于消息的消费速度。长此以往，消息就会堆积越来越多，无法及时处理。</p>
+<p>此时就可以使用work 模型，多个消费者共同处理消息处理，速度就能大大提高了。</p>
+<h3 id="321消息发送">3.2.1.消息发送</h3>
+<p>这次我们循环发送，模拟大量消息堆积现象。</p>
+<p>在publisher服务中的SpringAmqpTest类中添加一个测试方法：</p>
+<pre><code class="language-java">/**
+     * workQueue
+     * 向队列中不停发送消息，模拟消息堆积。
+     */
+@Test
+public void testWorkQueue() throws InterruptedException {
+    // 队列名称
+    String queueName = &quot;simple.queue&quot;;
+    // 消息
+    String message = &quot;hello, message_&quot;;
+    for (int i = 0; i &lt; 50; i++) {
+        // 发送消息
+        rabbitTemplate.convertAndSend(queueName, message + i);
+        Thread.sleep(20);
+    }
+}
+</code></pre>
+<h3 id="322消息接收">3.2.2.消息接收</h3>
+<p>要模拟多个消费者绑定同一个队列，我们在consumer服务的SpringRabbitListener中添加2个新的方法：</p>
+<pre><code class="language-java">@RabbitListener(queues = &quot;simple.queue&quot;)
+public void listenWorkQueue1(String msg) throws InterruptedException {
+    System.out.println(&quot;消费者1接收到消息：【&quot; + msg + &quot;】&quot; + LocalTime.now());
+    Thread.sleep(20);
+}
+
+@RabbitListener(queues = &quot;simple.queue&quot;)
+public void listenWorkQueue2(String msg) throws InterruptedException {
+    System.err.println(&quot;消费者2........接收到消息：【&quot; + msg + &quot;】&quot; + LocalTime.now());
+    Thread.sleep(200);
+}
+
+</code></pre>
+<p>注意到这个消费者sleep了1000秒，模拟任务耗时。</p>
+<h3 id="323测试">3.2.3.测试</h3>
+<p>启动ConsumerApplication后，在执行publisher服务中刚刚编写的发送测试方法testWorkQueue。</p>
+<p>可以看到消费者1很快完成了自己的25条消息。消费者2却在缓慢的处理自己的25条消息。</p>
+<p>也就是说消息是平均分配给每个消费者，并没有考虑到消费者的处理能力。这样显然是有问题的。</p>
+<h3 id="324能者多劳">3.2.4.能者多劳</h3>
+<p>在spring中有一个简单的配置，可以解决这个问题。我们修改consumer服务的application.yml文件，添加配置：</p>
+<pre><code class="language-yaml">spring:
+  rabbitmq:
+    listener:
+      simple:
+        prefetch: 1 # 每次只能获取一条消息，处理完成才能获取下一个消息
+
+</code></pre>
+<h3 id="325总结">3.2.5.总结</h3>
+<p>Work模型的使用：</p>
+<ul>
+<li>多个消费者绑定到一个队列，同一条消息只会被一个消费者处理</li>
+<li>通过设置prefetch来控制消费者预取的消息数量</li>
+</ul>
+<h2 id="33发布订阅">3.3.发布/订阅</h2>
+<p>发布订阅的模型如图：</p>
+<figure data-type="image" tabindex="13"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717165309625.png" alt="image-20210717165309625" loading="lazy"></figure>
+<p>可以看到，在订阅模型中，多了一个exchange角色，而且过程略有变化：</p>
+<ul>
+<li>Publisher：生产者，也就是要发送消息的程序，但是不再发送到队列中，而是发给X（交换机）</li>
+<li>Exchange：交换机，图中的X。一方面，接收生产者发送的消息。另一方面，知道如何处理消息，例如递交给某个特别队列、递交给所有队列、或是将消息丢弃。到底如何操作，取决于Exchange的类型。Exchange有以下3种类型：
+<ul>
+<li>Fanout：广播，将消息交给所有绑定到交换机的队列</li>
+<li>Direct：定向，把消息交给符合指定routing key 的队列</li>
+<li>Topic：通配符，把消息交给符合routing pattern（路由模式） 的队列</li>
+</ul>
+</li>
+<li>Consumer：消费者，与以前一样，订阅队列，没有变化</li>
+<li>Queue：消息队列也与以前一样，接收消息、缓存消息。</li>
+</ul>
+<p><strong>Exchange（交换机）只负责转发消息，不具备存储消息的能力</strong>，因此如果没有任何队列与Exchange绑定，或者没有符合路由规则的队列，那么消息会丢失！</p>
+<h2 id="34fanout">3.4.Fanout</h2>
+<p>Fanout，英文翻译是扇出，我觉得在MQ中叫广播更合适。</p>
+<figure data-type="image" tabindex="14"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717165438225.png" alt="image-20210717165438225" loading="lazy"></figure>
+<p>在广播模式下，消息发送流程是这样的：</p>
+<ul>
+<li>1）  可以有多个队列</li>
+<li>2）  每个队列都要绑定到Exchange（交换机）</li>
+<li>3）  生产者发送的消息，只能发送到交换机，交换机来决定要发给哪个队列，生产者无法决定</li>
+<li>4）  交换机把消息发送给绑定过的所有队列</li>
+<li>5）  订阅队列的消费者都能拿到消息</li>
+</ul>
+<p>我们的计划是这样的：</p>
+<ul>
+<li>创建一个交换机 itcast.fanout，类型是Fanout</li>
+<li>创建两个队列fanout.queue1和fanout.queue2，绑定到交换机itcast.fanout</li>
+</ul>
+<figure data-type="image" tabindex="15"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717165509466.png" alt="image-20210717165509466" loading="lazy"></figure>
+<h3 id="341声明队列和交换机">3.4.1.声明队列和交换机</h3>
+<p>Spring提供了一个接口Exchange，来表示所有不同类型的交换机：</p>
+<figure data-type="image" tabindex="16"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717165552676.png" alt="image-20210717165552676" loading="lazy"></figure>
+<p>在consumer中创建一个类，声明队列和交换机：</p>
+<pre><code class="language-java">package cn.itcast.mq.config;
+
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.FanoutExchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class FanoutConfig {
+    /**
+     * 声明交换机
+     * @return Fanout类型交换机
+     */
+    @Bean
+    public FanoutExchange fanoutExchange(){
+        return new FanoutExchange(&quot;itcast.fanout&quot;);
+    }
+
+    /**
+     * 第1个队列
+     */
+    @Bean
+    public Queue fanoutQueue1(){
+        return new Queue(&quot;fanout.queue1&quot;);
+    }
+
+    /**
+     * 绑定队列和交换机
+     */
+    @Bean
+    public Binding bindingQueue1(Queue fanoutQueue1, FanoutExchange fanoutExchange){
+        return BindingBuilder.bind(fanoutQueue1).to(fanoutExchange);
+    }
+
+    /**
+     * 第2个队列
+     */
+    @Bean
+    public Queue fanoutQueue2(){
+        return new Queue(&quot;fanout.queue2&quot;);
+    }
+
+    /**
+     * 绑定队列和交换机
+     */
+    @Bean
+    public Binding bindingQueue2(Queue fanoutQueue2, FanoutExchange fanoutExchange){
+        return BindingBuilder.bind(fanoutQueue2).to(fanoutExchange);
+    }
+}
+
+</code></pre>
+<h3 id="342消息发送">3.4.2.消息发送</h3>
+<p>在publisher服务的SpringAmqpTest类中添加测试方法：</p>
+<pre><code class="language-java">@Test
+public void testFanoutExchange() {
+    // 队列名称
+    String exchangeName = &quot;itcast.fanout&quot;;
+    // 消息
+    String message = &quot;hello, everyone!&quot;;
+    rabbitTemplate.convertAndSend(exchangeName, &quot;&quot;, message);
+}
+
+</code></pre>
+<h3 id="343消息接收">3.4.3.消息接收</h3>
+<p>在consumer服务的SpringRabbitListener中添加两个方法，作为消费者：</p>
+<pre><code class="language-java">@RabbitListener(queues = &quot;fanout.queue1&quot;)
+public void listenFanoutQueue1(String msg) {
+    System.out.println(&quot;消费者1接收到Fanout消息：【&quot; + msg + &quot;】&quot;);
+}
+
+@RabbitListener(queues = &quot;fanout.queue2&quot;)
+public void listenFanoutQueue2(String msg) {
+    System.out.println(&quot;消费者2接收到Fanout消息：【&quot; + msg + &quot;】&quot;);
+}
+
+</code></pre>
+<h3 id="344总结">3.4.4.总结</h3>
+<p>交换机的作用是什么？</p>
+<ul>
+<li>接收publisher发送的消息</li>
+<li>将消息按照规则路由到与之绑定的队列</li>
+<li>不能缓存消息，路由失败，消息丢失</li>
+<li>FanoutExchange的会将消息路由到每个绑定的队列</li>
+</ul>
+<p>声明队列、交换机、绑定关系的Bean是什么？</p>
+<ul>
+<li>Queue</li>
+<li>FanoutExchange</li>
+<li>Binding</li>
+</ul>
+<h2 id="35direct">3.5.Direct</h2>
+<p>在Fanout模式中，一条消息，会被所有订阅的队列都消费。但是，在某些场景下，我们希望不同的消息被不同的队列消费。这时就要用到Direct类型的Exchange。</p>
+<figure data-type="image" tabindex="17"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717170041447.png" alt="image-20210717170041447" loading="lazy"></figure>
+<p>在Direct模型下：</p>
+<ul>
+<li>队列与交换机的绑定，不能是任意绑定了，而是要指定一个<code>RoutingKey</code>（路由key）</li>
+<li>消息的发送方在 向 Exchange发送消息时，也必须指定消息的 <code>RoutingKey</code>。</li>
+<li>Exchange不再把消息交给每一个绑定的队列，而是根据消息的<code>Routing Key</code>进行判断，只有队列的<code>Routingkey</code>与消息的 <code>Routing key</code>完全一致，才会接收到消息</li>
+</ul>
+<p><strong>案例需求如下</strong>：</p>
+<ol>
+<li>
+<p>利用@RabbitListener声明Exchange、Queue、RoutingKey</p>
+</li>
+<li>
+<p>在consumer服务中，编写两个消费者方法，分别监听direct.queue1和direct.queue2</p>
+</li>
+<li>
+<p>在publisher中编写测试方法，向itcast. direct发送消息</p>
+</li>
+</ol>
+<figure data-type="image" tabindex="18"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717170223317.png" alt="image-20210717170223317" loading="lazy"></figure>
+<h3 id="351基于注解声明队列和交换机">3.5.1.基于注解声明队列和交换机</h3>
+<p>基于@Bean的方式声明队列和交换机比较麻烦，Spring还提供了基于注解方式来声明。</p>
+<p>在consumer的SpringRabbitListener中添加两个消费者，同时基于注解来声明队列和交换机：</p>
+<pre><code class="language-java">@RabbitListener(bindings = @QueueBinding(
+    value = @Queue(name = &quot;direct.queue1&quot;),
+    exchange = @Exchange(name = &quot;itcast.direct&quot;, type = ExchangeTypes.DIRECT),
+    key = {&quot;red&quot;, &quot;blue&quot;}
+))
+public void listenDirectQueue1(String msg){
+    System.out.println(&quot;消费者接收到direct.queue1的消息：【&quot; + msg + &quot;】&quot;);
+}
+
+@RabbitListener(bindings = @QueueBinding(
+    value = @Queue(name = &quot;direct.queue2&quot;),
+    exchange = @Exchange(name = &quot;itcast.direct&quot;, type = ExchangeTypes.DIRECT),
+    key = {&quot;red&quot;, &quot;yellow&quot;}
+))
+public void listenDirectQueue2(String msg){
+    System.out.println(&quot;消费者接收到direct.queue2的消息：【&quot; + msg + &quot;】&quot;);
+}
+
+</code></pre>
+<h3 id="352消息发送">3.5.2.消息发送</h3>
+<p>在publisher服务的SpringAmqpTest类中添加测试方法：</p>
+<pre><code class="language-java">@Test
+public void testSendDirectExchange() {
+    // 交换机名称
+    String exchangeName = &quot;itcast.direct&quot;;
+    // 消息
+    String message = &quot;红色警报！日本乱排核废水，导致海洋生物变异，惊现哥斯拉！&quot;;
+    // 发送消息
+    rabbitTemplate.convertAndSend(exchangeName, &quot;red&quot;, message);
+}
+
+</code></pre>
+<h3 id="353总结">3.5.3.总结</h3>
+<p>描述下Direct交换机与Fanout交换机的差异？</p>
+<ul>
+<li>Fanout交换机将消息路由给每一个与之绑定的队列</li>
+<li>Direct交换机根据RoutingKey判断路由给哪个队列</li>
+<li>如果多个队列具有相同的RoutingKey，则与Fanout功能类似</li>
+</ul>
+<p>基于@RabbitListener注解声明队列和交换机有哪些常见注解？</p>
+<ul>
+<li>@Queue</li>
+<li>@Exchange</li>
+</ul>
+<h2 id="36topic">3.6.Topic</h2>
+<h3 id="361说明">3.6.1.说明</h3>
+<p><code>Topic</code>类型的<code>Exchange</code>与<code>Direct</code>相比，都是可以根据<code>RoutingKey</code>把消息路由到不同的队列。只不过<code>Topic</code>类型<code>Exchange</code>可以让队列在绑定<code>Routing key</code> 的时候使用通配符！</p>
+<p><code>Routingkey</code> 一般都是有一个或多个单词组成，多个单词之间以”.”分割，例如： <code>item.insert</code></p>
+<p>通配符规则：</p>
+<p><code>#</code>：匹配一个或多个词</p>
+<p><code>*</code>：匹配不多不少恰好1个词</p>
+<p>举例：</p>
+<p><code>item.#</code>：能够匹配<code>item.spu.insert</code> 或者 <code>item.spu</code></p>
+<p><code>item.*</code>：只能匹配<code>item.spu</code></p>
+<p>​</p>
+<p>图示：</p>
+<figure data-type="image" tabindex="19"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717170705380.png" alt="image-20210717170705380" loading="lazy"></figure>
+<p>解释：</p>
+<ul>
+<li>Queue1：绑定的是<code>china.#</code> ，因此凡是以 <code>china.</code>开头的<code>routing key</code> 都会被匹配到。包括china.news和china.weather</li>
+<li>Queue2：绑定的是<code>#.news</code> ，因此凡是以 <code>.news</code>结尾的 <code>routing key</code> 都会被匹配。包括china.news和japan.news</li>
+</ul>
+<p>案例需求：</p>
+<p>实现思路如下：</p>
+<ol>
+<li>
+<p>并利用@RabbitListener声明Exchange、Queue、RoutingKey</p>
+</li>
+<li>
+<p>在consumer服务中，编写两个消费者方法，分别监听topic.queue1和topic.queue2</p>
+</li>
+<li>
+<p>在publisher中编写测试方法，向itcast. topic发送消息</p>
+</li>
+</ol>
+<figure data-type="image" tabindex="20"><img src="https://shenshen6666.GitHub.io/post-images/image-20210717170829229.png" alt="image-20210717170829229" loading="lazy"></figure>
+<h3 id="362消息发送">3.6.2.消息发送</h3>
+<p>在publisher服务的SpringAmqpTest类中添加测试方法：</p>
+<pre><code class="language-java">/**
+     * topicExchange
+     */
+@Test
+public void testSendTopicExchange() {
+    // 交换机名称
+    String exchangeName = &quot;itcast.topic&quot;;
+    // 消息
+    String message = &quot;喜报！孙悟空大战哥斯拉，胜!&quot;;
+    // 发送消息
+    rabbitTemplate.convertAndSend(exchangeName, &quot;china.news&quot;, message);
+}
+
+</code></pre>
+<h3 id="363消息接收">3.6.3.消息接收</h3>
+<p>在consumer服务的SpringRabbitListener中添加方法：</p>
+<pre><code class="language-java">@RabbitListener(bindings = @QueueBinding(
+    value = @Queue(name = &quot;topic.queue1&quot;),
+    exchange = @Exchange(name = &quot;itcast.topic&quot;, type = ExchangeTypes.TOPIC),
+    key = &quot;china.#&quot;
+))
+public void listenTopicQueue1(String msg){
+    System.out.println(&quot;消费者接收到topic.queue1的消息：【&quot; + msg + &quot;】&quot;);
+}
+
+@RabbitListener(bindings = @QueueBinding(
+    value = @Queue(name = &quot;topic.queue2&quot;),
+    exchange = @Exchange(name = &quot;itcast.topic&quot;, type = ExchangeTypes.TOPIC),
+    key = &quot;#.news&quot;
+))
+public void listenTopicQueue2(String msg){
+    System.out.println(&quot;消费者接收到topic.queue2的消息：【&quot; + msg + &quot;】&quot;);
+}
+
+</code></pre>
+<h3 id="364总结">3.6.4.总结</h3>
+<p>描述下Direct交换机与Topic交换机的差异？</p>
+<ul>
+<li>Topic交换机接收的消息RoutingKey必须是多个单词，以 <code>**.**</code> 分割</li>
+<li>Topic交换机与队列绑定时的bindingKey可以指定通配符</li>
+<li><code>#</code>：代表0个或多个词</li>
+<li><code>*</code>：代表1个词</li>
+</ul>
+<h2 id="37消息转换器">3.7.消息转换器</h2>
+<p>之前说过，Spring会把你发送的消息序列化为字节发送给MQ，接收消息的时候，还会把字节反序列化为Java对象。</p>
+<figure data-type="image" tabindex="21"><img src="https://shenshen6666.GitHub.io/post-images/image-20200525170410401.png" alt="image-20200525170410401" loading="lazy"></figure>
+<p>只不过，默认情况下Spring采用的序列化方式是JDK序列化。众所周知，JDK序列化存在下列问题：</p>
+<ul>
+<li>数据体积过大</li>
+<li>有安全漏洞</li>
+<li>可读性差</li>
+</ul>
+<p>我们来测试一下。</p>
+<h3 id="371测试默认转换器">3.7.1.测试默认转换器</h3>
+<p>我们修改消息发送的代码，发送一个Map对象：</p>
+<pre><code class="language-java">@Test
+public void testSendMap() throws InterruptedException {
+    // 准备消息
+    Map&lt;String,Object&gt; msg = new HashMap&lt;&gt;();
+    msg.put(&quot;name&quot;, &quot;Jack&quot;);
+    msg.put(&quot;age&quot;, 21);
+    // 发送消息
+    rabbitTemplate.convertAndSend(&quot;simple.queue&quot;,&quot;&quot;, msg);
+}
+
+</code></pre>
+<p>停止consumer服务</p>
+<p>发送消息后查看控制台：</p>
+<figure data-type="image" tabindex="22"><img src="https://shenshen6666.GitHub.io/post-images/image-20210422232835363.png" alt="image-20210422232835363" loading="lazy"></figure>
+<h3 id="372配置json转换器">3.7.2.配置JSON转换器</h3>
+<p>显然，JDK序列化方式并不合适。我们希望消息体的体积更小、可读性更高，因此可以使用JSON方式来做序列化和反序列化。</p>
+<p>在publisher和consumer两个服务中都引入依赖：</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.fasterxml.jackson.dataformat&lt;/groupId&gt;
+    &lt;artifactId&gt;jackson-dataformat-xml&lt;/artifactId&gt;
+    &lt;version&gt;2.9.10&lt;/version&gt;
+&lt;/dependency&gt;
+
+</code></pre>
+<p>配置消息转换器。</p>
+<p>在启动类中添加一个Bean即可：</p>
+<pre><code class="language-java">@Bean
+public MessageConverter jsonMessageConverter(){
+    return new Jackson2JsonMessageConverter();
+}
+
+</code></pre>
+
+          </div>
+        </div>
+        <!-- 右侧内容 -->
+        <div class="w-full md:w-1/3 mt-6 md:pl-8" id="additionalContent">
+          <!-- 阅读模块相关内容 -->
+          <div class="mt-6 md:pl-8">
+            <!-- 发布时间 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-release"></i>
+              发布时间
+            </h4>
+            <div class="text-lg mb-6">2024-02-03</div>
+            <!-- 标签 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-tag"></i>
+              标签
+            </h4>
+            <div class="mb-6">
+              <!-- 循环显示标签 -->
+              
+            </div>
+            <!-- 字数 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-words"></i>
+              字数
+            </h4>
+            <div class="text-lg mb-6">4975 Char</div>
+            <!-- 阅读时间 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-read"></i>
+              阅读时间
+            </h4>
+            <div class="text-lg mb-6">21 min read</div>
+            <!-- 阅读量 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-times"></i>
+              阅读量
+            </h4>
+            <div class="text-lg mb-6"><span id="busuanzi_value_page_pv"></span> Times</div>
+            <!-- 相关阅读 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-related"></i>
+              相关阅读
+            </h4>
+            <div class="border-internal border-gray-400">
+              
+
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+
+  <div class="py-6 text-gray-700 text-sm">暂无相关文章</div>
+
+            </div>
+            <!-- 赞助内容 -->
+            
+  <h4 class="text-base font-thin text-gray-700 mb-2 mt-6">
+    <i class="icon icon-sponsor"></i>
+    赞赏
+  </h4>
+  <div class="post-sponsor text-gray-700">
+    <img class="post-sponsor-img w-32 h-32 md:w-40 md:h-40" src="https://shenshen6666.GitHub.io\media\images\custom-weChatPayQR.png" alt="">
+    <div>
+      <i class="icon icon-wechat"></i>
+      支付宝扫一扫领红包
+    </div>
+  </div>
+
+
+          </div>
+          <!-- 网址模块 -->
+          <div class="zhihu-iframe mt-6">
+            <!-- 添加网址模块地址的 iframe 代码 -->
+            <iframe src="https://onehu.xyz/" width="100%" height="400px" frameborder="0" scrolling="yes"></iframe>
+          </div>
+          <!-- 切换按钮 -->
+          <button id="toggleButton">切换</button>
+          <!-- 上移按钮 -->
+          <button id="moveUpButton">上</button>
+          <!-- 下移按钮 -->
+          <button id="moveDownButton">下</button>
+        </div>
+      </div>
+      <!-- 页面底部内容 -->
+      <!-- 其他内容省略 -->
+      <div class="footer border-gray-400 border-external-top pt-6 mt-6 sm:mt-8 md:mt-10 mb-20 text-gray-700 text-sm sm:text-base lg:text-lg">
+  Powered by <a href="https://github.com/shenshen6666/shenshen6666.GitHub.io" target="_blank">我的小屋</a>
+</div>
+    </div>
+  </div>
+  <!-- 页面脚本 -->
+  <script>
+    // 初始状态
+    let isZhihuVisible = false;
+
+    // 切换按钮点击事件
+    $('#toggleButton').on('click', function() {
+      $('.zhihu-iframe, #additionalContent .mt-6').toggle();
+      // 这里可以添加其他模块的切换逻辑
+    });
+
+    // 上移按钮点击事件
+    $('#moveUpButton').on('click', function() {
+      let currentPosition = parseFloat($('.zhihu-iframe').css('top'));
+      $('.zhihu-iframe').css('top', currentPosition - 10 + 'px');
+    });
+
+    // 下移按钮点击事件
+    $('#moveDownButton').on('click', function() {
+      let currentPosition = parseFloat($('.zhihu-iframe').css('top'));
+      $('.zhihu-iframe').css('top', currentPosition + 10 + 'px');
+    });
+
+    // 代码高亮
+    Prism.highlightAll();
+  </script>
+</body>
+</html>
