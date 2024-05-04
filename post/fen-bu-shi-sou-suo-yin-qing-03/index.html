@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+  <!-- 包含 head 部分，动态设置页面标题 -->
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>分布式搜索引擎03 | 申申丫的</title>
+<link rel="stylesheet" href="https://shenshen6666.GitHub.io/styles/main.css">
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  <script src="https://shenshen6666.GitHub.io/media/js/page.js"></script>
+
+    
+
+  <!-- 页面描述信息 -->
+  <meta name="description" content="0.学习目标
+1.数据聚合
+**聚合（aggregations）**可以让我们极其方便的实现对数据的统计、分析、运算。例如：
+
+什么品牌的手机最受欢迎？
+这些手机的平均价格、最高价格、最低价格？
+这些手机每月的销售情况如何？
+
+实现这些统计...">
+  <!-- 引入 jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <!-- 代码高亮库 Prism.js -->
+  <script src="https://shenshen6666.GitHub.io/media/js/prism.js"></script>
+  <!-- KaTeX数学公式样式 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+  <!-- Gitalk评论样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <!-- 引入 Gitalk评论功能脚本 -->
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  <!-- 页面样式 -->
+  <style>
+    /* 网址模块样式 */
+    .zhihu-iframe {
+      position: fixed;
+      top: 5px; /* 初始状态悬浮在页面上方 */
+      left: 75%; /* 距离左边界75%的位置 */
+      transform: translateX(-50%);
+      z-index: 999;
+      display: none; /* 初始状态隐藏网址模块 */
+    }
+
+    /* 按钮样式 */
+    #toggleButton, #moveUpButton, #moveDownButton {
+      cursor: pointer;
+      position: fixed;
+      bottom: 20px;
+      right: 50px; /* 按钮距离右边界50px的位置 */
+      padding: 10px;
+      background-color: transparent;
+      color: #000000;
+      border: none;
+      border-radius: 5px;
+      margin: 5px;
+    }
+
+    /* 修复按钮样式 */
+    #moveUpButton, #moveDownButton {
+      bottom: 70px; /* 上移、下移按钮的位置 */
+    }
+
+    #moveDownButton {
+      bottom: 120px; /* 下移按钮的位置 */
+    }
+  </style>
+</head>
+<body>
+  <div class="antialiased">
+    <div class="body-width mx-auto px-6 md:px-8">
+      <!-- 包含页面头部 -->
+      
+<div class="flex justify-between items-center mt-10">
+  <h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-900 font-medium md:font-normal leading-none">
+    <div class="glitch-wrapper">
+      <div class="glitch" data-text="申申丫的">
+        <a href="https://shenshen6666.GitHub.io">申申丫的</a>
+      </div>
+    </div>
+  </h1>
+  <div class="block lg:hidden" id="thumb-menu">
+    <button id="thumb-open" type="button" class="block">
+      <i class="icon icon-menu-close"></i>
+    </button>
+    <button id="thumb-close" type="button" class="hidden">
+      <i class="icon icon-menu-open"></i>
+    </button>
+  </div>
+</div>
+<div id="nav-list" class="lg:block hidden">
+  <div class="w-full block lg:flex lg:justify-between border-external-bottom lg:border-gray-400 mt-10 text-gray-700 lg:text-lg">
+    <div class="lg:flex -mb-px">
+      
+        
+          <div class="pb-4">
+            <a href="/" class="nav-link">
+              <i class="icon icon-home"></i> 
+              首页
+            </a>
+          </div>
+        
+      
+        
+          <div class="pb-4">
+            <a href="/archives" class="nav-link">
+              <i class="icon icon-archive"></i> 
+              归档
+            </a>
+          </div>
+        
+      
+        
+          <div class="pb-4">
+            <a href="/tags" class="nav-link">
+              <i class="icon icon-tags"></i> 
+              标签
+            </a>
+          </div>
+        
+      
+        
+          <div class="pb-4">
+            <a href="/post/about" class="nav-link">
+              <i class="icon icon-user"></i> 
+              关于
+            </a>
+          </div>
+        
+      
+        
+          <div class="pb-4">
+            <a href="/essays" class="nav-link">
+              <i class="icon icon-"></i> 
+              测试菜单
+            </a>
+          </div>
+        
+      
+      <div class="search-frame pb-4">
+        <i class="icon icon-search"></i>
+        <form id="search-form" action="https://shenshen6666.GitHub.io/search/">
+          <input name="searchContent" type="text" placeholder="Search..." />
+        </form>
+      </div>
+    </div>
+    <div class="lg:flex">
+      <ul>
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+      <a href="https://shenshen6666.GitHub.io/atom.xml" class="block mt-4 lg:mt-0 lg:ml-8 align-center hover:text-gray-900" target="_blank">
+        <i class="icon icon-rss"></i>
+        RSS
+      </a>
+    </div>
+  </div>
+</div>
+      <!-- 页面主体 -->
+      <div class="mb-20 md:flex mt-10 lg:mt-6 md:border-internal md:border-gray-400 md:pt-2 lg:border-t-0 lg:pt-0">
+        <!-- 左侧内容 -->
+        <div class="w-full md:w-2/3 mt-6">
+          <!-- 文章标题 -->
+          <h1 class="post-title text-3xl">分布式搜索引擎03</h1>
+          <!-- 如果有特色图片，则显示 -->
+          
+            <img class="max-w-full mt-6 rounded-sm" src="https://img0.baidu.com/it/u=2232615224,1795298255&amp;fm=253&amp;fmt=auto&amp;app=138&amp;f=JPEG?w=500&amp;h=500" alt="">
+          
+          <!-- 文章内容 -->
+          <div class="mt-6 lg:mt-10 post-content">
+            <h1 id="0学习目标">0.学习目标</h1>
+<h1 id="1数据聚合">1.数据聚合</h1>
+<p>**<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html">聚合（</a><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html">aggregations</a><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html">）</a>**可以让我们极其方便的实现对数据的统计、分析、运算。例如：</p>
+<ul>
+<li>什么品牌的手机最受欢迎？</li>
+<li>这些手机的平均价格、最高价格、最低价格？</li>
+<li>这些手机每月的销售情况如何？</li>
+</ul>
+<p>实现这些统计功能的比数据库的sql要方便的多，而且查询速度非常快，可以实现近实时搜索效果。</p>
+<h2 id="11聚合的种类">1.1.聚合的种类</h2>
+<p>聚合常见的有三类：</p>
+<ul>
+<li>
+<p>**桶（Bucket）**聚合：用来对文档做分组</p>
+<ul>
+<li>TermAggregation：按照文档字段值分组，例如按照品牌值分组、按照国家分组</li>
+<li>Date Histogram：按照日期阶梯分组，例如一周为一组，或者一月为一组</li>
+</ul>
+</li>
+<li>
+<p>**度量（Metric）**聚合：用以计算一些值，比如：最大值、最小值、平均值等</p>
+<ul>
+<li>Avg：求平均值</li>
+<li>Max：求最大值</li>
+<li>Min：求最小值</li>
+<li>Stats：同时求max、min、avg、sum等</li>
+</ul>
+</li>
+<li>
+<p>**管道（pipeline）**聚合：其它聚合的结果为基础做聚合</p>
+</li>
+</ul>
+<blockquote>
+<p>**注意：**参加聚合的字段必须是keyword、日期、数值、布尔类型</p>
+</blockquote>
+<h2 id="12dsl实现聚合">1.2.DSL实现聚合</h2>
+<p>现在，我们要统计所有数据中的酒店品牌有几种，其实就是按照品牌对数据分组。此时可以根据酒店品牌的名称做聚合，也就是Bucket聚合。</p>
+<h3 id="121bucket聚合语法">1.2.1.Bucket聚合语法</h3>
+<p>语法如下：</p>
+<pre><code class="language-json">GET /hotel/_search
+{
+  &quot;size&quot;: 0,  // 设置size为0，结果中不包含文档，只包含聚合结果
+  &quot;aggs&quot;: { // 定义聚合
+    &quot;brandAgg&quot;: { //给聚合起个名字
+      &quot;terms&quot;: { // 聚合的类型，按照品牌值聚合，所以选择term
+        &quot;field&quot;: &quot;brand&quot;, // 参与聚合的字段
+        &quot;size&quot;: 20 // 希望获取的聚合结果数量
+      }
+    }
+  }
+}
+</code></pre>
+<p>结果如图：</p>
+<figure data-type="image" tabindex="1"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723171948228.png" alt="image-20210723171948228" loading="lazy"></figure>
+<h3 id="122聚合结果排序">1.2.2.聚合结果排序</h3>
+<p>默认情况下，Bucket聚合会统计Bucket内的文档数量，记为_count，并且按照_count降序排序。</p>
+<p>我们可以指定order属性，自定义聚合的排序方式：</p>
+<pre><code class="language-json">GET /hotel/_search
+{
+  &quot;size&quot;: 0, 
+  &quot;aggs&quot;: {
+    &quot;brandAgg&quot;: {
+      &quot;terms&quot;: {
+        &quot;field&quot;: &quot;brand&quot;,
+        &quot;order&quot;: {
+          &quot;_count&quot;: &quot;asc&quot; // 按照_count升序排列
+        },
+        &quot;size&quot;: 20
+      }
+    }
+  }
+}
+</code></pre>
+<h3 id="123限定聚合范围">1.2.3.限定聚合范围</h3>
+<p>默认情况下，Bucket聚合是对索引库的所有文档做聚合，但真实场景下，用户会输入搜索条件，因此聚合必须是对搜索结果聚合。那么聚合必须添加限定条件。</p>
+<p>我们可以限定要聚合的文档范围，只要添加query条件即可：</p>
+<pre><code class="language-json">GET /hotel/_search
+{
+  &quot;query&quot;: {
+    &quot;range&quot;: {
+      &quot;price&quot;: {
+        &quot;lte&quot;: 200 // 只对200元以下的文档聚合
+      }
+    }
+  }, 
+  &quot;size&quot;: 0, 
+  &quot;aggs&quot;: {
+    &quot;brandAgg&quot;: {
+      &quot;terms&quot;: {
+        &quot;field&quot;: &quot;brand&quot;,
+        &quot;size&quot;: 20
+      }
+    }
+  }
+}
+</code></pre>
+<p>这次，聚合得到的品牌明显变少了：</p>
+<figure data-type="image" tabindex="2"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723172404836.png" alt="image-20210723172404836" loading="lazy"></figure>
+<h3 id="124metric聚合语法">1.2.4.Metric聚合语法</h3>
+<p>上节课，我们对酒店按照品牌分组，形成了一个个桶。现在我们需要对桶内的酒店做运算，获取每个品牌的用户评分的min、max、avg等值。</p>
+<p>这就要用到Metric聚合了，例如stat聚合：就可以获取min、max、avg等结果。</p>
+<p>语法如下：</p>
+<pre><code class="language-json">GET /hotel/_search
+{
+  &quot;size&quot;: 0, 
+  &quot;aggs&quot;: {
+    &quot;brandAgg&quot;: { 
+      &quot;terms&quot;: { 
+        &quot;field&quot;: &quot;brand&quot;, 
+        &quot;size&quot;: 20
+      },
+      &quot;aggs&quot;: { // 是brands聚合的子聚合，也就是分组后对每组分别计算
+        &quot;score_stats&quot;: { // 聚合名称
+          &quot;stats&quot;: { // 聚合类型，这里stats可以计算min、max、avg等
+            &quot;field&quot;: &quot;score&quot; // 聚合字段，这里是score
+          }
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<p>这次的score_stats聚合是在brandAgg的聚合内部嵌套的子聚合。因为我们需要在每个桶分别计算。</p>
+<p>另外，我们还可以给聚合结果做个排序，例如按照每个桶的酒店平均分做排序：</p>
+<figure data-type="image" tabindex="3"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723172917636.png" alt="image-20210723172917636" loading="lazy"></figure>
+<h3 id="125小结">1.2.5.小结</h3>
+<p>aggs代表聚合，与query同级，此时query的作用是？</p>
+<ul>
+<li>限定聚合的的文档范围</li>
+</ul>
+<p>聚合必须的三要素：</p>
+<ul>
+<li>聚合名称</li>
+<li>聚合类型</li>
+<li>聚合字段</li>
+</ul>
+<p>聚合可配置属性有：</p>
+<ul>
+<li>size：指定聚合结果数量</li>
+<li>order：指定聚合结果排序方式</li>
+<li>field：指定聚合字段</li>
+</ul>
+<h2 id="13restapi实现聚合">1.3.RestAPI实现聚合</h2>
+<h3 id="131api语法">1.3.1.API语法</h3>
+<p>聚合条件与query条件同级别，因此需要使用request.source()来指定聚合条件。</p>
+<p>聚合条件的语法：</p>
+<figure data-type="image" tabindex="4"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723173057733.png" alt="image-20210723173057733" loading="lazy"></figure>
+<p>聚合的结果也与查询结果不同，API也比较特殊。不过同样是JSON逐层解析：</p>
+<figure data-type="image" tabindex="5"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723173215728.png" alt="image-20210723173215728" loading="lazy"></figure>
+<h3 id="132业务需求">1.3.2.业务需求</h3>
+<p>需求：搜索页面的品牌、城市等信息不应该是在页面写死，而是通过聚合索引库中的酒店数据得来的：</p>
+<figure data-type="image" tabindex="6"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723192605566.png" alt="image-20210723192605566" loading="lazy"></figure>
+<p>分析：</p>
+<p>目前，页面的城市列表、星级列表、品牌列表都是写死的，并不会随着搜索结果的变化而变化。但是用户搜索条件改变时，搜索结果会跟着变化。</p>
+<p>例如：用户搜索“东方明珠”，那搜索的酒店肯定是在上海东方明珠附近，因此，城市只能是上海，此时城市列表中就不应该显示北京、深圳、杭州这些信息了。</p>
+<p>也就是说，搜索结果中包含哪些城市，页面就应该列出哪些城市；搜索结果中包含哪些品牌，页面就应该列出哪些品牌。</p>
+<p>如何得知搜索结果中包含哪些品牌？如何得知搜索结果中包含哪些城市？</p>
+<p>使用聚合功能，利用Bucket聚合，对搜索结果中的文档基于品牌分组、基于城市分组，就能得知包含哪些品牌、哪些城市了。</p>
+<p>因为是对搜索结果聚合，因此聚合是<strong>限定范围的聚合</strong>，也就是说聚合的限定条件跟搜索文档的条件一致。</p>
+<p>查看浏览器可以发现，前端其实已经发出了这样的一个请求：</p>
+<figure data-type="image" tabindex="7"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723193730799.png" alt="image-20210723193730799" loading="lazy"></figure>
+<p>请求<strong>参数与搜索文档的参数完全一致</strong>。</p>
+<p>返回值类型就是页面要展示的最终结果：</p>
+<figure data-type="image" tabindex="8"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723203915982.png" alt="image-20210723203915982" loading="lazy"></figure>
+<p>结果是一个Map结构：</p>
+<ul>
+<li>key是字符串，城市、星级、品牌、价格</li>
+<li>value是集合，例如多个城市的名称</li>
+</ul>
+<h3 id="133业务实现">1.3.3.业务实现</h3>
+<p>在<code>cn.itcast.hotel.web</code>包的<code>HotelController</code>中添加一个方法，遵循下面的要求：</p>
+<ul>
+<li>请求方式：<code>POST</code></li>
+<li>请求路径：<code>/hotel/filters</code></li>
+<li>请求参数：<code>RequestParams</code>，与搜索文档的参数一致</li>
+<li>返回值类型：<code>Map&lt;String, List&lt;String&gt;&gt;</code></li>
+</ul>
+<p>代码：</p>
+<pre><code class="language-java">    @PostMapping(&quot;filters&quot;)
+    public Map&lt;String, List&lt;String&gt;&gt; getFilters(@RequestBody RequestParams params){
+        return hotelService.getFilters(params);
+    }
+</code></pre>
+<p>这里调用了IHotelService中的getFilters方法，尚未实现。</p>
+<p>在<code>cn.itcast.hotel.service.IHotelService</code>中定义新方法：</p>
+<pre><code class="language-java">Map&lt;String, List&lt;String&gt;&gt; filters(RequestParams params);
+</code></pre>
+<p>在<code>cn.itcast.hotel.service.impl.HotelService</code>中实现该方法：</p>
+<pre><code class="language-java">@Override
+public Map&lt;String, List&lt;String&gt;&gt; filters(RequestParams params) {
+    try {
+        // 1.准备Request
+        SearchRequest request = new SearchRequest(&quot;hotel&quot;);
+        // 2.准备DSL
+        // 2.1.query
+        buildBasicQuery(params, request);
+        // 2.2.设置size
+        request.source().size(0);
+        // 2.3.聚合
+        buildAggregation(request);
+        // 3.发出请求
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        // 4.解析结果
+        Map&lt;String, List&lt;String&gt;&gt; result = new HashMap&lt;&gt;();
+        Aggregations aggregations = response.getAggregations();
+        // 4.1.根据品牌名称，获取品牌结果
+        List&lt;String&gt; brandList = getAggByName(aggregations, &quot;brandAgg&quot;);
+        result.put(&quot;品牌&quot;, brandList);
+        // 4.2.根据品牌名称，获取品牌结果
+        List&lt;String&gt; cityList = getAggByName(aggregations, &quot;cityAgg&quot;);
+        result.put(&quot;城市&quot;, cityList);
+        // 4.3.根据品牌名称，获取品牌结果
+        List&lt;String&gt; starList = getAggByName(aggregations, &quot;starAgg&quot;);
+        result.put(&quot;星级&quot;, starList);
+
+        return result;
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+
+private void buildAggregation(SearchRequest request) {
+    request.source().aggregation(AggregationBuilders
+                                 .terms(&quot;brandAgg&quot;)
+                                 .field(&quot;brand&quot;)
+                                 .size(100)
+                                );
+    request.source().aggregation(AggregationBuilders
+                                 .terms(&quot;cityAgg&quot;)
+                                 .field(&quot;city&quot;)
+                                 .size(100)
+                                );
+    request.source().aggregation(AggregationBuilders
+                                 .terms(&quot;starAgg&quot;)
+                                 .field(&quot;starName&quot;)
+                                 .size(100)
+                                );
+}
+
+private List&lt;String&gt; getAggByName(Aggregations aggregations, String aggName) {
+    // 4.1.根据聚合名称获取聚合结果
+    Terms brandTerms = aggregations.get(aggName);
+    // 4.2.获取buckets
+    List&lt;? extends Terms.Bucket&gt; buckets = brandTerms.getBuckets();
+    // 4.3.遍历
+    List&lt;String&gt; brandList = new ArrayList&lt;&gt;();
+    for (Terms.Bucket bucket : buckets) {
+        // 4.4.获取key
+        String key = bucket.getKeyAsString();
+        brandList.add(key);
+    }
+    return brandList;
+}
+</code></pre>
+<h1 id="2自动补全">2.自动补全</h1>
+<p>当用户在搜索框输入字符时，我们应该提示出与该字符有关的搜索项，如图：</p>
+<figure data-type="image" tabindex="9"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723204936367.png" alt="image-20210723204936367" loading="lazy"></figure>
+<p>这种根据用户输入的字母，提示完整词条的功能，就是自动补全了。</p>
+<p>因为需要根据拼音字母来推断，因此要用到拼音分词功能。</p>
+<h2 id="21拼音分词器">2.1.拼音分词器</h2>
+<p>要实现根据字母做补全，就必须对文档按照拼音分词。在GitHub上恰好有elasticsearch的拼音分词插件。地址：https://github.com/medcl/elasticsearch-analysis-pinyin</p>
+<figure data-type="image" tabindex="10"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723205932746.png" alt="image-20210723205932746" loading="lazy"></figure>
+<p>课前资料中也提供了拼音分词器的安装包：</p>
+<figure data-type="image" tabindex="11"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723205722303.png" alt="image-20210723205722303" loading="lazy"></figure>
+<p>安装方式与IK分词器一样，分三步：</p>
+<p>​	①解压</p>
+<p>​	②上传到虚拟机中，elasticsearch的plugin目录</p>
+<p>​	③重启elasticsearch</p>
+<p>​	④测试</p>
+<p>详细安装步骤可以参考IK分词器的安装过程。</p>
+<p>测试用法如下：</p>
+<pre><code class="language-json">POST /_analyze
+{
+  &quot;text&quot;: &quot;如家酒店还不错&quot;,
+  &quot;analyzer&quot;: &quot;pinyin&quot;
+}
+</code></pre>
+<p>结果：</p>
+<figure data-type="image" tabindex="12"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723210126506.png" alt="image-20210723210126506" loading="lazy"></figure>
+<h2 id="22自定义分词器">2.2.自定义分词器</h2>
+<p>默认的拼音分词器会将每个汉字单独分为拼音，而我们希望的是每个词条形成一组拼音，需要对拼音分词器做个性化定制，形成自定义分词器。</p>
+<p>elasticsearch中分词器（analyzer）的组成包含三部分：</p>
+<ul>
+<li>character filters：在tokenizer之前对文本进行处理。例如删除字符、替换字符</li>
+<li>tokenizer：将文本按照一定的规则切割成词条（term）。例如keyword，就是不分词；还有ik_smart</li>
+<li>tokenizer filter：将tokenizer输出的词条做进一步处理。例如大小写转换、同义词处理、拼音处理等</li>
+</ul>
+<p>文档分词时会依次由这三部分来处理文档：</p>
+<figure data-type="image" tabindex="13"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723210427878.png" alt="image-20210723210427878" loading="lazy"></figure>
+<p>声明自定义分词器的语法如下：</p>
+<pre><code class="language-json">PUT /test
+{
+  &quot;settings&quot;: {
+    &quot;analysis&quot;: {
+      &quot;analyzer&quot;: { // 自定义分词器
+        &quot;my_analyzer&quot;: {  // 分词器名称
+          &quot;tokenizer&quot;: &quot;ik_max_word&quot;,
+          &quot;filter&quot;: &quot;py&quot;
+        }
+      },
+      &quot;filter&quot;: { // 自定义tokenizer filter
+        &quot;py&quot;: { // 过滤器名称
+          &quot;type&quot;: &quot;pinyin&quot;, // 过滤器类型，这里是pinyin
+		  &quot;keep_full_pinyin&quot;: false,
+          &quot;keep_joined_full_pinyin&quot;: true,
+          &quot;keep_original&quot;: true,
+          &quot;limit_first_letter_length&quot;: 16,
+          &quot;remove_duplicated_term&quot;: true,
+          &quot;none_chinese_pinyin_tokenize&quot;: false
+        }
+      }
+    }
+  },
+  &quot;mappings&quot;: {
+    &quot;properties&quot;: {
+      &quot;name&quot;: {
+        &quot;type&quot;: &quot;text&quot;,
+        &quot;analyzer&quot;: &quot;my_analyzer&quot;,
+        &quot;search_analyzer&quot;: &quot;ik_smart&quot;
+      }
+    }
+  }
+}
+
+</code></pre>
+<p>测试：</p>
+<figure data-type="image" tabindex="14"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723211829150.png" alt="image-20210723211829150" loading="lazy"></figure>
+<p>总结：</p>
+<p>如何使用拼音分词器？</p>
+<ul>
+<li>
+<p>①下载pinyin分词器</p>
+</li>
+<li>
+<p>②解压并放到elasticsearch的plugin目录</p>
+</li>
+<li>
+<p>③重启即可</p>
+</li>
+</ul>
+<p>如何自定义分词器？</p>
+<ul>
+<li>
+<p>①创建索引库时，在settings中配置，可以包含三部分</p>
+</li>
+<li>
+<p>②character filter</p>
+</li>
+<li>
+<p>③tokenizer</p>
+</li>
+<li>
+<p>④filter</p>
+</li>
+</ul>
+<p>拼音分词器注意事项？</p>
+<ul>
+<li>为了避免搜索到同音字，搜索时不要使用拼音分词器</li>
+</ul>
+<h2 id="23自动补全查询">2.3.自动补全查询</h2>
+<p>elasticsearch提供了<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.6/search-suggesters.html">Completion Suggester</a>查询来实现自动补全功能。这个查询会匹配以用户输入内容开头的词条并返回。为了提高补全查询的效率，对于文档中字段的类型有一些约束：</p>
+<ul>
+<li>
+<p>参与补全查询的字段必须是completion类型。</p>
+</li>
+<li>
+<p>字段的内容一般是用来补全的多个词条形成的数组。</p>
+</li>
+</ul>
+<p>比如，一个这样的索引库：</p>
+<pre><code class="language-json">// 创建索引库
+PUT test
+{
+  &quot;mappings&quot;: {
+    &quot;properties&quot;: {
+      &quot;title&quot;:{
+        &quot;type&quot;: &quot;completion&quot;
+      }
+    }
+  }
+}
+
+</code></pre>
+<p>然后插入下面的数据：</p>
+<pre><code class="language-json">// 示例数据
+POST test/_doc
+{
+  &quot;title&quot;: [&quot;Sony&quot;, &quot;WH-1000XM3&quot;]
+}
+POST test/_doc
+{
+  &quot;title&quot;: [&quot;SK-II&quot;, &quot;PITERA&quot;]
+}
+POST test/_doc
+{
+  &quot;title&quot;: [&quot;Nintendo&quot;, &quot;switch&quot;]
+}
+
+</code></pre>
+<p>查询的DSL语句如下：</p>
+<pre><code class="language-json">// 自动补全查询
+GET /test/_search
+{
+  &quot;suggest&quot;: {
+    &quot;title_suggest&quot;: {
+      &quot;text&quot;: &quot;s&quot;, // 关键字
+      &quot;completion&quot;: {
+        &quot;field&quot;: &quot;title&quot;, // 补全查询的字段
+        &quot;skip_duplicates&quot;: true, // 跳过重复的
+        &quot;size&quot;: 10 // 获取前10条结果
+      }
+    }
+  }
+}
+
+</code></pre>
+<h2 id="24实现酒店搜索框自动补全">2.4.实现酒店搜索框自动补全</h2>
+<p>现在，我们的hotel索引库还没有设置拼音分词器，需要修改索引库中的配置。但是我们知道索引库是无法修改的，只能删除然后重新创建。</p>
+<p>另外，我们需要添加一个字段，用来做自动补全，将brand、suggestion、city等都放进去，作为自动补全的提示。</p>
+<p>因此，总结一下，我们需要做的事情包括：</p>
+<ol>
+<li>
+<p>修改hotel索引库结构，设置自定义拼音分词器</p>
+</li>
+<li>
+<p>修改索引库的name、all字段，使用自定义分词器</p>
+</li>
+<li>
+<p>索引库添加一个新字段suggestion，类型为completion类型，使用自定义的分词器</p>
+</li>
+<li>
+<p>给HotelDoc类添加suggestion字段，内容包含brand、business</p>
+</li>
+<li>
+<p>重新导入数据到hotel库</p>
+</li>
+</ol>
+<h3 id="241修改酒店映射结构">2.4.1.修改酒店映射结构</h3>
+<p>代码如下：</p>
+<pre><code class="language-json">// 酒店数据索引库
+PUT /hotel
+{
+  &quot;settings&quot;: {
+    &quot;analysis&quot;: {
+      &quot;analyzer&quot;: {
+        &quot;text_anlyzer&quot;: {
+          &quot;tokenizer&quot;: &quot;ik_max_word&quot;,
+          &quot;filter&quot;: &quot;py&quot;
+        },
+        &quot;completion_analyzer&quot;: {
+          &quot;tokenizer&quot;: &quot;keyword&quot;,
+          &quot;filter&quot;: &quot;py&quot;
+        }
+      },
+      &quot;filter&quot;: {
+        &quot;py&quot;: {
+          &quot;type&quot;: &quot;pinyin&quot;,
+          &quot;keep_full_pinyin&quot;: false,
+          &quot;keep_joined_full_pinyin&quot;: true,
+          &quot;keep_original&quot;: true,
+          &quot;limit_first_letter_length&quot;: 16,
+          &quot;remove_duplicated_term&quot;: true,
+          &quot;none_chinese_pinyin_tokenize&quot;: false
+        }
+      }
+    }
+  },
+  &quot;mappings&quot;: {
+    &quot;properties&quot;: {
+      &quot;id&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;
+      },
+      &quot;name&quot;:{
+        &quot;type&quot;: &quot;text&quot;,
+        &quot;analyzer&quot;: &quot;text_anlyzer&quot;,
+        &quot;search_analyzer&quot;: &quot;ik_smart&quot;,
+        &quot;copy_to&quot;: &quot;all&quot;
+      },
+      &quot;address&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;,
+        &quot;index&quot;: false
+      },
+      &quot;price&quot;:{
+        &quot;type&quot;: &quot;integer&quot;
+      },
+      &quot;score&quot;:{
+        &quot;type&quot;: &quot;integer&quot;
+      },
+      &quot;brand&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;,
+        &quot;copy_to&quot;: &quot;all&quot;
+      },
+      &quot;city&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;
+      },
+      &quot;starName&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;
+      },
+      &quot;business&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;,
+        &quot;copy_to&quot;: &quot;all&quot;
+      },
+      &quot;location&quot;:{
+        &quot;type&quot;: &quot;geo_point&quot;
+      },
+      &quot;pic&quot;:{
+        &quot;type&quot;: &quot;keyword&quot;,
+        &quot;index&quot;: false
+      },
+      &quot;all&quot;:{
+        &quot;type&quot;: &quot;text&quot;,
+        &quot;analyzer&quot;: &quot;text_anlyzer&quot;,
+        &quot;search_analyzer&quot;: &quot;ik_smart&quot;
+      },
+      &quot;suggestion&quot;:{
+          &quot;type&quot;: &quot;completion&quot;,
+          &quot;analyzer&quot;: &quot;completion_analyzer&quot;
+      }
+    }
+  }
+}
+
+</code></pre>
+<h3 id="242修改hoteldoc实体">2.4.2.修改HotelDoc实体</h3>
+<p>HotelDoc中要添加一个字段，用来做自动补全，内容可以是酒店品牌、城市、商圈等信息。按照自动补全字段的要求，最好是这些字段的数组。</p>
+<p>因此我们在HotelDoc中添加一个suggestion字段，类型为<code>List&lt;String&gt;</code>，然后将brand、city、business等信息放到里面。</p>
+<p>代码如下：</p>
+<pre><code class="language-java">package cn.itcast.hotel.pojo;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+public class HotelDoc {
+    private Long id;
+    private String name;
+    private String address;
+    private Integer price;
+    private Integer score;
+    private String brand;
+    private String city;
+    private String starName;
+    private String business;
+    private String location;
+    private String pic;
+    private Object distance;
+    private Boolean isAD;
+    private List&lt;String&gt; suggestion;
+
+    public HotelDoc(Hotel hotel) {
+        this.id = hotel.getId();
+        this.name = hotel.getName();
+        this.address = hotel.getAddress();
+        this.price = hotel.getPrice();
+        this.score = hotel.getScore();
+        this.brand = hotel.getBrand();
+        this.city = hotel.getCity();
+        this.starName = hotel.getStarName();
+        this.business = hotel.getBusiness();
+        this.location = hotel.getLatitude() + &quot;, &quot; + hotel.getLongitude();
+        this.pic = hotel.getPic();
+        // 组装suggestion
+        if(this.business.contains(&quot;/&quot;)){
+            // business有多个值，需要切割
+            String[] arr = this.business.split(&quot;/&quot;);
+            // 添加元素
+            this.suggestion = new ArrayList&lt;&gt;();
+            this.suggestion.add(this.brand);
+            Collections.addAll(this.suggestion, arr);
+        }else {
+            this.suggestion = Arrays.asList(this.brand, this.business);
+        }
+    }
+}
+
+</code></pre>
+<h3 id="243重新导入">2.4.3.重新导入</h3>
+<p>重新执行之前编写的导入数据功能，可以看到新的酒店数据中包含了suggestion：</p>
+<figure data-type="image" tabindex="15"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723213546183.png" alt="image-20210723213546183" loading="lazy"></figure>
+<h3 id="244自动补全查询的javaapi">2.4.4.自动补全查询的JavaAPI</h3>
+<p>之前我们学习了自动补全查询的DSL，而没有学习对应的JavaAPI，这里给出一个示例：</p>
+<figure data-type="image" tabindex="16"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723213759922.png" alt="image-20210723213759922" loading="lazy"></figure>
+<p>而自动补全的结果也比较特殊，解析的代码如下：</p>
+<figure data-type="image" tabindex="17"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723213917524.png" alt="image-20210723213917524" loading="lazy"></figure>
+<h3 id="245实现搜索框自动补全">2.4.5.实现搜索框自动补全</h3>
+<p>查看前端页面，可以发现当我们在输入框键入时，前端会发起ajax请求：</p>
+<figure data-type="image" tabindex="18"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723214021062.png" alt="image-20210723214021062" loading="lazy"></figure>
+<p>返回值是补全词条的集合，类型为<code>List&lt;String&gt;</code></p>
+<p>1）在<code>cn.itcast.hotel.web</code>包下的<code>HotelController</code>中添加新接口，接收新的请求：</p>
+<pre><code class="language-java">@GetMapping(&quot;suggestion&quot;)
+public List&lt;String&gt; getSuggestions(@RequestParam(&quot;key&quot;) String prefix) {
+    return hotelService.getSuggestions(prefix);
+}
+
+</code></pre>
+<p>2）在<code>cn.itcast.hotel.service</code>包下的<code>IhotelService</code>中添加方法：</p>
+<pre><code class="language-java">List&lt;String&gt; getSuggestions(String prefix);
+
+</code></pre>
+<p>3）在<code>cn.itcast.hotel.service.impl.HotelService</code>中实现该方法：</p>
+<pre><code class="language-java">@Override
+public List&lt;String&gt; getSuggestions(String prefix) {
+    try {
+        // 1.准备Request
+        SearchRequest request = new SearchRequest(&quot;hotel&quot;);
+        // 2.准备DSL
+        request.source().suggest(new SuggestBuilder().addSuggestion(
+            &quot;suggestions&quot;,
+            SuggestBuilders.completionSuggestion(&quot;suggestion&quot;)
+            .prefix(prefix)
+            .skipDuplicates(true)
+            .size(10)
+        ));
+        // 3.发起请求
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        // 4.解析结果
+        Suggest suggest = response.getSuggest();
+        // 4.1.根据补全查询名称，获取补全结果
+        CompletionSuggestion suggestions = suggest.getSuggestion(&quot;suggestions&quot;);
+        // 4.2.获取options
+        List&lt;CompletionSuggestion.Entry.Option&gt; options = suggestions.getOptions();
+        // 4.3.遍历
+        List&lt;String&gt; list = new ArrayList&lt;&gt;(options.size());
+        for (CompletionSuggestion.Entry.Option option : options) {
+            String text = option.getText().toString();
+            list.add(text);
+        }
+        return list;
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+
+</code></pre>
+<h1 id="3数据同步">3.数据同步</h1>
+<p>elasticsearch中的酒店数据来自于mysql数据库，因此mysql数据发生改变时，elasticsearch也必须跟着改变，这个就是elasticsearch与mysql之间的<strong>数据同步</strong>。</p>
+<figure data-type="image" tabindex="19"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723214758392.png" alt="image-20210723214758392" loading="lazy"></figure>
+<h2 id="31思路分析">3.1.思路分析</h2>
+<p>常见的数据同步方案有三种：</p>
+<ul>
+<li>同步调用</li>
+<li>异步通知</li>
+<li>监听binlog</li>
+</ul>
+<h3 id="311同步调用">3.1.1.同步调用</h3>
+<p>方案一：同步调用</p>
+<figure data-type="image" tabindex="20"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723214931869.png" alt="image-20210723214931869" loading="lazy"></figure>
+<p>基本步骤如下：</p>
+<ul>
+<li>hotel-demo对外提供接口，用来修改elasticsearch中的数据</li>
+<li>酒店管理服务在完成数据库操作后，直接调用hotel-demo提供的接口，</li>
+</ul>
+<h3 id="312异步通知">3.1.2.异步通知</h3>
+<p>方案二：异步通知</p>
+<figure data-type="image" tabindex="21"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723215140735.png" alt="image-20210723215140735" loading="lazy"></figure>
+<p>流程如下：</p>
+<ul>
+<li>hotel-admin对mysql数据库数据完成增、删、改后，发送MQ消息</li>
+<li>hotel-demo监听MQ，接收到消息后完成elasticsearch数据修改</li>
+</ul>
+<h3 id="313监听binlog">3.1.3.监听binlog</h3>
+<p>方案三：监听binlog</p>
+<figure data-type="image" tabindex="22"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723215518541.png" alt="image-20210723215518541" loading="lazy"></figure>
+<p>流程如下：</p>
+<ul>
+<li>给mysql开启binlog功能</li>
+<li>mysql完成增、删、改操作都会记录在binlog中</li>
+<li>hotel-demo基于canal监听binlog变化，实时更新elasticsearch中的内容</li>
+</ul>
+<h3 id="314选择">3.1.4.选择</h3>
+<p>方式一：同步调用</p>
+<ul>
+<li>优点：实现简单，粗暴</li>
+<li>缺点：业务耦合度高</li>
+</ul>
+<p>方式二：异步通知</p>
+<ul>
+<li>优点：低耦合，实现难度一般</li>
+<li>缺点：依赖mq的可靠性</li>
+</ul>
+<p>方式三：监听binlog</p>
+<ul>
+<li>优点：完全解除服务间耦合</li>
+<li>缺点：开启binlog增加数据库负担、实现复杂度高</li>
+</ul>
+<h2 id="32实现数据同步">3.2.实现数据同步</h2>
+<h3 id="321思路">3.2.1.思路</h3>
+<p>利用课前资料提供的hotel-admin项目作为酒店管理的微服务。当酒店数据发生增、删、改时，要求对elasticsearch中数据也要完成相同操作。</p>
+<p>步骤：</p>
+<ul>
+<li>
+<p>导入课前资料提供的hotel-admin项目，启动并测试酒店数据的CRUD</p>
+</li>
+<li>
+<p>声明exchange、queue、RoutingKey</p>
+</li>
+<li>
+<p>在hotel-admin中的增、删、改业务中完成消息发送</p>
+</li>
+<li>
+<p>在hotel-demo中完成消息监听，并更新elasticsearch中数据</p>
+</li>
+<li>
+<p>启动并测试数据同步功能</p>
+</li>
+</ul>
+<h3 id="322导入demo">3.2.2.导入demo</h3>
+<p>导入课前资料提供的hotel-admin项目：</p>
+<figure data-type="image" tabindex="23"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723220237930.png" alt="image-20210723220237930" loading="lazy"></figure>
+<p>运行后，访问 http://localhost:8099</p>
+<figure data-type="image" tabindex="24"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723220354464.png" alt="image-20210723220354464" loading="lazy"></figure>
+<p>其中包含了酒店的CRUD功能：</p>
+<figure data-type="image" tabindex="25"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723220511090.png" alt="image-20210723220511090" loading="lazy"></figure>
+<h3 id="323声明交换机-队列">3.2.3.声明交换机、队列</h3>
+<p>MQ结构如图：</p>
+<figure data-type="image" tabindex="26"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723215850307.png" alt="image-20210723215850307" loading="lazy"></figure>
+<h4 id="1引入依赖">1）引入依赖</h4>
+<p>在hotel-admin、hotel-demo中引入rabbitmq的依赖：</p>
+<pre><code class="language-xml">&lt;!--amqp--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-amqp&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+</code></pre>
+<h4 id="2声明队列交换机名称">2）声明队列交换机名称</h4>
+<p>在hotel-admin和hotel-demo中的<code>cn.itcast.hotel.constatnts</code>包下新建一个类<code>MqConstants</code>：</p>
+<pre><code class="language-java">package cn.itcast.hotel.constatnts;
+
+    public class MqConstants {
+    /**
+     * 交换机
+     */
+    public final static String HOTEL_EXCHANGE = &quot;hotel.topic&quot;;
+    /**
+     * 监听新增和修改的队列
+     */
+    public final static String HOTEL_INSERT_QUEUE = &quot;hotel.insert.queue&quot;;
+    /**
+     * 监听删除的队列
+     */
+    public final static String HOTEL_DELETE_QUEUE = &quot;hotel.delete.queue&quot;;
+    /**
+     * 新增或修改的RoutingKey
+     */
+    public final static String HOTEL_INSERT_KEY = &quot;hotel.insert&quot;;
+    /**
+     * 删除的RoutingKey
+     */
+    public final static String HOTEL_DELETE_KEY = &quot;hotel.delete&quot;;
+}
+
+</code></pre>
+<h4 id="3声明队列交换机">3）声明队列交换机</h4>
+<p>在hotel-demo中，定义配置类，声明队列、交换机：</p>
+<pre><code class="language-java">package cn.itcast.hotel.config;
+
+import cn.itcast.hotel.constants.MqConstants;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class MqConfig {
+    @Bean
+    public TopicExchange topicExchange(){
+        return new TopicExchange(MqConstants.HOTEL_EXCHANGE, true, false);
+    }
+
+    @Bean
+    public Queue insertQueue(){
+        return new Queue(MqConstants.HOTEL_INSERT_QUEUE, true);
+    }
+
+    @Bean
+    public Queue deleteQueue(){
+        return new Queue(MqConstants.HOTEL_DELETE_QUEUE, true);
+    }
+
+    @Bean
+    public Binding insertQueueBinding(){
+        return BindingBuilder.bind(insertQueue()).to(topicExchange()).with(MqConstants.HOTEL_INSERT_KEY);
+    }
+
+    @Bean
+    public Binding deleteQueueBinding(){
+        return BindingBuilder.bind(deleteQueue()).to(topicExchange()).with(MqConstants.HOTEL_DELETE_KEY);
+    }
+}
+
+</code></pre>
+<h3 id="324发送mq消息">3.2.4.发送MQ消息</h3>
+<p>在hotel-admin中的增、删、改业务中分别发送MQ消息：</p>
+<figure data-type="image" tabindex="27"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723221843816.png" alt="image-20210723221843816" loading="lazy"></figure>
+<h3 id="325接收mq消息">3.2.5.接收MQ消息</h3>
+<p>hotel-demo接收到MQ消息要做的事情包括：</p>
+<ul>
+<li>新增消息：根据传递的hotel的id查询hotel信息，然后新增一条数据到索引库</li>
+<li>删除消息：根据传递的hotel的id删除索引库中的一条数据</li>
+</ul>
+<p>1）首先在hotel-demo的<code>cn.itcast.hotel.service</code>包下的<code>IHotelService</code>中新增新增、删除业务</p>
+<pre><code class="language-java">void deleteById(Long id);
+
+void insertById(Long id);
+
+</code></pre>
+<p>2）给hotel-demo中的<code>cn.itcast.hotel.service.impl</code>包下的HotelService中实现业务：</p>
+<pre><code class="language-java">@Override
+public void deleteById(Long id) {
+    try {
+        // 1.准备Request
+        DeleteRequest request = new DeleteRequest(&quot;hotel&quot;, id.toString());
+        // 2.发送请求
+        client.delete(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+
+@Override
+public void insertById(Long id) {
+    try {
+        // 0.根据id查询酒店数据
+        Hotel hotel = getById(id);
+        // 转换为文档类型
+        HotelDoc hotelDoc = new HotelDoc(hotel);
+
+        // 1.准备Request对象
+        IndexRequest request = new IndexRequest(&quot;hotel&quot;).id(hotel.getId().toString());
+        // 2.准备Json文档
+        request.source(JSON.toJSONString(hotelDoc), XContentType.JSON);
+        // 3.发送请求
+        client.index(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+
+</code></pre>
+<p>3）编写监听器</p>
+<p>在hotel-demo中的<code>cn.itcast.hotel.mq</code>包新增一个类：</p>
+<pre><code class="language-java">package cn.itcast.hotel.mq;
+
+import cn.itcast.hotel.constants.MqConstants;
+import cn.itcast.hotel.service.IHotelService;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class HotelListener {
+
+    @Autowired
+    private IHotelService hotelService;
+
+    /**
+     * 监听酒店新增或修改的业务
+     * @param id 酒店id
+     */
+    @RabbitListener(queues = MqConstants.HOTEL_INSERT_QUEUE)
+    public void listenHotelInsertOrUpdate(Long id){
+        hotelService.insertById(id);
+    }
+
+    /**
+     * 监听酒店删除的业务
+     * @param id 酒店id
+     */
+    @RabbitListener(queues = MqConstants.HOTEL_DELETE_QUEUE)
+    public void listenHotelDelete(Long id){
+        hotelService.deleteById(id);
+    }
+}
+
+</code></pre>
+<h1 id="4集群">4.集群</h1>
+<p>单机的elasticsearch做数据存储，必然面临两个问题：海量数据存储问题、单点故障问题。</p>
+<ul>
+<li>海量数据存储问题：将索引库从逻辑上拆分为N个分片（shard），存储到多个节点</li>
+<li>单点故障问题：将分片数据在不同节点备份（replica ）</li>
+</ul>
+<p><strong>ES集群相关概念</strong>:</p>
+<ul>
+<li>
+<p>集群（cluster）：一组拥有共同的 cluster name 的 节点。</p>
+</li>
+<li>
+<p><font color="red">节点（node)</font>   ：集群中的一个 Elasticearch 实例</p>
+</li>
+<li>
+<p><font color="red">分片（shard）</font>：索引可以被拆分为不同的部分进行存储，称为分片。在集群环境下，一个索引的不同分片可以拆分到不同的节点中</p>
+<p>解决问题：数据量太大，单点存储量有限的问题。</p>
+<figure data-type="image" tabindex="28"><img src="https://shenshen6666.GitHub.io/post-images/image-20200104124440086-5602723.png" alt="image-20200104124440086" loading="lazy"></figure>
+<blockquote>
+<p>此处，我们把数据分成3片：shard0、shard1、shard2</p>
+</blockquote>
+</li>
+<li>
+<p>主分片（Primary shard）：相对于副本分片的定义。</p>
+</li>
+<li>
+<p>副本分片（Replica shard）每个主分片可以有一个或者多个副本，数据和主分片一样。</p>
+<p>​</p>
+</li>
+</ul>
+<p>数据备份可以保证高可用，但是每个分片备份一份，所需要的节点数量就会翻一倍，成本实在是太高了！</p>
+<p>为了在高可用和成本间寻求平衡，我们可以这样做：</p>
+<ul>
+<li>首先对数据分片，存储到不同节点</li>
+<li>然后对每个分片进行备份，放到对方节点，完成互相备份</li>
+</ul>
+<p>这样可以大大减少所需要的服务节点数量，如图，我们以3分片，每个分片备份一份为例：</p>
+<figure data-type="image" tabindex="29"><img src="https://shenshen6666.GitHub.io/post-images/image-20200104124551912.png" alt="image-20200104124551912" loading="lazy"></figure>
+<p>现在，每个分片都有1个备份，存储在3个节点：</p>
+<ul>
+<li>node0：保存了分片0和1</li>
+<li>node1：保存了分片0和2</li>
+<li>node2：保存了分片1和2</li>
+</ul>
+<h2 id="41搭建es集群">4.1.搭建ES集群</h2>
+<p>参考课前资料的文档：</p>
+<figure data-type="image" tabindex="30"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723222732427.png" alt="image-20210723222732427" loading="lazy"></figure>
+<p>其中的第四章节：</p>
+<figure data-type="image" tabindex="31"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723222812619.png" alt="image-20210723222812619" loading="lazy"></figure>
+<h2 id="42集群脑裂问题">4.2.集群脑裂问题</h2>
+<h3 id="421集群职责划分">4.2.1.集群职责划分</h3>
+<p>elasticsearch中集群节点有不同的职责划分：</p>
+<figure data-type="image" tabindex="32"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723223008967.png" alt="image-20210723223008967" loading="lazy"></figure>
+<p>默认情况下，集群中的任何一个节点都同时具备上述四种角色。</p>
+<p>但是真实的集群一定要将集群职责分离：</p>
+<ul>
+<li>master节点：对CPU要求高，但是内存要求第</li>
+<li>data节点：对CPU和内存要求都高</li>
+<li>coordinating节点：对网络带宽、CPU要求高</li>
+</ul>
+<p>职责分离可以让我们根据不同节点的需求分配不同的硬件去部署。而且避免业务之间的互相干扰。</p>
+<p>一个典型的es集群职责划分如图：</p>
+<figure data-type="image" tabindex="33"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723223629142.png" alt="image-20210723223629142" loading="lazy"></figure>
+<h3 id="422脑裂问题">4.2.2.脑裂问题</h3>
+<p>脑裂是因为集群中的节点失联导致的。</p>
+<p>例如一个集群中，主节点与其它节点失联：</p>
+<figure data-type="image" tabindex="34"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723223804995.png" alt="image-20210723223804995" loading="lazy"></figure>
+<p>此时，node2和node3认为node1宕机，就会重新选主：</p>
+<figure data-type="image" tabindex="35"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723223845754.png" alt="image-20210723223845754" loading="lazy"></figure>
+<p>当node3当选后，集群继续对外提供服务，node2和node3自成集群，node1自成集群，两个集群数据不同步，出现数据差异。</p>
+<p>当网络恢复后，因为集群中有两个master节点，集群状态的不一致，出现脑裂的情况：</p>
+<figure data-type="image" tabindex="36"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723224000555.png" alt="image-20210723224000555" loading="lazy"></figure>
+<p>解决脑裂的方案是，要求选票超过 ( eligible节点数量 + 1 ）/ 2 才能当选为主，因此eligible节点数量最好是奇数。对应配置项是discovery.zen.minimum_master_nodes，在es7.0以后，已经成为默认配置，因此一般不会发生脑裂问题</p>
+<p>例如：3个节点形成的集群，选票必须超过 （3 + 1） / 2 ，也就是2票。node3得到node2和node3的选票，当选为主。node1只有自己1票，没有当选。集群中依然只有1个主节点，没有出现脑裂。</p>
+<h3 id="423小结">4.2.3.小结</h3>
+<p>master eligible节点的作用是什么？</p>
+<ul>
+<li>参与集群选主</li>
+<li>主节点可以管理集群状态、管理分片信息、处理创建和删除索引库的请求</li>
+</ul>
+<p>data节点的作用是什么？</p>
+<ul>
+<li>数据的CRUD</li>
+</ul>
+<p>coordinator节点的作用是什么？</p>
+<ul>
+<li>
+<p>路由请求到其它节点</p>
+</li>
+<li>
+<p>合并查询到的结果，返回给用户</p>
+</li>
+</ul>
+<h2 id="43集群分布式存储">4.3.集群分布式存储</h2>
+<p>当新增文档时，应该保存到不同分片，保证数据均衡，那么coordinating node如何确定数据该存储到哪个分片呢？</p>
+<h3 id="431分片存储测试">4.3.1.分片存储测试</h3>
+<p>插入三条数据：</p>
+<figure data-type="image" tabindex="37"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723225006058.png" alt="image-20210723225006058" loading="lazy"></figure>
+<figure data-type="image" tabindex="38"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723225034637.png" alt="image-20210723225034637" loading="lazy"></figure>
+<figure data-type="image" tabindex="39"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723225112029.png" alt="image-20210723225112029" loading="lazy"></figure>
+<p>测试可以看到，三条数据分别在不同分片：</p>
+<figure data-type="image" tabindex="40"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723225227928.png" alt="image-20210723225227928" loading="lazy"></figure>
+<p>结果：</p>
+<figure data-type="image" tabindex="41"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723225342120.png" alt="image-20210723225342120" loading="lazy"></figure>
+<h3 id="432分片存储原理">4.3.2.分片存储原理</h3>
+<p>elasticsearch会通过hash算法来计算文档应该存储到哪个分片：</p>
+<figure data-type="image" tabindex="42"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723224354904.png" alt="image-20210723224354904" loading="lazy"></figure>
+<p>说明：</p>
+<ul>
+<li>_routing默认是文档的id</li>
+<li>算法与分片数量有关，因此索引库一旦创建，分片数量不能修改！</li>
+</ul>
+<p>新增文档的流程如下：</p>
+<figure data-type="image" tabindex="43"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723225436084.png" alt="image-20210723225436084" loading="lazy"></figure>
+<p>解读：</p>
+<ul>
+<li>1）新增一个id=1的文档</li>
+<li>2）对id做hash运算，假如得到的是2，则应该存储到shard-2</li>
+<li>3）shard-2的主分片在node3节点，将数据路由到node3</li>
+<li>4）保存文档</li>
+<li>5）同步给shard-2的副本replica-2，在node2节点</li>
+<li>6）返回结果给coordinating-node节点</li>
+</ul>
+<h2 id="44集群分布式查询">4.4.集群分布式查询</h2>
+<p>elasticsearch的查询分成两个阶段：</p>
+<ul>
+<li>
+<p>scatter phase：分散阶段，coordinating node会把请求分发到每一个分片</p>
+</li>
+<li>
+<p>gather phase：聚集阶段，coordinating node汇总data node的搜索结果，并处理为最终结果集返回给用户</p>
+</li>
+</ul>
+<figure data-type="image" tabindex="44"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723225809848.png" alt="image-20210723225809848" loading="lazy"></figure>
+<h2 id="45集群故障转移">4.5.集群故障转移</h2>
+<p>集群的master节点会监控集群中的节点状态，如果发现有节点宕机，会立即将宕机节点的分片数据迁移到其它节点，确保数据安全，这个叫做故障转移。</p>
+<p>1）例如一个集群结构如图：</p>
+<figure data-type="image" tabindex="45"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723225945963.png" alt="image-20210723225945963" loading="lazy"></figure>
+<p>现在，node1是主节点，其它两个节点是从节点。</p>
+<p>2）突然，node1发生了故障：</p>
+<figure data-type="image" tabindex="46"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723230020574.png" alt="image-20210723230020574" loading="lazy"></figure>
+<p>宕机后的第一件事，需要重新选主，例如选中了node2：</p>
+<figure data-type="image" tabindex="47"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723230055974.png" alt="image-20210723230055974" loading="lazy"></figure>
+<p>node2成为主节点后，会检测集群监控状态，发现：shard-1、shard-0没有副本节点。因此需要将node1上的数据迁移到node2、node3：</p>
+<figure data-type="image" tabindex="48"><img src="https://shenshen6666.GitHub.io/post-images/image-20210723230216642.png" alt="image-20210723230216642" loading="lazy"></figure>
+
+          </div>
+        </div>
+        <!-- 右侧内容 -->
+        <div class="w-full md:w-1/3 mt-6 md:pl-8" id="additionalContent">
+          <!-- 阅读模块相关内容 -->
+          <div class="mt-6 md:pl-8">
+            <!-- 发布时间 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-release"></i>
+              发布时间
+            </h4>
+            <div class="text-lg mb-6">2023-12-28</div>
+            <!-- 标签 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-tag"></i>
+              标签
+            </h4>
+            <div class="mb-6">
+              <!-- 循环显示标签 -->
+              
+                <a href="https://shenshen6666.GitHub.io/tag/-r-4XTYN8/" class="py-1 px-4 border-gray-300 border text-sm inline-block text-gray-700 hover:text-gray-900 rounded mr-2 mb-2"># ES</a>
+              
+                <a href="https://shenshen6666.GitHub.io/tag/cBIbsZvpM/" class="py-1 px-4 border-gray-300 border text-sm inline-block text-gray-700 hover:text-gray-900 rounded mr-2 mb-2"># 转载</a>
+              
+            </div>
+            <!-- 字数 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-words"></i>
+              字数
+            </h4>
+            <div class="text-lg mb-6">6674 Char</div>
+            <!-- 阅读时间 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-read"></i>
+              阅读时间
+            </h4>
+            <div class="text-lg mb-6">29 min read</div>
+            <!-- 阅读量 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-times"></i>
+              阅读量
+            </h4>
+            <div class="text-lg mb-6"><span id="busuanzi_value_page_pv"></span> Times</div>
+            <!-- 相关阅读 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-related"></i>
+              相关阅读
+            </h4>
+            <div class="border-internal border-gray-400">
+              
+
+  
+    
+      
+    
+      
+    
+  
+
+  
+    
+      
+    
+      
+    
+  
+
+  
+    
+      
+    
+      
+    
+  
+
+  
+
+  
+    
+      
+        
+        <div class="border-internal border-gray-400 py-6">
+          <a href="https://shenshen6666.GitHub.io/post/fen-bu-shi-sou-suo-yin-qing-02/" class="text-lg hover:text-red-600 my-2 inline-block post-list-title">
+            
+            分布式搜索引擎02
+          </a>
+        </div>
+      
+    
+      
+    
+  
+
+  
+    
+      
+    
+      
+    
+  
+
+  
+    
+      
+        
+        <div class="border-internal border-gray-400 py-6">
+          <a href="https://shenshen6666.GitHub.io/post/fen-bu-shi-sou-suo-yin-qing/" class="text-lg hover:text-red-600 my-2 inline-block post-list-title">
+            
+            分布式搜索引擎
+          </a>
+        </div>
+      
+    
+      
+    
+  
+
+  
+    
+      
+    
+      
+    
+  
+
+  
+    
+      
+    
+      
+    
+  
+
+  
+    
+      
+    
+      
+    
+  
+
+  
+    
+      
+    
+      
+    
+  
+
+  
+    
+      
+    
+      
+    
+  
+
+  
+    
+      
+    
+      
+    
+  
+
+  
+    
+      
+    
+      
+    
+  
+
+
+            </div>
+            <!-- 赞助内容 -->
+            
+  <h4 class="text-base font-thin text-gray-700 mb-2 mt-6">
+    <i class="icon icon-sponsor"></i>
+    赞赏
+  </h4>
+  <div class="post-sponsor text-gray-700">
+    <img class="post-sponsor-img w-32 h-32 md:w-40 md:h-40" src="https://shenshen6666.GitHub.io\media\images\custom-weChatPayQR.png" alt="">
+    <div>
+      <i class="icon icon-wechat"></i>
+      支付宝扫一扫领红包
+    </div>
+  </div>
+
+
+          </div>
+          <!-- 网址模块 -->
+          <div class="zhihu-iframe mt-6">
+            <!-- 添加网址模块地址的 iframe 代码 -->
+            <iframe src="https://onehu.xyz/" width="100%" height="400px" frameborder="0" scrolling="yes"></iframe>
+          </div>
+          <!-- 切换按钮 -->
+          <button id="toggleButton">切换</button>
+          <!-- 上移按钮 -->
+          <button id="moveUpButton">上</button>
+          <!-- 下移按钮 -->
+          <button id="moveDownButton">下</button>
+        </div>
+      </div>
+      <!-- 页面底部内容 -->
+      <!-- 其他内容省略 -->
+      <div class="footer border-gray-400 border-external-top pt-6 mt-6 sm:mt-8 md:mt-10 mb-20 text-gray-700 text-sm sm:text-base lg:text-lg">
+  Powered by <a href="https://github.com/shenshen6666/shenshen6666.GitHub.io" target="_blank">我的小屋</a>
+</div>
+    </div>
+  </div>
+  <!-- 页面脚本 -->
+  <script>
+    // 初始状态
+    let isZhihuVisible = false;
+
+    // 切换按钮点击事件
+    $('#toggleButton').on('click', function() {
+      $('.zhihu-iframe, #additionalContent .mt-6').toggle();
+      // 这里可以添加其他模块的切换逻辑
+    });
+
+    // 上移按钮点击事件
+    $('#moveUpButton').on('click', function() {
+      let currentPosition = parseFloat($('.zhihu-iframe').css('top'));
+      $('.zhihu-iframe').css('top', currentPosition - 10 + 'px');
+    });
+
+    // 下移按钮点击事件
+    $('#moveDownButton').on('click', function() {
+      let currentPosition = parseFloat($('.zhihu-iframe').css('top'));
+      $('.zhihu-iframe').css('top', currentPosition + 10 + 'px');
+    });
+
+    // 代码高亮
+    Prism.highlightAll();
+  </script>
+</body>
+</html>

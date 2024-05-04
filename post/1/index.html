@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+  <!-- 包含 head 部分，动态设置页面标题 -->
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>SpringCloud01 | 申申丫的</title>
+<link rel="stylesheet" href="https://shenshen6666.GitHub.io/styles/main.css">
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  <script src="https://shenshen6666.GitHub.io/media/js/page.js"></script>
+
+    
+
+  <!-- 页面描述信息 -->
+  <meta name="description" content="SpringCloud01
+1.认识微服务
+随着互联网行业的发展，对服务的要求也越来越高，服务架构也从单体架构逐渐演变为现在流行的微服务架构。这些架构之间有怎样的差别呢？
+1.0.学习目标
+了解微服务架构的优缺点
+1.1.单体架构
+单体架构...">
+  <!-- 引入 jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <!-- 代码高亮库 Prism.js -->
+  <script src="https://shenshen6666.GitHub.io/media/js/prism.js"></script>
+  <!-- KaTeX数学公式样式 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+  <!-- Gitalk评论样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+  <!-- 引入 Gitalk评论功能脚本 -->
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  <!-- 页面样式 -->
+  <style>
+    /* 网址模块样式 */
+    .zhihu-iframe {
+      position: fixed;
+      top: 5px; /* 初始状态悬浮在页面上方 */
+      left: 75%; /* 距离左边界75%的位置 */
+      transform: translateX(-50%);
+      z-index: 999;
+      display: none; /* 初始状态隐藏网址模块 */
+    }
+
+    /* 按钮样式 */
+    #toggleButton, #moveUpButton, #moveDownButton {
+      cursor: pointer;
+      position: fixed;
+      bottom: 20px;
+      right: 50px; /* 按钮距离右边界50px的位置 */
+      padding: 10px;
+      background-color: transparent;
+      color: #000000;
+      border: none;
+      border-radius: 5px;
+      margin: 5px;
+    }
+
+    /* 修复按钮样式 */
+    #moveUpButton, #moveDownButton {
+      bottom: 70px; /* 上移、下移按钮的位置 */
+    }
+
+    #moveDownButton {
+      bottom: 120px; /* 下移按钮的位置 */
+    }
+  </style>
+</head>
+<body>
+  <div class="antialiased">
+    <div class="body-width mx-auto px-6 md:px-8">
+      <!-- 包含页面头部 -->
+      
+<div class="flex justify-between items-center mt-10">
+  <h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-900 font-medium md:font-normal leading-none">
+    <div class="glitch-wrapper">
+      <div class="glitch" data-text="申申丫的">
+        <a href="https://shenshen6666.GitHub.io">申申丫的</a>
+      </div>
+    </div>
+  </h1>
+  <div class="block lg:hidden" id="thumb-menu">
+    <button id="thumb-open" type="button" class="block">
+      <i class="icon icon-menu-close"></i>
+    </button>
+    <button id="thumb-close" type="button" class="hidden">
+      <i class="icon icon-menu-open"></i>
+    </button>
+  </div>
+</div>
+<div id="nav-list" class="lg:block hidden">
+  <div class="w-full block lg:flex lg:justify-between border-external-bottom lg:border-gray-400 mt-10 text-gray-700 lg:text-lg">
+    <div class="lg:flex -mb-px">
+      
+        
+          <div class="pb-4">
+            <a href="/" class="nav-link">
+              <i class="icon icon-home"></i> 
+              首页
+            </a>
+          </div>
+        
+      
+        
+          <div class="pb-4">
+            <a href="/archives" class="nav-link">
+              <i class="icon icon-archive"></i> 
+              归档
+            </a>
+          </div>
+        
+      
+        
+          <div class="pb-4">
+            <a href="/tags" class="nav-link">
+              <i class="icon icon-tags"></i> 
+              标签
+            </a>
+          </div>
+        
+      
+        
+          <div class="pb-4">
+            <a href="/post/about" class="nav-link">
+              <i class="icon icon-user"></i> 
+              关于
+            </a>
+          </div>
+        
+      
+        
+          <div class="pb-4">
+            <a href="/essays" class="nav-link">
+              <i class="icon icon-"></i> 
+              测试菜单
+            </a>
+          </div>
+        
+      
+      <div class="search-frame pb-4">
+        <i class="icon icon-search"></i>
+        <form id="search-form" action="https://shenshen6666.GitHub.io/search/">
+          <input name="searchContent" type="text" placeholder="Search..." />
+        </form>
+      </div>
+    </div>
+    <div class="lg:flex">
+      <ul>
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </ul>
+      <a href="https://shenshen6666.GitHub.io/atom.xml" class="block mt-4 lg:mt-0 lg:ml-8 align-center hover:text-gray-900" target="_blank">
+        <i class="icon icon-rss"></i>
+        RSS
+      </a>
+    </div>
+  </div>
+</div>
+      <!-- 页面主体 -->
+      <div class="mb-20 md:flex mt-10 lg:mt-6 md:border-internal md:border-gray-400 md:pt-2 lg:border-t-0 lg:pt-0">
+        <!-- 左侧内容 -->
+        <div class="w-full md:w-2/3 mt-6">
+          <!-- 文章标题 -->
+          <h1 class="post-title text-3xl">SpringCloud01</h1>
+          <!-- 如果有特色图片，则显示 -->
+          
+          <!-- 文章内容 -->
+          <div class="mt-6 lg:mt-10 post-content">
+            <h1 id="springcloud01">SpringCloud01</h1>
+<h1 id="1认识微服务">1.认识微服务</h1>
+<p>随着互联网行业的发展，对服务的要求也越来越高，服务架构也从单体架构逐渐演变为现在流行的微服务架构。这些架构之间有怎样的差别呢？</p>
+<h2 id="10学习目标">1.0.学习目标</h2>
+<p>了解微服务架构的优缺点</p>
+<h2 id="11单体架构">1.1.单体架构</h2>
+<p><strong>单体架构</strong>：将业务的所有功能集中在一个项目中开发，打成一个包部署。</p>
+<figure data-type="image" tabindex="1"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713202807818.png" alt="image-20210713202807818" loading="lazy"></figure>
+<p>单体架构的优缺点如下：</p>
+<p><strong>优点：</strong></p>
+<ul>
+<li>架构简单</li>
+<li>部署成本低</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>耦合度高（维护困难、升级困难）</li>
+</ul>
+<h2 id="12分布式架构">1.2.分布式架构</h2>
+<p><strong>分布式架构</strong>：根据业务功能对系统做拆分，每个业务功能模块作为独立项目开发，称为一个服务。</p>
+<figure data-type="image" tabindex="2"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713203124797.png" alt="image-20210713203124797" loading="lazy"></figure>
+<p>分布式架构的优缺点：</p>
+<p><strong>优点：</strong></p>
+<ul>
+<li>降低服务耦合</li>
+<li>有利于服务升级和拓展</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>服务调用关系错综复杂</li>
+</ul>
+<p>分布式架构虽然降低了服务耦合，但是服务拆分时也有很多问题需要思考：</p>
+<ul>
+<li>服务拆分的粒度如何界定？</li>
+<li>服务之间如何调用？</li>
+<li>服务的调用关系如何管理？</li>
+</ul>
+<p>人们需要制定一套行之有效的标准来约束分布式架构。</p>
+<h2 id="13微服务">1.3.微服务</h2>
+<p>微服务的架构特征：</p>
+<ul>
+<li>单一职责：微服务拆分粒度更小，每一个服务都对应唯一的业务能力，做到单一职责</li>
+<li>自治：团队独立、技术独立、数据独立，独立部署和交付</li>
+<li>面向服务：服务提供统一标准的接口，与语言和技术无关</li>
+<li>隔离性强：服务调用做好隔离、容错、降级，避免出现级联问题</li>
+</ul>
+<figure data-type="image" tabindex="3"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713203753373.png" alt="image-20210713203753373" loading="lazy"></figure>
+<p>微服务的上述特性其实是在给分布式架构制定一个标准，进一步降低服务之间的耦合度，提供服务的独立性和灵活性。做到高内聚，低耦合。</p>
+<p>因此，可以认为<strong>微服务</strong>是一种经过良好架构设计的<strong>分布式架构方案</strong> 。</p>
+<p>但方案该怎么落地？选用什么样的技术栈？全球的互联网公司都在积极尝试自己的微服务落地方案。</p>
+<p>其中在Java领域最引人注目的就是SpringCloud提供的方案了。</p>
+<h2 id="14springcloud">1.4.SpringCloud</h2>
+<p>SpringCloud是目前国内使用最广泛的微服务框架。官网地址：https://spring.io/projects/spring-cloud。</p>
+<p>SpringCloud集成了各种微服务功能组件，并基于SpringBoot实现了这些组件的自动装配，从而提供了良好的开箱即用体验。</p>
+<p>其中常见的组件包括：</p>
+<figure data-type="image" tabindex="4"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713204155887.png" alt="image-20210713204155887" loading="lazy"></figure>
+<p>另外，SpringCloud底层是依赖于SpringBoot的，并且有版本的兼容关系，如下：</p>
+<figure data-type="image" tabindex="5"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713205003790.png" alt="image-20210713205003790" loading="lazy"></figure>
+<p>我们课堂学习的版本是 Hoxton.SR10，因此对应的SpringBoot版本是2.3.x版本。</p>
+<h2 id="15总结">1.5.总结</h2>
+<ul>
+<li>
+<p>单体架构：简单方便，高度耦合，扩展性差，适合小型项目。例如：学生管理系统</p>
+</li>
+<li>
+<p>分布式架构：松耦合，扩展性好，但架构复杂，难度大。适合大型互联网项目，例如：京东、淘宝</p>
+</li>
+<li>
+<p>微服务：一种良好的分布式架构方案</p>
+<p>①优点：拆分粒度更小、服务更独立、耦合度更低</p>
+<p>②缺点：架构非常复杂，运维、监控、部署难度提高</p>
+</li>
+<li>
+<p>SpringCloud是微服务架构的一站式解决方案，集成了各种优秀微服务功能组件</p>
+</li>
+</ul>
+<h1 id="2服务拆分和远程调用">2.服务拆分和远程调用</h1>
+<p>任何分布式架构都离不开服务的拆分，微服务也是一样。</p>
+<h2 id="21服务拆分原则">2.1.服务拆分原则</h2>
+<p>这里我总结了微服务拆分时的几个原则：</p>
+<ul>
+<li>不同微服务，不要重复开发相同业务</li>
+<li>微服务数据独立，不要访问其它微服务的数据库</li>
+<li>微服务可以将自己的业务暴露为接口，供其它微服务调用</li>
+</ul>
+<figure data-type="image" tabindex="6"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713210800950.png" alt="image-20210713210800950" loading="lazy"></figure>
+<h2 id="22服务拆分示例">2.2.服务拆分示例</h2>
+<p>以课前资料中的微服务cloud-demo为例，其结构如下：</p>
+<figure data-type="image" tabindex="7"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713211009593.png" alt="image-20210713211009593" loading="lazy"></figure>
+<p>cloud-demo：父工程，管理依赖</p>
+<ul>
+<li>order-service：订单微服务，负责订单相关业务</li>
+<li>user-service：用户微服务，负责用户相关业务</li>
+</ul>
+<p>要求：</p>
+<ul>
+<li>订单微服务和用户微服务都必须有各自的数据库，相互独立</li>
+<li>订单服务和用户服务都对外暴露Restful的接口</li>
+<li>订单服务如果需要查询用户信息，只能调用用户服务的Restful接口，不能查询用户数据库</li>
+</ul>
+<h3 id="221导入sql语句">2.2.1.导入Sql语句</h3>
+<p>首先，将课前资料提供的<code>cloud-order.sql</code>和<code>cloud-user.sql</code>导入到mysql中：</p>
+<figure data-type="image" tabindex="8"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713211417049.png" alt="image-20210713211417049" loading="lazy"></figure>
+<p>cloud-user表中初始数据如下：</p>
+<figure data-type="image" tabindex="9"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713211550169.png" alt="image-20210713211550169" loading="lazy"></figure>
+<p>cloud-order表中初始数据如下：</p>
+<figure data-type="image" tabindex="10"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713211657319.png" alt="image-20210713211657319" loading="lazy"></figure>
+<p>cloud-order表中持有cloud-user表中的id字段。</p>
+<h3 id="222导入demo工程">2.2.2.导入demo工程</h3>
+<p>用IDEA导入课前资料提供的Demo：</p>
+<figure data-type="image" tabindex="11"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713211814094.png" alt="image-20210713211814094" loading="lazy"></figure>
+<p>项目结构如下：</p>
+<figure data-type="image" tabindex="12"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713212656887.png" alt="image-20210713212656887" loading="lazy"></figure>
+<p>导入后，会在IDEA右下角出现弹窗：</p>
+<figure data-type="image" tabindex="13"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713212349272.png" alt="image-20210713212349272" loading="lazy"></figure>
+<p>点击弹窗，然后按下图选择：</p>
+<figure data-type="image" tabindex="14"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713212336185.png" alt="image-20210713212336185" loading="lazy"></figure>
+<p>会出现这样的菜单：</p>
+<figure data-type="image" tabindex="15"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713212513324.png" alt="image-20210713212513324" loading="lazy"></figure>
+<p>配置下项目使用的JDK：</p>
+<figure data-type="image" tabindex="16"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713220736408.png" alt="image-20210713220736408" loading="lazy"></figure>
+<h2 id="23实现远程调用案例">2.3.实现远程调用案例</h2>
+<p>在order-service服务中，有一个根据id查询订单的接口：</p>
+<figure data-type="image" tabindex="17"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713212749575.png" alt="image-20210713212749575" loading="lazy"></figure>
+<p>根据id查询订单，返回值是Order对象，如图：</p>
+<figure data-type="image" tabindex="18"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713212901725.png" alt="image-20210713212901725" loading="lazy"></figure>
+<p>其中的user为null</p>
+<p>在user-service中有一个根据id查询用户的接口：</p>
+<figure data-type="image" tabindex="19"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713213146089.png" alt="image-20210713213146089" loading="lazy"></figure>
+<p>查询的结果如图：</p>
+<figure data-type="image" tabindex="20"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713213213075.png" alt="image-20210713213213075" loading="lazy"></figure>
+<h3 id="231案例需求">2.3.1.案例需求：</h3>
+<p>修改order-service中的根据id查询订单业务，要求在查询订单的同时，根据订单中包含的userId查询出用户信息，一起返回。</p>
+<figure data-type="image" tabindex="21"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713213312278.png" alt="image-20210713213312278" loading="lazy"></figure>
+<p>因此，我们需要在order-service中 向user-service发起一个http的请求，调用http://localhost:8081/user/{userId}这个接口。</p>
+<p>大概的步骤是这样的：</p>
+<ul>
+<li>注册一个RestTemplate的实例到Spring容器</li>
+<li>修改order-service服务中的OrderService类中的queryOrderById方法，根据Order对象中的userId查询User</li>
+<li>将查询的User填充到Order对象，一起返回</li>
+</ul>
+<h3 id="232注册resttemplate">2.3.2.注册RestTemplate</h3>
+<p>首先，我们在order-service服务中的OrderApplication启动类中，注册RestTemplate实例：</p>
+<pre><code class="language-java">package cn.itcast.order;
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
+
+@MapperScan(&quot;cn.itcast.order.mapper&quot;)
+@SpringBootApplication
+public class OrderApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(OrderApplication.class, args);
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+</code></pre>
+<h3 id="233实现远程调用">2.3.3.实现远程调用</h3>
+<p>修改order-service服务中的cn.itcast.order.service包下的OrderService类中的queryOrderById方法：</p>
+<figure data-type="image" tabindex="22"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713213959569.png" alt="image-20210713213959569" loading="lazy"></figure>
+<h2 id="24提供者与消费者">2.4.提供者与消费者</h2>
+<p>在服务调用关系中，会有两个不同的角色：</p>
+<p><strong>服务提供者</strong>：一次业务中，被其它微服务调用的服务。（提供接口给其它微服务）</p>
+<p><strong>服务消费者</strong>：一次业务中，调用其它微服务的服务。（调用其它微服务提供的接口）</p>
+<figure data-type="image" tabindex="23"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713214404481.png" alt="image-20210713214404481" loading="lazy"></figure>
+<p>但是，服务提供者与服务消费者的角色并不是绝对的，而是相对于业务而言。</p>
+<p>如果服务A调用了服务B，而服务B又调用了服务C，服务B的角色是什么？</p>
+<ul>
+<li>对于A调用B的业务而言：A是服务消费者，B是服务提供者</li>
+<li>对于B调用C的业务而言：B是服务消费者，C是服务提供者</li>
+</ul>
+<p>因此，服务B既可以是服务提供者，也可以是服务消费者。</p>
+<h1 id="3eureka注册中心">3.Eureka注册中心</h1>
+<p>假如我们的服务提供者user-service部署了多个实例，如图：</p>
+<figure data-type="image" tabindex="24"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713214925388.png" alt="image-20210713214925388" loading="lazy"></figure>
+<p>大家思考几个问题：</p>
+<ul>
+<li>order-service在发起远程调用的时候，该如何得知user-service实例的ip地址和端口？</li>
+<li>有多个user-service实例地址，order-service调用时该如何选择？</li>
+<li>order-service如何得知某个user-service实例是否依然健康，是不是已经宕机？</li>
+</ul>
+<h2 id="31eureka的结构和作用">3.1.Eureka的结构和作用</h2>
+<p>这些问题都需要利用SpringCloud中的注册中心来解决，其中最广为人知的注册中心就是Eureka，其结构如下：</p>
+<figure data-type="image" tabindex="25"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713220104956.png" alt="image-20210713220104956" loading="lazy"></figure>
+<p>回答之前的各个问题。</p>
+<p>问题1：order-service如何得知user-service实例地址？</p>
+<p>获取地址信息的流程如下：</p>
+<ul>
+<li>user-service服务实例启动后，将自己的信息注册到eureka-server（Eureka服务端）。这个叫服务注册</li>
+<li>eureka-server保存服务名称到服务实例地址列表的映射关系</li>
+<li>order-service根据服务名称，拉取实例地址列表。这个叫服务发现或服务拉取</li>
+</ul>
+<p>问题2：order-service如何从多个user-service实例中选择具体的实例？</p>
+<ul>
+<li>order-service从实例列表中利用负载均衡算法选中一个实例地址</li>
+<li>向该实例地址发起远程调用</li>
+</ul>
+<p>问题3：order-service如何得知某个user-service实例是否依然健康，是不是已经宕机？</p>
+<ul>
+<li>user-service会每隔一段时间（默认30秒）向eureka-server发起请求，报告自己状态，称为心跳</li>
+<li>当超过一定时间没有发送心跳时，eureka-server会认为微服务实例故障，将该实例从服务列表中剔除</li>
+<li>order-service拉取服务时，就能将故障实例排除了</li>
+</ul>
+<blockquote>
+<p>注意：一个微服务，既可以是服务提供者，又可以是服务消费者，因此eureka将服务注册、服务发现等功能统一封装到了eureka-client端</p>
+</blockquote>
+<p>因此，接下来我们动手实践的步骤包括：</p>
+<figure data-type="image" tabindex="26"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713220509769.png" alt="image-20210713220509769" loading="lazy"></figure>
+<h2 id="32搭建eureka-server">3.2.搭建eureka-server</h2>
+<p>首先大家注册中心服务端：eureka-server，这必须是一个独立的微服务</p>
+<h3 id="321创建eureka-server服务">3.2.1.创建eureka-server服务</h3>
+<p>在cloud-demo父工程下，创建一个子模块：</p>
+<figure data-type="image" tabindex="27"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713220605881.png" alt="image-20210713220605881" loading="lazy"></figure>
+<p>填写模块信息：</p>
+<figure data-type="image" tabindex="28"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713220857396.png" alt="image-20210713220857396" loading="lazy"></figure>
+<p>然后填写服务信息：</p>
+<figure data-type="image" tabindex="29"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713221339022.png" alt="image-20210713221339022" loading="lazy"></figure>
+<h3 id="322引入eureka依赖">3.2.2.引入eureka依赖</h3>
+<p>引入SpringCloud为eureka提供的starter依赖：</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-server&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="323编写启动类">3.2.3.编写启动类</h3>
+<p>给eureka-server服务编写一个启动类，一定要添加一个@EnableEurekaServer注解，开启eureka的注册中心功能：</p>
+<pre><code class="language-java">package cn.itcast.eureka;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
+
+@SpringBootApplication
+@EnableEurekaServer
+public class EurekaApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(EurekaApplication.class, args);
+    }
+}
+</code></pre>
+<h3 id="324编写配置文件">3.2.4.编写配置文件</h3>
+<p>编写一个application.yml文件，内容如下：</p>
+<pre><code class="language-yaml">server:
+  port: 10086
+spring:
+  application:
+    name: eureka-server
+eureka:
+  client:
+    service-url: 
+      defaultZone: http://127.0.0.1:10086/eureka
+</code></pre>
+<h3 id="325启动服务">3.2.5.启动服务</h3>
+<p>启动微服务，然后在浏览器访问：http://127.0.0.1:10086</p>
+<p>看到下面结果应该是成功了：</p>
+<figure data-type="image" tabindex="30"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713222157190.png" alt="image-20210713222157190" loading="lazy"></figure>
+<h2 id="33服务注册">3.3.服务注册</h2>
+<p>下面，我们将user-service注册到eureka-server中去。</p>
+<h3 id="1引入依赖">1）引入依赖</h3>
+<p>在user-service的pom文件中，引入下面的eureka-client依赖：</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="2配置文件">2）配置文件</h3>
+<p>在user-service中，修改application.yml文件，添加服务名称、eureka地址：</p>
+<pre><code class="language-yaml">spring:
+  application:
+    name: userservice
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:10086/eureka
+</code></pre>
+<h3 id="3启动多个user-service实例">3）启动多个user-service实例</h3>
+<p>为了演示一个服务有多个实例的场景，我们添加一个SpringBoot的启动配置，再启动一个user-service。</p>
+<p>首先，复制原来的user-service启动配置：</p>
+<figure data-type="image" tabindex="31"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713222656562.png" alt="image-20210713222656562" loading="lazy"></figure>
+<p>然后，在弹出的窗口中，填写信息：</p>
+<figure data-type="image" tabindex="32"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713222757702.png" alt="image-20210713222757702" loading="lazy"></figure>
+<p>现在，SpringBoot窗口会出现两个user-service启动配置：</p>
+<figure data-type="image" tabindex="33"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713222841951.png" alt="image-20210713222841951" loading="lazy"></figure>
+<p>不过，第一个是8081端口，第二个是8082端口。</p>
+<p>启动两个user-service实例：</p>
+<figure data-type="image" tabindex="34"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713223041491.png" alt="image-20210713223041491" loading="lazy"></figure>
+<p>查看eureka-server管理页面：</p>
+<figure data-type="image" tabindex="35"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713223150650.png" alt="image-20210713223150650" loading="lazy"></figure>
+<h2 id="34服务发现">3.4.服务发现</h2>
+<p>下面，我们将order-service的逻辑修改：向eureka-server拉取user-service的信息，实现服务发现。</p>
+<h3 id="1引入依赖-2">1）引入依赖</h3>
+<p>之前说过，服务发现、服务注册统一都封装在eureka-client依赖，因此这一步与服务注册时一致。</p>
+<p>在order-service的pom文件中，引入下面的eureka-client依赖：</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="2配置文件-2">2）配置文件</h3>
+<p>服务发现也需要知道eureka地址，因此第二步与服务注册一致，都是配置eureka信息：</p>
+<p>在order-service中，修改application.yml文件，添加服务名称、eureka地址：</p>
+<pre><code class="language-yaml">spring:
+  application:
+    name: orderservice
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:10086/eureka
+</code></pre>
+<h3 id="3服务拉取和负载均衡">3）服务拉取和负载均衡</h3>
+<p>最后，我们要去eureka-server中拉取user-service服务的实例列表，并且实现负载均衡。</p>
+<p>不过这些动作不用我们去做，只需要添加一些注解即可。</p>
+<p>在order-service的OrderApplication中，给RestTemplate这个Bean添加一个@LoadBalanced注解：</p>
+<figure data-type="image" tabindex="36"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713224049419.png" alt="image-20210713224049419" loading="lazy"></figure>
+<p>修改order-service服务中的cn.itcast.order.service包下的OrderService类中的queryOrderById方法。修改访问的url路径，用服务名代替ip、端口：</p>
+<figure data-type="image" tabindex="37"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713224245731.png" alt="image-20210713224245731" loading="lazy"></figure>
+<p>spring会自动帮助我们从eureka-server端，根据userservice这个服务名称，获取实例列表，而后完成负载均衡。</p>
+<h1 id="4ribbon负载均衡">4.Ribbon负载均衡</h1>
+<p>上一节中，我们添加了@LoadBalanced注解，即可实现负载均衡功能，这是什么原理呢？</p>
+<h2 id="41负载均衡原理">4.1.负载均衡原理</h2>
+<p>SpringCloud底层其实是利用了一个名为Ribbon的组件，来实现负载均衡功能的。</p>
+<figure data-type="image" tabindex="38"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713224517686.png" alt="image-20210713224517686" loading="lazy"></figure>
+<p>那么我们发出的请求明明是http://userservice/user/1，怎么变成了http://localhost:8081的呢？</p>
+<h2 id="42源码跟踪">4.2.源码跟踪</h2>
+<p>为什么我们只输入了service名称就可以访问了呢？之前还要获取ip和端口。</p>
+<p>显然有人帮我们根据service名称，获取到了服务实例的ip和端口。它就是<code>LoadBalancerInterceptor</code>，这个类会在对RestTemplate的请求进行拦截，然后从Eureka根据服务id获取服务列表，随后利用负载均衡算法得到真实的服务地址信息，替换服务id。</p>
+<p>我们进行源码跟踪：</p>
+<h3 id="1loadbalancerintercepor">1）LoadBalancerIntercepor</h3>
+<figure data-type="image" tabindex="39"><img src="assets/1525620483637.png" alt="1525620483637" loading="lazy"></figure>
+<p>可以看到这里的intercept方法，拦截了用户的HttpRequest请求，然后做了几件事：</p>
+<ul>
+<li><code>request.getURI()</code>：获取请求uri，本例中就是 http://user-service/user/8</li>
+<li><code>originalUri.getHost()</code>：获取uri路径的主机名，其实就是服务id，<code>user-service</code></li>
+<li><code>this.loadBalancer.execute()</code>：处理服务id，和用户请求。</li>
+</ul>
+<p>这里的<code>this.loadBalancer</code>是<code>LoadBalancerClient</code>类型，我们继续跟入。</p>
+<h3 id="2loadbalancerclient">2）LoadBalancerClient</h3>
+<p>继续跟入execute方法：</p>
+<figure data-type="image" tabindex="40"><img src="assets/1525620787090.png" alt="1525620787090" loading="lazy"></figure>
+<p>代码是这样的：</p>
+<ul>
+<li>getLoadBalancer(serviceId)：根据服务id获取ILoadBalancer，而ILoadBalancer会拿着服务id去eureka中获取服务列表并保存起来。</li>
+<li>getServer(loadBalancer)：利用内置的负载均衡算法，从服务列表中选择一个。本例中，可以看到获取了8082端口的服务</li>
+</ul>
+<p>放行后，再次访问并跟踪，发现获取的是8081：</p>
+<figure data-type="image" tabindex="41"><img src="assets/1525620835911.png" alt="1525620835911" loading="lazy"></figure>
+<p>果然实现了负载均衡。</p>
+<h3 id="3负载均衡策略irule">3）负载均衡策略IRule</h3>
+<p>在刚才的代码中，可以看到获取服务使通过一个<code>getServer</code>方法来做负载均衡:</p>
+<figure data-type="image" tabindex="42"><img src="assets/1525620835911.png" alt="1525620835911" loading="lazy"></figure>
+<p>我们继续跟入：</p>
+<figure data-type="image" tabindex="43"><img src="assets/1544361421671.png" alt="1544361421671" loading="lazy"></figure>
+<p>继续跟踪源码chooseServer方法，发现这么一段代码：</p>
+<figure data-type="image" tabindex="44"><img src="assets/1525622652849.png" alt="1525622652849" loading="lazy"></figure>
+<p>我们看看这个rule是谁：</p>
+<figure data-type="image" tabindex="45"><img src="assets/1525622699666.png" alt="1525622699666" loading="lazy"></figure>
+<p>这里的rule默认值是一个<code>RoundRobinRule</code>，看类的介绍：</p>
+<figure data-type="image" tabindex="46"><img src="assets/1525622754316.png" alt="1525622754316" loading="lazy"></figure>
+<p>这不就是轮询的意思嘛。</p>
+<p>到这里，整个负载均衡的流程我们就清楚了。</p>
+<h3 id="4总结">4）总结</h3>
+<p>SpringCloudRibbon的底层采用了一个拦截器，拦截了RestTemplate发出的请求，对地址做了修改。用一幅图来总结一下：</p>
+<figure data-type="image" tabindex="47"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713224724673.png" alt="image-20210713224724673" loading="lazy"></figure>
+<p>基本流程如下：</p>
+<ul>
+<li>拦截我们的RestTemplate请求http://userservice/user/1</li>
+<li>RibbonLoadBalancerClient会从请求url中获取服务名称，也就是user-service</li>
+<li>DynamicServerListLoadBalancer根据user-service到eureka拉取服务列表</li>
+<li>eureka返回列表，localhost:8081、localhost:8082</li>
+<li>IRule利用内置负载均衡规则，从列表中选择一个，例如localhost:8081</li>
+<li>RibbonLoadBalancerClient修改请求地址，用localhost:8081替代userservice，得到http://localhost:8081/user/1，发起真实请求</li>
+</ul>
+<h2 id="43负载均衡策略">4.3.负载均衡策略</h2>
+<h3 id="431负载均衡策略">4.3.1.负载均衡策略</h3>
+<p>负载均衡的规则都定义在IRule接口中，而IRule有很多不同的实现类：</p>
+<figure data-type="image" tabindex="48"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713225653000.png" alt="image-20210713225653000" loading="lazy"></figure>
+<p>不同规则的含义如下：</p>
+<table>
+<thead>
+<tr>
+<th><strong>内置负载均衡规则类</strong></th>
+<th><strong>规则描述</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RoundRobinRule</td>
+<td>简单轮询服务列表来选择服务器。它是Ribbon默认的负载均衡规则。</td>
+</tr>
+<tr>
+<td>AvailabilityFilteringRule</td>
+<td>对以下两种服务器进行忽略：   （1）在默认情况下，这台服务器如果3次连接失败，这台服务器就会被设置为“短路”状态。短路状态将持续30秒，如果再次连接失败，短路的持续时间就会几何级地增加。  （2）并发数过高的服务器。如果一个服务器的并发连接数过高，配置了AvailabilityFilteringRule规则的客户端也会将其忽略。并发连接数的上限，可以由客户端的<clientName>.<clientConfigNameSpace>.ActiveConnectionsLimit属性进行配置。</td>
+</tr>
+<tr>
+<td>WeightedResponseTimeRule</td>
+<td>为每一个服务器赋予一个权重值。服务器响应时间越长，这个服务器的权重就越小。这个规则会随机选择服务器，这个权重值会影响服务器的选择。</td>
+</tr>
+<tr>
+<td><strong>ZoneAvoidanceRule</strong></td>
+<td>以区域可用的服务器为基础进行服务器的选择。使用Zone对服务器进行分类，这个Zone可以理解为一个机房、一个机架等。而后再对Zone内的多个服务做轮询。</td>
+</tr>
+<tr>
+<td>BestAvailableRule</td>
+<td>忽略那些短路的服务器，并选择并发数较低的服务器。</td>
+</tr>
+<tr>
+<td>RandomRule</td>
+<td>随机选择一个可用的服务器。</td>
+</tr>
+<tr>
+<td>RetryRule</td>
+<td>重试机制的选择逻辑</td>
+</tr>
+</tbody>
+</table>
+<p>默认的实现就是ZoneAvoidanceRule，是一种轮询方案</p>
+<h3 id="432自定义负载均衡策略">4.3.2.自定义负载均衡策略</h3>
+<p>通过定义IRule实现可以修改负载均衡规则，有两种方式：</p>
+<ol>
+<li>代码方式：在order-service中的OrderApplication类中，定义一个新的IRule：</li>
+</ol>
+<pre><code class="language-java">@Bean
+public IRule randomRule(){
+    return new RandomRule();
+}
+
+</code></pre>
+<ol start="2">
+<li>配置文件方式：在order-service的application.yml文件中，添加新的配置也可以修改规则：</li>
+</ol>
+<pre><code class="language-yaml">userservice: # 给某个微服务配置负载均衡规则，这里是userservice服务
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule # 负载均衡规则 
+
+</code></pre>
+<blockquote>
+<p><strong>注意</strong>，一般用默认的负载均衡规则，不做修改。</p>
+</blockquote>
+<h2 id="44饥饿加载">4.4.饥饿加载</h2>
+<p>Ribbon默认是采用懒加载，即第一次访问时才会去创建LoadBalanceClient，请求时间会很长。</p>
+<p>而饥饿加载则会在项目启动时创建，降低第一次访问的耗时，通过下面配置开启饥饿加载：</p>
+<pre><code class="language-yaml">ribbon:
+  eager-load:
+    enabled: true
+    clients: userservice
+
+</code></pre>
+<h1 id="5nacos注册中心">5.Nacos注册中心</h1>
+<p>国内公司一般都推崇阿里巴巴的技术，比如注册中心，SpringCloudAlibaba也推出了一个名为Nacos的注册中心。</p>
+<h2 id="51认识和安装nacos">5.1.认识和安装Nacos</h2>
+<p><a href="https://nacos.io/">Nacos</a>是阿里巴巴的产品，现在是<a href="https://spring.io/projects/spring-cloud">SpringCloud</a>中的一个组件。相比<a href="https://github.com/Netflix/eureka">Eureka</a>功能更加丰富，在国内受欢迎程度较高。</p>
+<figure data-type="image" tabindex="49"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713230444308.png" alt="image-20210713230444308" loading="lazy"></figure>
+<p>安装方式可以参考课前资料《Nacos安装指南.md》</p>
+<h2 id="52服务注册到nacos">5.2.服务注册到nacos</h2>
+<p>Nacos是SpringCloudAlibaba的组件，而SpringCloudAlibaba也遵循SpringCloud中定义的服务注册、服务发现规范。因此使用Nacos和使用Eureka对于微服务来说，并没有太大区别。</p>
+<p>主要差异在于：</p>
+<ul>
+<li>依赖不同</li>
+<li>服务地址不同</li>
+</ul>
+<h3 id="1引入依赖-3">1）引入依赖</h3>
+<p>在cloud-demo父工程的pom文件中的<code>&lt;dependencyManagement&gt;</code>中引入SpringCloudAlibaba的依赖：</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-alibaba-dependencies&lt;/artifactId&gt;
+    &lt;version&gt;2.2.6.RELEASE&lt;/version&gt;
+    &lt;type&gt;pom&lt;/type&gt;
+    &lt;scope&gt;import&lt;/scope&gt;
+&lt;/dependency&gt;
+
+</code></pre>
+<p>然后在user-service和order-service中的pom文件中引入nacos-discovery依赖：</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+</code></pre>
+<blockquote>
+<p><strong>注意</strong>：不要忘了注释掉eureka的依赖。</p>
+</blockquote>
+<h3 id="2配置nacos地址">2）配置nacos地址</h3>
+<p>在user-service和order-service的application.yml中添加nacos地址：</p>
+<pre><code class="language-yaml">spring:
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+
+</code></pre>
+<blockquote>
+<p><strong>注意</strong>：不要忘了注释掉eureka的地址</p>
+</blockquote>
+<h3 id="3重启">3）重启</h3>
+<p>重启微服务后，登录nacos管理页面，可以看到微服务信息：</p>
+<figure data-type="image" tabindex="50"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713231439607.png" alt="image-20210713231439607" loading="lazy"></figure>
+<h2 id="53服务分级存储模型">5.3.服务分级存储模型</h2>
+<p>一个<strong>服务</strong>可以有多个<strong>实例</strong>，例如我们的user-service，可以有:</p>
+<ul>
+<li>127.0.0.1:8081</li>
+<li>127.0.0.1:8082</li>
+<li>127.0.0.1:8083</li>
+</ul>
+<p>假如这些实例分布于全国各地的不同机房，例如：</p>
+<ul>
+<li>127.0.0.1:8081，在上海机房</li>
+<li>127.0.0.1:8082，在上海机房</li>
+<li>127.0.0.1:8083，在杭州机房</li>
+</ul>
+<p>Nacos就将同一机房内的实例 划分为一个<strong>集群</strong>。</p>
+<p>也就是说，user-service是服务，一个服务可以包含多个集群，如杭州、上海，每个集群下可以有多个实例，形成分级模型，如图：</p>
+<figure data-type="image" tabindex="51"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713232522531.png" alt="image-20210713232522531" loading="lazy"></figure>
+<p>微服务互相访问时，应该尽可能访问同集群实例，因为本地访问速度更快。当本集群内不可用时，才访问其它集群。例如：</p>
+<figure data-type="image" tabindex="52"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713232658928.png" alt="image-20210713232658928" loading="lazy"></figure>
+<p>杭州机房内的order-service应该优先访问同机房的user-service。</p>
+<h3 id="531给user-service配置集群">5.3.1.给user-service配置集群</h3>
+<p>修改user-service的application.yml文件，添加集群配置：</p>
+<pre><code class="language-yaml">spring:
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      discovery:
+        cluster-name: HZ # 集群名称
+
+</code></pre>
+<p>重启两个user-service实例后，我们可以在nacos控制台看到下面结果：</p>
+<figure data-type="image" tabindex="53"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713232916215.png" alt="image-20210713232916215" loading="lazy"></figure>
+<p>我们再次复制一个user-service启动配置，添加属性：</p>
+<pre><code class="language-sh">-Dserver.port=8083 -Dspring.cloud.nacos.discovery.cluster-name=SH
+
+</code></pre>
+<p>配置如图所示：</p>
+<figure data-type="image" tabindex="54"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713233528982.png" alt="image-20210713233528982" loading="lazy"></figure>
+<p>启动UserApplication3后再次查看nacos控制台：</p>
+<figure data-type="image" tabindex="55"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713233727923.png" alt="image-20210713233727923" loading="lazy"></figure>
+<h3 id="532同集群优先的负载均衡">5.3.2.同集群优先的负载均衡</h3>
+<p>默认的<code>ZoneAvoidanceRule</code>并不能实现根据同集群优先来实现负载均衡。</p>
+<p>因此Nacos中提供了一个<code>NacosRule</code>的实现，可以优先从同集群中挑选实例。</p>
+<p>1）给order-service配置集群信息</p>
+<p>修改order-service的application.yml文件，添加集群配置：</p>
+<pre><code class="language-sh">spring:
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      discovery:
+        cluster-name: HZ # 集群名称
+
+</code></pre>
+<p>2）修改负载均衡规则</p>
+<p>修改order-service的application.yml文件，修改负载均衡规则：</p>
+<pre><code class="language-yaml">userservice:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.alibaba.cloud.nacos.ribbon.NacosRule # 负载均衡规则 
+
+</code></pre>
+<h2 id="54权重配置">5.4.权重配置</h2>
+<p>实际部署中会出现这样的场景：</p>
+<p>服务器设备性能有差异，部分实例所在机器性能较好，另一些较差，我们希望性能好的机器承担更多的用户请求。</p>
+<p>但默认情况下NacosRule是同集群内随机挑选，不会考虑机器的性能问题。</p>
+<p>因此，Nacos提供了权重配置来控制访问频率，权重越大则访问频率越高。</p>
+<p>在nacos控制台，找到user-service的实例列表，点击编辑，即可修改权重：</p>
+<figure data-type="image" tabindex="56"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713235133225.png" alt="image-20210713235133225" loading="lazy"></figure>
+<p>在弹出的编辑窗口，修改权重：</p>
+<figure data-type="image" tabindex="57"><img src="https://shenshen6666.GitHub.io/post-images/image-20210713235235219.png" alt="image-20210713235235219" loading="lazy"></figure>
+<blockquote>
+<p><strong>注意</strong>：如果权重修改为0，则该实例永远不会被访问</p>
+</blockquote>
+<h2 id="55环境隔离">5.5.环境隔离</h2>
+<p>Nacos提供了namespace来实现环境隔离功能。</p>
+<ul>
+<li>nacos中可以有多个namespace</li>
+<li>namespace下可以有group、service等</li>
+<li>不同namespace之间相互隔离，例如不同namespace的服务互相不可见</li>
+</ul>
+<figure data-type="image" tabindex="58"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714000101516.png" alt="image-20210714000101516" loading="lazy"></figure>
+<h3 id="551创建namespace">5.5.1.创建namespace</h3>
+<p>默认情况下，所有service、data、group都在同一个namespace，名为public：</p>
+<figure data-type="image" tabindex="59"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714000414781.png" alt="image-20210714000414781" loading="lazy"></figure>
+<p>我们可以点击页面新增按钮，添加一个namespace：</p>
+<figure data-type="image" tabindex="60"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714000440143.png" alt="image-20210714000440143" loading="lazy"></figure>
+<p>然后，填写表单：</p>
+<figure data-type="image" tabindex="61"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714000505928.png" alt="image-20210714000505928" loading="lazy"></figure>
+<p>就能在页面看到一个新的namespace：</p>
+<figure data-type="image" tabindex="62"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714000522913.png" alt="image-20210714000522913" loading="lazy"></figure>
+<h3 id="552给微服务配置namespace">5.5.2.给微服务配置namespace</h3>
+<p>给微服务配置namespace只能通过修改配置来实现。</p>
+<p>例如，修改order-service的application.yml文件：</p>
+<pre><code class="language-yaml">spring:
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      discovery:
+        cluster-name: HZ
+        namespace: 492a7d5d-237b-46a1-a99a-fa8e98e4b0f9 # 命名空间，填ID
+
+</code></pre>
+<p>重启order-service后，访问控制台，可以看到下面的结果：</p>
+<figure data-type="image" tabindex="63"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714000830703.png" alt="image-20210714000830703" loading="lazy"></figure>
+<figure data-type="image" tabindex="64"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714000837140.png" alt="image-20210714000837140" loading="lazy"></figure>
+<p>此时访问order-service，因为namespace不同，会导致找不到userservice，控制台会报错：</p>
+<figure data-type="image" tabindex="65"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714000941256.png" alt="image-20210714000941256" loading="lazy"></figure>
+<h2 id="56nacos与eureka的区别">5.6.Nacos与Eureka的区别</h2>
+<p>Nacos的服务实例分为两种l类型：</p>
+<ul>
+<li>
+<p>临时实例：如果实例宕机超过一定时间，会从服务列表剔除，默认的类型。</p>
+</li>
+<li>
+<p>非临时实例：如果实例宕机，不会从服务列表剔除，也可以叫永久实例。</p>
+</li>
+</ul>
+<p>配置一个服务实例为永久实例：</p>
+<pre><code class="language-yaml">spring:
+  cloud:
+    nacos:
+      discovery:
+        ephemeral: false # 设置为非临时实例
+
+</code></pre>
+<p>Nacos和Eureka整体结构类似，服务注册、服务拉取、心跳等待，但是也存在一些差异：</p>
+<figure data-type="image" tabindex="66"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714001728017.png" alt="image-20210714001728017" loading="lazy"></figure>
+<ul>
+<li>
+<p>Nacos与eureka的共同点</p>
+<ul>
+<li>都支持服务注册和服务拉取</li>
+<li>都支持服务提供者心跳方式做健康检测</li>
+</ul>
+</li>
+<li>
+<p>Nacos与Eureka的区别</p>
+<ul>
+<li>Nacos支持服务端主动检测提供者状态：临时实例采用心跳模式，非临时实例采用主动检测模式</li>
+<li>临时实例心跳不正常会被剔除，非临时实例则不会被剔除</li>
+<li>Nacos支持服务列表变更的消息推送模式，服务列表更新更及时</li>
+<li>Nacos集群默认采用AP方式，当集群中存在非临时实例时，采用CP模式；Eureka采用AP方式</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+        <!-- 右侧内容 -->
+        <div class="w-full md:w-1/3 mt-6 md:pl-8" id="additionalContent">
+          <!-- 阅读模块相关内容 -->
+          <div class="mt-6 md:pl-8">
+            <!-- 发布时间 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-release"></i>
+              发布时间
+            </h4>
+            <div class="text-lg mb-6">2023-02-22</div>
+            <!-- 标签 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-tag"></i>
+              标签
+            </h4>
+            <div class="mb-6">
+              <!-- 循环显示标签 -->
+              
+            </div>
+            <!-- 字数 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-words"></i>
+              字数
+            </h4>
+            <div class="text-lg mb-6">5969 Char</div>
+            <!-- 阅读时间 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-read"></i>
+              阅读时间
+            </h4>
+            <div class="text-lg mb-6">23 min read</div>
+            <!-- 阅读量 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-times"></i>
+              阅读量
+            </h4>
+            <div class="text-lg mb-6"><span id="busuanzi_value_page_pv"></span> Times</div>
+            <!-- 相关阅读 -->
+            <h4 class="text-base font-thin text-gray-700 mb-2">
+              <i class="icon icon-related"></i>
+              相关阅读
+            </h4>
+            <div class="border-internal border-gray-400">
+              
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+  
+    
+  
+
+
+  <div class="py-6 text-gray-700 text-sm">暂无相关文章</div>
+
+            </div>
+            <!-- 赞助内容 -->
+            
+  <h4 class="text-base font-thin text-gray-700 mb-2 mt-6">
+    <i class="icon icon-sponsor"></i>
+    赞赏
+  </h4>
+  <div class="post-sponsor text-gray-700">
+    <img class="post-sponsor-img w-32 h-32 md:w-40 md:h-40" src="https://shenshen6666.GitHub.io\media\images\custom-weChatPayQR.png" alt="">
+    <div>
+      <i class="icon icon-wechat"></i>
+      支付宝扫一扫领红包
+    </div>
+  </div>
+
+
+          </div>
+          <!-- 网址模块 -->
+          <div class="zhihu-iframe mt-6">
+            <!-- 添加网址模块地址的 iframe 代码 -->
+            <iframe src="https://onehu.xyz/" width="100%" height="400px" frameborder="0" scrolling="yes"></iframe>
+          </div>
+          <!-- 切换按钮 -->
+          <button id="toggleButton">切换</button>
+          <!-- 上移按钮 -->
+          <button id="moveUpButton">上</button>
+          <!-- 下移按钮 -->
+          <button id="moveDownButton">下</button>
+        </div>
+      </div>
+      <!-- 页面底部内容 -->
+      <!-- 其他内容省略 -->
+      <div class="footer border-gray-400 border-external-top pt-6 mt-6 sm:mt-8 md:mt-10 mb-20 text-gray-700 text-sm sm:text-base lg:text-lg">
+  Powered by <a href="https://github.com/shenshen6666/shenshen6666.GitHub.io" target="_blank">我的小屋</a>
+</div>
+    </div>
+  </div>
+  <!-- 页面脚本 -->
+  <script>
+    // 初始状态
+    let isZhihuVisible = false;
+
+    // 切换按钮点击事件
+    $('#toggleButton').on('click', function() {
+      $('.zhihu-iframe, #additionalContent .mt-6').toggle();
+      // 这里可以添加其他模块的切换逻辑
+    });
+
+    // 上移按钮点击事件
+    $('#moveUpButton').on('click', function() {
+      let currentPosition = parseFloat($('.zhihu-iframe').css('top'));
+      $('.zhihu-iframe').css('top', currentPosition - 10 + 'px');
+    });
+
+    // 下移按钮点击事件
+    $('#moveDownButton').on('click', function() {
+      let currentPosition = parseFloat($('.zhihu-iframe').css('top'));
+      $('.zhihu-iframe').css('top', currentPosition + 10 + 'px');
+    });
+
+    // 代码高亮
+    Prism.highlightAll();
+  </script>
+</body>
+</html>
