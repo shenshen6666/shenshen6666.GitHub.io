@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+  <meta charset="UTF-8">
+<!-- 设置文档字符集为 UTF-8，支持多种语言字符 -->
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 设置视口，使网页在移动设备上显示的宽度等于设备宽度，初始缩放比例为1.0 -->
+
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<!-- 设置 IE 浏览器的兼容性模式，使用最新的浏览器渲染引擎 -->
+
+<title>Spring Statemachine状态机示例 | 申申丫的</title>
+<!-- 设置网页标题，使用模板引擎输出网站标题 -->
+
+<link rel="stylesheet" href="https://shenshen6666.GitHub.io/styles/main.css">
+<!-- 引入主样式表文件 -->
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 异步加载不蒜子统计的 JavaScript 文件，用于网站访问量统计 -->
+
+
+  <!-- 如果当前页面不是首页 -->
+  <script src="https://shenshen6666.GitHub.io/media/js/page.js"></script>
+  <!-- 引入其他页面特定的 JavaScript 文件 -->
+
+
+    
+
+  <meta name="description" content="1、什么是状态机
+1.1 什么是状态
+状态（State）是指现实事物存在的不同形态或状态。例如，自动门有两种状态：open（开启）和closed（关闭）。状态机（State Machine）是对现实事物状态的数学模型，通常被描述为状态转换图...">
+  
+  <!-- 资源预加载 -->
+  <link rel="preload" href="https://code.jquery.com/jquery-3.6.4.min.js" as="script">
+  <link rel="preload" href="https://shenshen6666.GitHub.io/media/js/prism.js" as="script">
+  
+  <!-- 样式资源 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --hover-color: #3498db;
+      --shadow-light: 0 2px 5px rgba(0,0,0,0.1);
+      --shadow-medium: 0 4px 8px rgba(0,0,0,0.15);
+      --transition-fast: all 0.2s ease;
+    }
+
+    /* 增强的浮动窗口样式 */
+    .zhihu-iframe {
+      position: fixed;
+      top: 5px;
+      left: 75%;
+      transform: translateX(-50%);
+      z-index: 999;
+      display: none;
+      resize: both;
+      overflow: auto;
+      min-width: 200px;
+      min-height: 200px;
+      max-width: 90vw;
+      max-height: 90vh;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: var(--shadow-medium);
+      transition: var(--transition-fast);
+    }
+
+    .zhihu-iframe::after {
+      content: '⤢';
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 16px;
+      cursor: se-resize;
+      background: linear-gradient(135deg, transparent 45%, #f0f0f0 45%);
+    }
+
+    /* 按钮组样式优化 */
+    .float-control-group {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .control-btn {
+      cursor: pointer;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--primary-color);
+      border: 1px solid #e0e0e0;
+      border-radius: 50%;
+      box-shadow: var(--shadow-light);
+      transition: var(--transition-fast);
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    /* 设置按钮特殊样式 */
+    .zhihu-iframe .control-btn {
+      width: 28px;
+      height: 28px;
+      padding: 4px;
+      font-size: 14px;
+      position: absolute;
+      left: 10px;
+      bottom: 0;
+      border-radius: 4px;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+
+    .zhihu-iframe .control-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .control-btn:hover {
+      background: #fff;
+      color: var(--hover-color);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    /* 增强的菜单样式 */
+    .url-menu {
+      display: none;
+      position: fixed;
+      right: 90px;
+      bottom: 30px;
+      background: rgba(255, 255, 255, 0.98);
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: var(--shadow-medium);
+      backdrop-filter: blur(8px);
+      min-width: 240px;
+    }
+
+    .url-menu input {
+      width: 100%;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      transition: var(--transition-fast);
+    }
+
+    .url-menu input:focus {
+      border-color: var(--hover-color);
+      outline: none;
+    }
+
+    .url-menu button {
+      padding: 6px 12px;
+      margin: 4px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      background: #f8f9fa;
+      transition: var(--transition-fast);
+    }
+
+    .url-menu button:hover {
+      background: #e9ecef;
+      border-color: var(--hover-color);
+    }
+
+    /* 新增灰色按钮样式 */
+    .quick-urls button.grey-btn {
+      background: #e0e0e0;
+      color: #555;
+      border: 1px solid #ccc;
+    }
+
+    @media (max-width: 768px) {
+      .zhihu-iframe {
+        left: 50%;
+        max-width: 95vw;
+      }
+      
+      .float-control-group {
+        right: 10px;
+        bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 主体结构保持不变 -->
+  <div class="antialiased">
+    <div class="body-width mx-auto px-6 md:px-8">
+      
+<!-- 使用 Map 存储菜单项和对应的图标类名 -->
+
+<div class="flex justify-between items-center mt-10">
+  <!-- 创建顶部导航栏容器 -->
+  <h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-900 font-medium md:font-normal leading-none">
+    <!-- 创建网站标题部分 -->
+    <div class="glitch-wrapper">
+      <!-- 创建标题特效容器 -->
+      <div class="glitch" data-text="申申丫的">
+        <!-- 创建标题特效 -->
+        <a href="https://shenshen6666.GitHub.io">申申丫的</a>
+        <!-- 显示网站标题并设置链接 -->
+      </div>
+    </div>
+  </h1>
+  <div class="block lg:hidden" id="thumb-menu">
+    <!-- 创建移动设备下的菜单按钮容器 -->
+    <button id="thumb-open" type="button" class="block">
+      <!-- 打开菜单的按钮图标 -->
+      <i class="icon icon-menu-close"></i>
+    </button>
+    <button id="thumb-close" type="button" class="hidden">
+      <!-- 关闭菜单的按钮图标 -->
+      <i class="icon icon-menu-open"></i>
+    </button>
+  </div>
+</div>
+
+<div id="nav-list" class="lg:block hidden">
+  <!-- 创建导航列表容器 -->
+  <div class="w-full block lg:flex lg:justify-between border-external-bottom lg:border-gray-400 mt-10 text-gray-700 lg:text-lg">
+    <!-- 创建导航列表 -->
+    <div class="lg:flex -mb-px">
+      <!-- 创建导航项容器 -->
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-home"></i> 
+              <!-- 显示对应图标 -->
+              首页
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/archives" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-archive"></i> 
+              <!-- 显示对应图标 -->
+              归档
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/tags" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-tags"></i> 
+              <!-- 显示对应图标 -->
+              标签
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/post/about" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-user"></i> 
+              <!-- 显示对应图标 -->
+              关于
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/essays" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-"></i> 
+              <!-- 显示对应图标 -->
+              测试菜单
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+      <!-- 循环结束 -->
+      <div class="search-frame pb-4">
+        <!-- 创建搜索框容器 -->
+        <i class="icon icon-search"></i>
+        <!-- 显示搜索图标 -->
+        <form id="search-form" action="https://shenshen6666.GitHub.io/search/">
+          <!-- 创建搜索表单 -->
+          <input name="searchContent" type="text" placeholder="Search..." />
+          <!-- 显示搜索框，并设置占位符 -->
+        </form>
+      </div>
+    </div>
+
+    <div class="lg:flex">
+      <!-- 创建右侧导航项容器 -->
+      <ul>
+        <!-- 创建导航链接列表 -->
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+      </ul>
+      <!-- 社交媒体链接列表结束 -->
+
+      <a href="https://shenshen6666.GitHub.io/atom.xml" class="block mt-4 lg:mt-0 lg:ml-8 align-center hover:text-gray-900" target="_blank">
+        <!-- 创建 RSS 订阅链接 -->
+        <i class="icon icon-rss"></i>
+        <!-- 显示 RSS 图标 -->
+        RSS
+        <!-- 显示 RSS 文字 -->
+      </a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="mb-20 md:flex mt-10 lg:mt-6 md:border-internal md:border-gray-400 md:pt-2 lg:border-t-0 lg:pt-0">
+        <!-- 左侧内容保持不变 -->
+        <div class="w-full md:w-2/3 mt-6">
+          <h1 class="post-title text-3xl">Spring Statemachine状态机示例</h1>
+          
+          <div class="mt-6 lg:mt-10 post-content">
+            <h1 id="1-什么是状态机">1、什么是状态机</h1>
+<h2 id="11-什么是状态">1.1 什么是状态</h2>
+<p>状态（State）是指现实事物存在的不同形态或状态。例如，自动门有两种状态：open（开启）和closed（关闭）。状态机（State Machine）是对现实事物状态的数学模型，通常被描述为状态转换图。</p>
+<p>状态机的全称是有限状态自动机（Finite-state machine, FSM），是一个数学模型，描述了有限个状态以及在这些状态之间的转移和动作等行为。</p>
+<h2 id="12-四大概念">1.2 四大概念</h2>
+<p>状态机的四大概念包括：</p>
+<ul>
+<li><strong>State（状态）</strong>：一个状态机至少包含两个状态，例如自动门的open和closed状态。</li>
+<li><strong>Event（事件）</strong>：触发执行某个操作的条件或口令，例如按下开门按钮。</li>
+<li><strong>Action（动作）</strong>：事件发生后要执行的操作，例如开门。一个动作通常对应一个函数。</li>
+<li><strong>Transition（变换）</strong>：从一个状态变换为另一个状态的过程，例如开门过程。</li>
+</ul>
+<h2 id="13-状态机">1.3 状态机</h2>
+<p>有限状态机（FSM）是表示有限个状态以及在这些状态之间的转移和动作等行为的数学模型。它描述了对象在生命周期内经历的状态序列以及如何响应来自外界的各种事件。</p>
+<h1 id="2-状态机图">2、状态机图</h1>
+<p>在设计状态机图时，需要考虑以下六种元素：起始、终止、现态、次态（目标状态）、动作、条件。</p>
+<p>以订单为例，现态是待支付状态，条件是支付事件，动作是状态转换为待发货，次态是待发货。</p>
+<p>注意事项：</p>
+<ol>
+<li>避免将“程序动作”当作“状态”处理。动作是不稳定的，一旦执行完毕就结束；而状态是相对稳定的，会持续下去。</li>
+<li>在状态划分时避免漏掉某些状态，确保跳转逻辑完整。</li>
+</ol>
+<h1 id="3-spring-statemachine">3、Spring Statemachine</h1>
+<h2 id="31-状态机spring-statemachine-概述">3.1 状态机spring statemachine 概述</h2>
+<p>Spring Statemachine是在Spring应用程序中使用状态机概念的框架，旨在提供易于使用的状态机、分层结构、状态机区域、触发器、转换、警卫、操作、键入安全配置适配器等功能。</p>
+<h2 id="32-快速开始">3.2 快速开始</h2>
+<p>以订单状态扭转的例子为例：</p>
+<h3 id="表结构设计">表结构设计</h3>
+<p>下面是订单表的表结构设计：</p>
+<pre><code class="language-sql">CREATE TABLE `tb_order` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `order_code` varchar(128) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '订单编码',
+  `status` smallint(3) DEFAULT NULL COMMENT '订单状态',
+  `name` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '订单名称',
+  `price` decimal(12,2) DEFAULT NULL COMMENT '价格',
+  `delete_flag` tinyint(2) NOT NULL DEFAULT '0' COMMENT '删除标记，0未删除  1已删除',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT '更新时间',
+  `create_user_code` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '创建人',
+  `update_user_code` varchar(32) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '更新人',
+  `version` int(11) NOT NULL DEFAULT '0' COMMENT '版本号',
+  `remark` varchar(64) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='订单表';
+
+/*Data for the table `tb_order` */
+
+INSERT INTO `tb_order`(`id`,`order_code`,`status`,`name`,`price`,`delete_flag`,`create_time`,`update_time`,`create_user_code`,`update_user_code`,`version`,`remark`) VALUES 
+(2,'A111',1,'A','22.00',0,'2022-10-15 16:14:11','2022-10-02 21:29:14','zhangsan','zhangsan',0,NULL),
+(3,'A111',1,'订单A','22.00',0,'2022-10-02 21:53:13','2022-10-02 21:29:14','zhangsan','zhangsan',0,NULL),
+(4,'A111',1,'订单A','22.00',0,'2022-10-02 21:53:13','2022-10-02 21:29:14','zhangsan','zhangsan',0,NULL),
+(5,'A111',1,'订单A','22.00',0,'2022-10-03 09:08:30','2022-10-02 21:29:14','zhangsan','zhangsan',0,NULL);
+</code></pre>
+<h3 id="引入依赖">引入依赖</h3>
+<pre><code class="language-xml">&lt;!-- redis持久化状态机 --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.statemachine&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-statemachine-redis&lt;/artifactId&gt;
+    &lt;version&gt;1.2.9.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!--状态机--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.statemachine&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-statemachine-starter&lt;/artifactId&gt;
+    &lt;version&gt;2.0.1.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h2 id="定义状态机状态和事件">定义状态机状态和事件</h2>
+<h4 id="状态枚举">状态枚举</h4>
+<pre><code class="language-java">public enum OrderStatus {
+    // 待支付，待发货，待收货，已完成
+    WAIT_PAYMENT(1, &quot;待支付&quot;),
+    WAIT_DELIVER(2, &quot;待发货&quot;),
+    WAIT_RECEIVE(3, &quot;待收货&quot;),
+    FINISH(4, &quot;已完成&quot;);
+
+    private Integer key;
+    private String desc;
+
+    OrderStatus(Integer key, String desc) {
+        this.key = key;
+        this.desc = desc;
+    }
+
+    public Integer getKey() {
+        return key;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public static OrderStatus getByKey(Integer key) {
+        for (OrderStatus e : values()) {
+            if (e.getKey().equals(key)) {
+                return e;
+            }
+        }
+        throw new RuntimeException(&quot;enum not exists.&quot;);
+    }
+}
+</code></pre>
+<h2 id="事件">事件</h2>
+<pre><code class="language-java">public enum OrderStatusChangeEvent {
+    // 支付，发货，确认收货
+    PAYED, DELIVERY, RECEIVED;
+}
+</code></pre>
+<h2 id="3定义状态机规则和配置状态机">3）定义状态机规则和配置状态机</h2>
+<pre><code class="language-java">@Configuration
+@EnableStateMachine(name = &quot;orderStateMachine&quot;)
+public class OrderStateMachineConfig extends StateMachineConfigurerAdapter&lt;OrderStatus, OrderStatusChangeEvent&gt; {
+
+    /**
+     * 配置状态
+     *
+     * @param states
+     * @throws Exception
+     */
+    public void configure(StateMachineStateConfigurer&lt;OrderStatus, OrderStatusChangeEvent&gt; states) throws Exception {
+        states
+            .withStates()
+            .initial(OrderStatus.WAIT_PAYMENT)
+            .states(EnumSet.allOf(OrderStatus.class));
+    }
+
+    /**
+     * 配置状态转换事件关系
+     *
+     * @param transitions
+     * @throws Exception
+     */
+    public void configure(StateMachineTransitionConfigurer&lt;OrderStatus, OrderStatusChangeEvent&gt; transitions) throws Exception {
+        transitions
+            //支付事件:待支付-》待发货
+            .withExternal().source(OrderStatus.WAIT_PAYMENT).target(OrderStatus.WAIT_DELIVER).event(OrderStatusChangeEvent.PAYED)
+            .and()
+            //发货事件:待发货-》待收货
+            .withExternal().source(OrderStatus.WAIT_DELIVER).target(OrderStatus.WAIT_RECEIVE).event(OrderStatusChangeEvent.DELIVERY)
+            .and()
+            //收货事件:待收货-》已完成
+            .withExternal().source(OrderStatus.WAIT_RECEIVE).target(OrderStatus.FINISH).event(OrderStatusChangeEvent.RECEIVED);
+    }
+}
+</code></pre>
+<h2 id="配置持久化">配置持久化</h2>
+<pre><code class="language-java">import com.alibaba.fastjson.JSON;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.statemachine.StateMachineContext;
+import org.springframework.statemachine.StateMachinePersist;
+import org.springframework.statemachine.persist.DefaultStateMachinePersister;
+import org.springframework.statemachine.persist.RepositoryStateMachinePersist;
+import org.springframework.statemachine.persist.StateMachinePersister;
+import org.springframework.statemachine.redis.RedisStateMachineContextRepository;
+import org.springframework.statemachine.redis.RedisStateMachinePersister;
+
+import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
+
+@Configuration
+@Slf4j
+public class Persist&lt;E, S&gt; {
+
+    /**
+     * 持久化到内存map中
+     *
+     * @return
+     */
+    @Bean(name = &quot;stateMachineMemPersister&quot;)
+    public static StateMachinePersister getPersister() {
+        return new DefaultStateMachinePersister(new StateMachinePersist() {
+            @Override
+            public void write(StateMachineContext context, Object contextObj) throws Exception {
+                log.info(&quot;持久化状态机,context:{},contextObj:{}&quot;, JSON.toJSONString(context), JSON.toJSONString(contextObj));
+                map.put(contextObj, context);
+            }
+
+            @Override
+            public StateMachineContext read(Object contextObj) throws Exception {
+                log.info(&quot;获取状态机,contextObj:{}&quot;, JSON.toJSONString(contextObj));
+                StateMachineContext stateMachineContext = (StateMachineContext) map.get(contextObj);
+                log.info(&quot;获取状态机结果,stateMachineContext:{}&quot;, JSON.toJSONString(stateMachineContext));
+                return stateMachineContext;
+            }
+
+            private Map map = new HashMap();
+        });
+    }
+
+    @Resource
+    private RedisConnectionFactory redisConnectionFactory;
+
+    /**
+     * 持久化到redis中，在分布式系统中使用
+     *
+     * @return
+     */
+    @Bean(name = &quot;stateMachineRedisPersister&quot;)
+    public RedisStateMachinePersister&lt;E, S&gt; getRedisPersister() {
+        RedisStateMachineContextRepository&lt;E, S&gt; repository = new RedisStateMachineContextRepository&lt;&gt;(redisConnectionFactory);
+        RepositoryStateMachinePersist p = new RepositoryStateMachinePersist&lt;&gt;(repository);
+        return new RedisStateMachinePersister&lt;&gt;(p);
+    }
+}
+</code></pre>
+<p>以下是业务系统的优化后的 Markdown 格式：</p>
+<pre><code class="language-markdown">## 4）业务系统
+
+### Controller
+
+```java
+@RestController
+@RequestMapping(&quot;/order&quot;)
+public class OrderController {
+
+    @Resource
+    private OrderService orderService;
+
+    /**
+     * 根据id查询订单
+     *
+     * @return
+     */
+    @RequestMapping(&quot;/getById&quot;)
+    public Order getById(@RequestParam(&quot;id&quot;) Long id) {
+        //根据id查询订单
+        Order order = orderService.getById(id);
+        return order;
+    }
+
+    /**
+     * 创建订单
+     *
+     * @return
+     */
+    @RequestMapping(&quot;/create&quot;)
+    public String create(@RequestBody Order order) {
+        //创建订单
+        orderService.create(order);
+        return &quot;success&quot;;
+    }
+
+    /**
+     * 对订单进行支付
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping(&quot;/pay&quot;)
+    public String pay(@RequestParam(&quot;id&quot;) Long id) {
+        //对订单进行支付
+        orderService.pay(id);
+        return &quot;success&quot;;
+    }
+
+    /**
+     * 对订单进行发货
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping(&quot;/deliver&quot;)
+    public String deliver(@RequestParam(&quot;id&quot;) Long id) {
+        //对订单进行确认收货
+        orderService.deliver(id);
+        return &quot;success&quot;;
+    }
+
+    /**
+     * 对订单进行确认收货
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping(&quot;/receive&quot;)
+    public String receive(@RequestParam(&quot;id&quot;) Long id) {
+        //对订单进行确认收货
+        orderService.receive(id);
+        return &quot;success&quot;;
+    }
+}
+</code></pre>
+<h3 id="service">Service</h3>
+<pre><code class="language-java">import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zengqingfa.springboot.state.demo.entity.Order;
+import com.zengqingfa.springboot.state.demo.enums.OrderStatus;
+import com.zengqingfa.springboot.state.demo.enums.OrderStatusChangeEvent;
+import com.zengqingfa.springboot.state.demo.mapper.OrderMapper;
+import com.zengqingfa.springboot.state.demo.service.OrderService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.statemachine.StateMachine;
+import org.springframework.statemachine.persist.StateMachinePersister;
+import org.springframework.stereotype.Service;
+import javax.annotation.Resource;
+
+@Service(&quot;orderService&quot;)
+@Slf4j
+public class OrderServiceImpl extends ServiceImpl&lt;OrderMapper, Order&gt; implements OrderService {
+
+    @Resource
+    private StateMachine&lt;OrderStatus, OrderStatusChangeEvent&gt; orderStateMachine;
+
+    @Resource
+    private StateMachinePersister&lt;OrderStatus, OrderStatusChangeEvent, String&gt; stateMachineMemPersister;
+
+    @Resource
+    private OrderMapper orderMapper;
+
+    /**
+     * 创建订单
+     *
+     * @param order
+     * @return
+     */
+    public Order create(Order order) {
+        order.setStatus(OrderStatus.WAIT_PAYMENT.getKey());
+        orderMapper.insert(order);
+        return order;
+    }
+
+    /**
+     * 对订单进行支付
+     *
+     * @param id
+     * @return
+     */
+    public Order pay(Long id) {
+        Order order = orderMapper.selectById(id);
+        log.info(&quot;线程名称：{},尝试支付，订单号：{}&quot; ,Thread.currentThread().getName() , id);
+        if (!sendEvent(OrderStatusChangeEvent.PAYED, order)) {
+            log.error(&quot;线程名称：{},支付失败, 状态异常，订单信息：{}&quot;, Thread.currentThread().getName(), order);
+            throw new RuntimeException(&quot;支付失败, 订单状态异常&quot;);
+        }
+        return order;
+    }
+
+    /**
+     * 对订单进行发货
+     *
+     * @param id
+     * @return
+     */
+    public Order deliver(Long id) {
+        Order order = orderMapper.selectById(id);
+        log.info(&quot;线程名称：{},尝试发货，订单号：{}&quot; ,Thread.currentThread().getName() , id);
+        if (!sendEvent(OrderStatusChangeEvent.DELIVERY, order)) {
+            log.error(&quot;线程名称：{},发货失败, 状态异常，订单信息：{}&quot;, Thread.currentThread().getName(), order);
+            throw new RuntimeException(&quot;发货失败, 订单状态异常&quot;);
+        }
+        return order;
+    }
+
+    /**
+     * 对订单进行确认收货
+     *
+     * @param id
+     * @return
+     */
+    public Order receive(Long id) {
+        Order order = orderMapper.selectById(id);
+        log.info(&quot;线程名称：{},尝试收货，订单号：{}&quot; ,Thread.currentThread().getName() , id);
+        if (!sendEvent(OrderStatusChangeEvent.RECEIVED, order)) {
+            log.error(&quot;线程名称：{},收货失败, 状态异常，订单信息：{}&quot;, Thread.currentThread().getName(), order);
+            throw new RuntimeException(&quot;收货失败, 订单状态异常&quot;);
+        }
+        return order;
+    }
+
+    /**
+     * 发送订单状态转换事件
+     * synchronized修饰保证这个方法是线程安全的
+     *
+     * @param changeEvent
+     * @param order
+     * @return
+     */
+    private synchronized boolean sendEvent(OrderStatusChangeEvent changeEvent, Order order) {
+        boolean result = false;
+        try {
+            //启动状态机
+            orderStateMachine.start();
+            //尝试恢复状态机状态
+            stateMachineMemPersister.restore(orderStateMachine, String.valueOf(order.getId()));
+            Message message = MessageBuilder.withPayload(changeEvent).setHeader(&quot;order&quot;, order).build();
+                result = orderStateMachine.sendEvent(message);
+                //持久化状态机状态
+                stateMachineMemPersister.persist(orderStateMachine, String.valueOf(order.getId()));
+            } catch (Exception e) {
+                log.error(&quot;订单操作失败:{}&quot;, e);
+            } finally {
+                orderStateMachine.stop();
+            }
+            return result;
+        }
+    }
+下面是优化后的监听器代码以及测试验证部分的 Markdown 格式：
+
+### 监听器
+
+```java
+package com.zengqingfa.springboot.state.demo.listener;
+
+import com.zengqingfa.springboot.state.demo.entity.Order;
+import com.zengqingfa.springboot.state.demo.enums.OrderStatus;
+import com.zengqingfa.springboot.state.demo.enums.OrderStatusChangeEvent;
+import com.zengqingfa.springboot.state.demo.mapper.OrderMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.Message;
+import org.springframework.statemachine.annotation.OnTransition;
+import org.springframework.statemachine.annotation.WithStateMachine;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+
+@Component(&quot;orderStateListener&quot;)
+@WithStateMachine(name = &quot;orderStateMachine&quot;)
+@Slf4j
+public class OrderStateListenerImpl {
+
+    @Resource
+    private OrderMapper orderMapper;
+
+    @OnTransition(source = &quot;WAIT_PAYMENT&quot;, target = &quot;WAIT_DELIVER&quot;)
+    public void payTransition(Message&lt;OrderStatusChangeEvent&gt; message) {
+        Order order = (Order) message.getHeaders().get(&quot;order&quot;);
+        log.info(&quot;支付，状态机反馈信息：{}&quot;, message.getHeaders().toString());
+        //更新订单
+        order.setStatus(OrderStatus.WAIT_DELIVER.getKey());
+        orderMapper.updateById(order);
+        //TODO 其他业务
+    }
+
+    @OnTransition(source = &quot;WAIT_DELIVER&quot;, target = &quot;WAIT_RECEIVE&quot;)
+    public void deliverTransition(Message&lt;OrderStatusChangeEvent&gt; message) {
+        Order order = (Order) message.getHeaders().get(&quot;order&quot;);
+        log.info(&quot;发货，状态机反馈信息：{}&quot;, message.getHeaders().toString());
+        //更新订单
+        order.setStatus(OrderStatus.WAIT_RECEIVE.getKey());
+        orderMapper.updateById(order);
+        //TODO 其他业务
+    }
+
+    @OnTransition(source = &quot;WAIT_RECEIVE&quot;, target = &quot;FINISH&quot;)
+    public void receiveTransition(Message&lt;OrderStatusChangeEvent&gt; message) {
+        Order order = (Order) message.getHeaders().get(&quot;order&quot;);
+        log.info(&quot;确认收货，状态机反馈信息：{}&quot;, message.getHeaders().toString());
+        //更新订单
+        order.setStatus(OrderStatus.FINISH.getKey());
+        orderMapper.updateById(order);
+        //TODO 其他业务
+    }
+}
+</code></pre>
+<h3 id="测试验证">测试验证</h3>
+<ol>
+<li>
+<p>验证业务：新增一个订单</p>
+<p>发送 POST 请求到：<code>http://localhost:8084/order/create</code></p>
+</li>
+<li>
+<p>对订单进行支付</p>
+<p>发送 GET 请求到：<code>http://localhost:8084/order/pay?id=2</code></p>
+</li>
+<li>
+<p>对订单进行发货</p>
+<p>发送 GET 请求到：<code>http://localhost:8084/order/deliver?id=2</code></p>
+</li>
+<li>
+<p>对订单进行确认收货</p>
+<p>发送 GET 请求到：<code>http://localhost:8084/order/receive?id=2</code></p>
+</li>
+</ol>
+<p>正常流程结束。如果对一个订单进行了支付，再次进行支付，则会报错：</p>
+<p>发送 GET 请求到：<code>http://localhost:8084/order/pay?id=2</code></p>
+<p>下面是持久化验证部分的优化：</p>
+<h3 id="验证持久化">验证持久化</h3>
+<h4 id="内存持久化">内存持久化</h4>
+<p>使用内存持久化类持久化：</p>
+<pre><code class="language-java">@Resource
+private StateMachinePersister&lt;OrderStatus, OrderStatusChangeEvent, String&gt; stateMachineMemPersister;
+
+/**
+ * 发送订单状态转换事件
+ * synchronized修饰保证这个方法是线程安全的
+ *
+ * @param changeEvent
+ * @param order
+ * @return
+ */
+private synchronized boolean sendEvent(OrderStatusChangeEvent changeEvent, Order order) {
+    boolean result = false;
+    try {
+        //启动状态机
+        orderStateMachine.start();
+        //尝试恢复状态机状态
+        stateMachineMemPersister.restore(orderStateMachine, String.valueOf(order.getId()));
+        Message message = MessageBuilder.withPayload(changeEvent).setHeader(&quot;order&quot;, order).build();
+        result = orderStateMachine.sendEvent(message);
+        //持久化状态机状态
+        stateMachineMemPersister.persist(orderStateMachine, String.valueOf(order.getId()));
+    } catch (Exception e) {
+        log.error(&quot;订单操作失败:{}&quot;, e);
+    } finally {
+        orderStateMachine.stop();
+    }
+    return result;
+}
+</code></pre>
+<h4 id="redis持久化">Redis持久化</h4>
+<p>引入依赖：</p>
+<pre><code class="language-xml">&lt;!-- redis持久化状态机 --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.statemachine&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-statemachine-redis&lt;/artifactId&gt;
+    &lt;version&gt;1.2.9.RELEASE&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>配置 YAML：</p>
+<pre><code class="language-yaml">spring:
+  redis:
+    database: 0
+    host: localhost
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        max-wait: ''
+        min-idle: 0
+    password: ''
+    port: 6379
+    timeout: 0
+</code></pre>
+<p>使用 Redis 持久化类持久化：</p>
+<pre><code class="language-java">@Resource
+private StateMachinePersister&lt;OrderStatus, OrderStatusChangeEvent, String&gt; stateMachineRedisPersister;
+
+/**
+ * 发送订单状态转换事件
+ * synchronized修饰保证这个方法是线程安全的
+ *
+ * @param changeEvent
+ * @param order
+ * @return
+ */
+private synchronized boolean sendEvent(OrderStatusChangeEvent changeEvent, Order order) {
+    boolean result = false;
+    try {
+        //启动状态机
+        orderStateMachine.start();
+        //尝试恢复状态机状态
+        stateMachineRedisPersister.restore(orderStateMachine, String.valueOf(order.getId()));
+        Message message = MessageBuilder.withPayload(changeEvent).setHeader(&quot;order&quot;, order).build();
+        result = orderStateMachine.sendEvent(message);
+        //持久化状态机状态
+        stateMachineRedisPersister.persist(orderStateMachine, String.valueOf(order.getId()));
+    } catch (Exception e) {
+        log.error(&quot;订单操作失败:{}&quot;, e);
+    } finally {
+        orderStateMachine.stop();
+    }
+    return result;
+}
+</code></pre>
+<h3 id="34-状态机存在的问题">3.4 状态机存在的问题</h3>
+<p>在你的业务中，你可能会遇到状态机无法抛出异常的情况。异常会被状态机给消化掉。</p>
+<h4 id="问题现象">问题现象</h4>
+<p>从 <code>orderStateMachine.sendEvent(message)</code> 获取的结果无法感知到。无论执行正常还是抛出异常，都返回 <code>true</code>。</p>
+<pre><code class="language-java">@Resource
+private OrderMapper orderMapper;
+
+@Resource
+private StateMachine&lt;OrderStatus, OrderStatusChangeEvent&gt; orderStateMachine;
+
+@OnTransition(source = &quot;WAIT_PAYMENT&quot;, target = &quot;WAIT_DELIVER&quot;)
+@Transactional(rollbackFor = Exception.class)
+public void payTransition(Message&lt;OrderStatusChangeEvent&gt; message) {
+    Order order = (Order) message.getHeaders().get(&quot;order&quot;);
+    log.info(&quot;支付，状态机反馈信息：{}&quot;,  message.getHeaders().toString());
+    try {
+        // 更新订单
+        order.setStatus(OrderStatus.WAIT_DELIVER.getKey());
+        orderMapper.updateById(order);
+        // 模拟异常
+        if (Objects.equals(order.getName(), &quot;A&quot;)) {
+            throw new RuntimeException(&quot;执行业务异常&quot;);
+        }
+    } catch (Exception e) {
+        // 如果出现异常，记录异常信息，抛出异常信息进行回滚
+        log.error(&quot;payTransition 出现异常：{}&quot;,e);
+        throw e;
+    }
+}
+</code></pre>
+<p>监听事件抛出异常，在发送事件中无法感知：</p>
+<pre><code class="language-java">private synchronized boolean sendEvent(OrderStatusChangeEvent changeEvent, Order order) {
+    boolean result = false;
+    try {
+        // 启动状态机
+        orderStateMachine.start();
+        // 尝试恢复状态机状态
+        stateMachineMemPersister.restore(orderStateMachine, String.valueOf(order.getId()));
+        Message message = MessageBuilder.withPayload(changeEvent).setHeader(&quot;order&quot;, order).build();
+        // 事件执行异常了，依然返回true，无法感知异常
+        result = orderStateMachine.sendEvent(message);
+        if (result) {
+            // 持久化状态机状态，如果根据true持久化，则会出现问题
+            stateMachineMemPersister.persist(orderStateMachine, String.valueOf(order.getId()));
+        }
+    } catch (Exception e) {
+        log.error(&quot;订单操作失败:{}&quot;, e);
+    } finally {
+        orderStateMachine.stop();
+    }
+    return result;
+}
+</code></pre>
+<h4 id="解决方案">解决方案</h4>
+<p>你可以自己保存异常到数据库或者内存中，进行判断。也可以通过接口 <code>org.springframework.statemachine.StateMachine#getExtendedState</code> 方法把执行状态放入 <code>ExtendedState</code> 变量中。</p>
+<pre><code class="language-java">public interface ExtendedState {
+    Map&lt;Object, Object&gt; getVariables();
+    &lt;T&gt; T get(Object var1, Class&lt;T&gt; var2);
+    void setExtendedStateChangeListener(ExtendedState.ExtendedStateChangeListener var1);
+    public interface ExtendedStateChangeListener {
+        void changed(Object var1, Object var2);
+    }
+}
+
+public class DefaultExtendedState() {
+    private final Map&lt;Object, Object&gt; variables;
+    
+    public DefaultExtendedState() {
+        this.variables = new ObservableMap(new ConcurrentHashMap(), new DefaultExtendedState.LocalMapChangeListener());
+    }
+    
+    public Map&lt;Object, Object&gt; getVariables() {
+        return this.variables;
+    }
+}
+</code></pre>
+<h3 id="改造监听状态和发送事件">改造监听状态和发送事件</h3>
+<h4 id="改造监听状态">改造监听状态</h4>
+<p>在监听状态的方法中，将业务的执行结果进行保存，1表示成功，0表示失败。</p>
+<pre><code class="language-java">@Resource
+private OrderMapper orderMapper;
+@Resource
+private StateMachine&lt;OrderStatus, OrderStatusChangeEvent&gt; orderStateMachine;
+
+@OnTransition(source = &quot;WAIT_PAYMENT&quot;, target = &quot;WAIT_DELIVER&quot;)
+@Transactional(rollbackFor = Exception.class)
+public void payTransition(Message&lt;OrderStatusChangeEvent&gt; message) {
+    Order order = (Order) message.getHeaders().get(&quot;order&quot;);
+    log.info(&quot;支付，状态机反馈信息：{}&quot;,  message.getHeaders().toString());
+    try {
+        // 更新订单
+        order.setStatus(OrderStatus.WAIT_DELIVER.getKey());
+        orderMapper.updateById(order);
+        // 模拟异常
+        if (Objects.equals(order.getName(), &quot;A&quot;)) {
+            throw new RuntimeException(&quot;执行业务异常&quot;);
+        }
+        // 成功 则为1
+        orderStateMachine.getExtendedState().getVariables().put(CommonConstants.payTransition + order.getId(), 1);
+    } catch (Exception e) {
+        // 如果出现异常，则进行回滚
+        log.error(&quot;payTransition 出现异常：{}&quot;,e);
+        // 将异常信息变量信息中，失败则为0
+        orderStateMachine.getExtendedState().getVariables().put(CommonConstants.payTransition + order.getId(), 0);
+        throw e;
+    }
+}
+</code></pre>
+<h4 id="发送事件改造">发送事件改造</h4>
+<p>在发送事件的方法中，如果获取到业务执行异常，则返回失败，不进行状态机持久化。</p>
+<pre><code class="language-java">@Resource
+private StateMachine&lt;OrderStatus, OrderStatusChangeEvent&gt; orderStateMachine;
+@Resource
+private StateMachinePersister&lt;OrderStatus, OrderStatusChangeEvent, String&gt; stateMachineMemPersister;
+
+/**
+ * 发送订单状态转换事件
+ * synchronized修饰保证这个方法是线程安全的
+ *
+ * @param changeEvent
+ * @param order
+ * @return
+ */
+private synchronized boolean sendEvent(OrderStatusChangeEvent changeEvent, Order order){
+    boolean result = false;
+    try {
+        // 启动状态机
+        orderStateMachine.start();
+        // 尝试恢复状态机状态
+        stateMachineMemPersister.restore(orderStateMachine, String.valueOf(order.getId()));
+        Message message = MessageBuilder.withPayload(changeEvent).setHeader(&quot;order&quot;, order).build();
+        result = orderStateMachine.sendEvent(message);
+        if (!result) {
+            return false;
+        }
+        // 获取到监听的结果信息
+        Integer o = (Integer) orderStateMachine.getExtendedState().getVariables().get(CommonConstants.payTransition + order.getId());
+        // 操作完成之后,删除本次对应的key信息
+        orderStateMachine.getExtendedState().getVariables().remove(CommonConstants.payTransition + order.getId());
+        // 如果事务执行成功，则持久化状态机
+        if (Objects.equals(1, Integer.valueOf(o))) {
+            // 持久化状态机状态
+            stateMachineMemPersister.persist(orderStateMachine, String.valueOf(order.getId()));
+        } else {
+            // 订单执行业务异常
+            return false;
+        }
+    } catch (Exception e) {
+        log.error(&quot;订单操作失败:{}&quot;, e);
+    } finally {
+        orderStateMachine.stop();
+    }
+    return result;
+}
+</code></pre>
+<h3 id="发送事件处理及aop优化">发送事件处理及AOP优化</h3>
+<h4 id="处理非支付事件">处理非支付事件</h4>
+<p>如果是非支付事件，需要对发送事件的方法进行通用化处理，以便于适用于不同的事件。同时，需要修改监听状态设置状态的代码，避免重复代码，可以使用AOP来优化。</p>
+<h4 id="常量类">常量类</h4>
+<p>首先定义一个常量类，用于存放公共的常量信息。</p>
+<pre><code class="language-java">public interface CommonConstants {
+    String orderHeader = &quot;order&quot;;
+    String payTransition = &quot;payTransition&quot;;
+    String deliverTransition = &quot;deliverTransition&quot;;
+    String receiveTransition = &quot;receiveTransition&quot;;
+}
+</code></pre>
+<h4 id="支付发送事件方法优化">支付发送事件方法优化</h4>
+<p>对于支付发送事件的方法，需要修改为通用的形式，以便处理不同的事件。</p>
+<pre><code class="language-java">@Resource
+private StateMachine&lt;OrderStatus, OrderStatusChangeEvent&gt; orderStateMachine;
+@Resource
+private StateMachinePersister&lt;OrderStatus, OrderStatusChangeEvent, String&gt; stateMachineMemPersister;
+@Resource
+private OrderMapper orderMapper;
+
+/**
+ * 对订单进行支付
+ *
+ * @param id
+ * @return
+ */
+public Order pay(Long id) {
+    Order order = orderMapper.selectById(id);
+    log.info(&quot;线程名称：{},尝试支付，订单号：{}&quot;, Thread.currentThread().getName(), id);
+    if (!sendEvent(OrderStatusChangeEvent.PAYED, order, CommonConstants.payTransition)) {
+        log.error(&quot;线程名称：{},支付失败, 状态异常，订单信息：{}&quot;, Thread.currentThread().getName(), order);
+        throw new RuntimeException(&quot;支付失败, 订单状态异常&quot;);
+    }
+    return order;
+}
+
+/**
+ * 发送订单状态转换事件
+ * synchronized修饰保证这个方法是线程安全的
+ *
+ * @param changeEvent
+ * @param order
+ * @param key
+ * @return
+ */
+private synchronized boolean sendEvent(OrderStatusChangeEvent changeEvent, Order order, String key) {
+    boolean result = false;
+    try {
+        // 启动状态机
+        orderStateMachine.start();
+        // 尝试恢复状态机状态
+        stateMachineMemPersister.restore(orderStateMachine, String.valueOf(order.getId()));
+        Message message = MessageBuilder.withPayload(changeEvent).setHeader(CommonConstants.orderHeader, order).build();
+        result = orderStateMachine.sendEvent(message);
+        if (!result) {
+            return false;
+        }
+        // 获取到监听的结果信息
+        Integer o = (Integer) orderStateMachine.getExtendedState().getVariables().get(key + order.getId());
+        // 操作完成之后,删除本次对应的key信息
+        orderStateMachine.getExtendedState().getVariables().remove(key + order.getId());
+        // 如果事务执行成功，则持久化状态机
+        if (Objects.equals(1, Integer.valueOf(o))) {
+            // 持久化状态机状态
+            stateMachineMemPersister.persist(orderStateMachine, String.valueOf(order.getId()));
+        } else {
+            // 订单执行业务异常
+            return false;
+        }
+    } catch (Exception e) {
+        log.error(&quot;订单操作失败:{}&quot;, e);
+    } finally {
+        orderStateMachine.stop();
+    }
+    return result;
+}
+</code></pre>
+<h4 id="使用aop对监听事件进行切面">使用AOP对监听事件进行切面</h4>
+<p>在监听状态设置状态的代码中，存在重复的代码，需要进行优化。可以使用AOP来实现，在监听状态的方法中，将业务的执行结果封装到状态机的变量中。</p>
+<pre><code class="language-java">@Retention(RetentionPolicy.RUNTIME)
+public @interface LogResult {
+    /**
+     * 执行的业务key
+     *
+     * @return String
+     */
+    String key();
+}
+</code></pre>
+<h3 id="引入aop优化监听类">引入AOP优化监听类</h3>
+<h4 id="aop切面处理">AOP切面处理</h4>
+<pre><code class="language-java">import com.zengqingfa.springboot.state.demo.aop.annotation.LogResult;
+import com.zengqingfa.springboot.state.demo.entity.Order;
+import com.zengqingfa.springboot.state.demo.enums.OrderStatus;
+import com.zengqingfa.springboot.state.demo.enums.OrderStatusChangeEvent;
+import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.messaging.Message;
+import org.springframework.statemachine.StateMachine;
+import org.springframework.stereotype.Component;
+import javax.annotation.Resource;
+import java.lang.reflect.Method;
+
+@Component
+@Aspect
+@Slf4j
+public class LogResultAspect {
+
+    @Pointcut(&quot;@annotation(com.zengqingfa.springboot.state.demo.aop.annotation.LogResult)&quot;)
+    private void logResultPointCut() {
+        // 定义日志注解切点
+    }
+
+    @Resource
+    private StateMachine&lt;OrderStatus, OrderStatusChangeEvent&gt; orderStateMachine;
+
+    @Around(&quot;logResultPointCut()&quot;)
+    public Object logResultAround(ProceedingJoinPoint pjp) throws Throwable {
+        Object[] args = pjp.getArgs();
+        log.info(&quot;参数args:{}&quot;, args);
+        Message message = (Message) args[0];
+        Order order = (Order) message.getHeaders().get(&quot;order&quot;);
+        Method method = ((MethodSignature) pjp.getSignature()).getMethod();
+        LogResult logResult = method.getAnnotation(LogResult.class);
+        String key = logResult.key();
+        Object returnVal = null;
+        try {
+            returnVal = pjp.proceed();
+            // 如果业务执行正常，则保存信息
+            orderStateMachine.getExtendedState().getVariables().put(key + order.getId(), 1);
+        } catch (Throwable e) {
+            log.error(&quot;e:{}&quot;, e.getMessage());
+            // 如果业务执行异常，则保存信息
+            orderStateMachine.getExtendedState().getVariables().put(key + order.getId(), 0);
+            throw e;
+        }
+        return returnVal;
+    }
+}
+</code></pre>
+<h4 id="监听类注解应用">监听类注解应用</h4>
+<pre><code class="language-java">@Component(&quot;orderStateListener&quot;)
+@WithStateMachine(name = &quot;orderStateMachine&quot;)
+@Slf4j
+public class OrderStateListenerImpl {
+    @Resource
+    private OrderMapper orderMapper;
+
+    @OnTransition(source = &quot;WAIT_PAYMENT&quot;, target = &quot;WAIT_DELIVER&quot;)
+    @Transactional(rollbackFor = Exception.class)
+    @LogResult(key = CommonConstants.payTransition)
+    public void payTransition(Message&lt;OrderStatusChangeEvent&gt; message) {
+        Order order = (Order) message.getHeaders().get(&quot;order&quot;);
+        log.info(&quot;支付，状态机反馈信息：{}&quot;, message.getHeaders().toString());
+        order.setStatus(OrderStatus.WAIT_DELIVER.getKey());
+        orderMapper.updateById(order);
+        // 模拟异常
+        if (Objects.equals(order.getName(), &quot;A&quot;)) {
+            throw new RuntimeException(&quot;执行业务异常&quot;);
+        }
+    }
+
+    @OnTransition(source = &quot;WAIT_DELIVER&quot;, target = &quot;WAIT_RECEIVE&quot;)
+    @LogResult(key = CommonConstants.deliverTransition)
+    public void deliverTransition(Message&lt;OrderStatusChangeEvent&gt; message) {
+        Order order = (Order) message.getHeaders().get(&quot;order&quot;);
+        log.info(&quot;发货，状态机反馈信息：{}&quot;, message.getHeaders().toString());
+        order.setStatus(OrderStatus.WAIT_RECEIVE.getKey());
+        orderMapper.updateById(order);
+    }
+
+    @OnTransition(source = &quot;WAIT_RECEIVE&quot;, target = &quot;FINISH&quot;)
+    @LogResult(key = CommonConstants.receiveTransition)
+    public void receiveTransition(Message&lt;OrderStatusChangeEvent&gt; message) {
+        Order order = (Order) message.getHeaders().get(&quot;order&quot;);
+        log.info(&quot;确认收货，状态机反馈信息：{}&quot;, message.getHeaders().toString());
+        order.setStatus(OrderStatus.FINISH.getKey());
+        orderMapper.updateById(order);
+    }
+}
+</code></pre>
+
+          </div>
+        </div>
+
+        <!-- 右侧内容优化分组 -->
+        <div class="w-full md:w-1/3 mt-6 md:pl-8" id="additionalContent">
+          <div class="sidebar-section">
+            <!-- 信息模块保持不变 -->
+            
+  <!-- 检查是否存在微信支付二维码 -->
+  <h4 class="text-base font-thin text-gray-700 mb-2 mt-6">
+    <!-- 赞赏标题 -->
+    <i class="icon icon-sponsor"></i>
+    <!-- 赞赏图标 -->
+    赞赏
+    <!-- 赞赏文本 -->
+  </h4>
+  <div class="post-sponsor text-gray-700">
+    <!-- 赞赏内容容器 -->
+    <img class="post-sponsor-img w-32 h-32 md:w-40 md:h-40" src="https://shenshen6666.GitHub.io\media\images\custom-weChatPayQR.png" alt="">
+    <!-- 微信支付二维码 -->
+    <div>
+      <!-- 支付提示 -->
+      <i class="icon icon-wechat"></i>
+      <!-- 微信图标 -->
+      支付宝扫一扫领红包
+      <!-- 支付宝提示 -->
+    </div>
+  </div>
+
+
+          </div>
+
+          <!-- 浮动窗口和控件 -->
+          <style>
+            /* 滑动条样式 */
+            .url-slider {
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              height: 30px;
+              background: rgba(255, 255, 255, 0.95);
+              border-top: 1px solid #e0e0e0;
+              display: flex;
+              align-items: center;
+              padding: 0 10px;
+            }
+          
+            .url-list {
+              width: 100%;
+              overflow-x: auto;
+              white-space: nowrap;
+              scrollbar-width: thin;
+              padding: 5px 0;
+            }
+          
+            .url-item {
+              display: inline-block;
+              padding: 4px 8px;
+              margin: 0 4px;
+              background: #f0f0f0;
+              border-radius: 4px;
+              cursor: pointer;
+            }
+          
+            .url-item.active {
+              background: var(--hover-color);
+              color: white;
+            }
+          </style>
+          
+          <!-- 在 body 中的浮动窗口部分 -->
+                  <div class="zhihu-iframe mt-6">
+                    <iframe src="https://onehu.xyz/" style="width:100%;height:calc(100% - 30px);border:none;"></iframe>
+                    <div class="url-slider">
+                      <div class="url-list" id="urlList"></div>
+                    </div>
+            <button class="control-btn" id="menuButton">⚙️</button>
+            <div class="url-menu">
+              <input type="text" id="customUrl" placeholder="输入自定义网址" class="url-input">
+              <div class="quick-urls">
+                <button class="grey-btn" data-url="https://onehu.xyz/">默认</button>
+                <button class="grey-btn" data-url="https://novelsj.xyz/">盐王</button>
+                <button data-url="https://www.bilibili.com/">哔哩哔哩</button>
+              </div>
+              <button class="confirm-btn" id="applyUrl">确定</button>
+            </div>
+          </div>
+
+          <!-- 控件按钮组 -->
+          <div class="float-control-group">
+            <button class="control-btn" id="toggleButton">↔️</button>
+            <button class="control-btn" id="moveUpButton">↑</button>
+            <button class="control-btn" id="moveDownButton">↓</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer border-gray-400 border-external-top pt-6 mt-6 sm:mt-8 md:mt-10 mb-20 text-gray-700 text-sm sm:text-base lg:text-lg">
+  <!-- 创建页脚容器，设置边框和样式 -->
+  Powered by <a href="https://github.com/shenshen6666/shenshen6666.GitHub.io" target="_blank">我的小屋</a>
+  <!-- 显示页脚信息 -->
+</div>
+
+    </div>
+  </div>
+
+  <!-- 脚本优化 -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="https://shenshen6666.GitHub.io/media/js/prism.js"></script>
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  <script>
+    (function() {
+      'use strict';
+      
+      // 模块初始化
+      const uiModule = (() => {
+        const elements = {
+          iframe: document.querySelector('.zhihu-iframe'),
+          toggleBtn: $('#toggleButton'),
+          moveUpBtn: $('#moveUpButton'),
+          moveDownBtn: $('#moveDownButton'),
+          menu: $('.url-menu'),
+          menuBtn: $('#menuButton')
+        };
+
+        // 位置控制
+        const moveFrame = (direction) => {
+          const current = parseFloat(elements.iframe.style.top) || 5;
+          elements.iframe.style.top = `${current + (direction === 'up' ? -10 : 10)}px`;
+        };
+
+        // URL 控制
+        const updateFrameUrl = (url) => {
+          elements.iframe.querySelector('iframe').src = url;
+        };
+
+        return {
+          init() {
+            // 初始尺寸
+            elements.iframe.style.width = '320px';
+            elements.iframe.style.height = '500px';
+
+            // 事件绑定
+            elements.toggleBtn.on('click', () => {
+              $('.zhihu-iframe, #additionalContent .mt-6').toggle();
+            });
+
+            elements.moveUpBtn.on('click', () => moveFrame('up'));
+            elements.moveDownBtn.on('click', () => moveFrame('down'));
+
+            // 点击菜单按钮时切换显示状态
+            elements.menuBtn.on('click', (e) => {
+              e.stopPropagation();
+              elements.menu.toggle();
+            });
+
+            // “默认”、“盐王”按钮：点击后立即更新 URL 并关闭菜单
+            $('.url-menu button[data-url]').on('click', function(e) {
+              e.stopPropagation();
+              const url = $(this).data('url');
+              const btnText = $(this).text();
+              if (btnText === '默认' || btnText === '盐王') {
+                updateFrameUrl(url);
+                elements.menu.hide();
+              } else if (btnText === '哔哩哔哩') {
+                // 只更新输入框，不关闭菜单
+                $('#customUrl').val(url);
+              }
+            });
+
+            // “确定”按钮：只有点击后才会关闭菜单
+            $('#applyUrl').on('click', (e) => {
+              e.stopPropagation();
+              const url = $('#customUrl').val();
+              if (url) {
+                updateFrameUrl(url);
+                elements.menu.hide();
+              }
+            });
+
+            // 阻止菜单内部点击时冒泡（防止因外部绑定而意外关闭）
+            elements.menu.on('click', (e) => {
+              e.stopPropagation();
+            });
+          }
+        };
+      })();
+
+      // 初始化模块
+      document.addEventListener('DOMContentLoaded', () => {
+        uiModule.init();
+        Prism.highlightAll();
+      });
+    })();
+  </script>
+</body>
+</html>

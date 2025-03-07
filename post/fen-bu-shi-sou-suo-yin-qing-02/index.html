@@ -1,0 +1,2018 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+  <meta charset="UTF-8">
+<!-- 设置文档字符集为 UTF-8，支持多种语言字符 -->
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 设置视口，使网页在移动设备上显示的宽度等于设备宽度，初始缩放比例为1.0 -->
+
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<!-- 设置 IE 浏览器的兼容性模式，使用最新的浏览器渲染引擎 -->
+
+<title>分布式搜索引擎02 | 申申丫的</title>
+<!-- 设置网页标题，使用模板引擎输出网站标题 -->
+
+<link rel="stylesheet" href="https://shenshen6666.GitHub.io/styles/main.css">
+<!-- 引入主样式表文件 -->
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 异步加载不蒜子统计的 JavaScript 文件，用于网站访问量统计 -->
+
+
+  <!-- 如果当前页面不是首页 -->
+  <script src="https://shenshen6666.GitHub.io/media/js/page.js"></script>
+  <!-- 引入其他页面特定的 JavaScript 文件 -->
+
+
+    
+
+  <meta name="description" content="分布式搜索引擎02
+在昨天的学习中，我们已经导入了大量数据到elasticsearch中，实现了elasticsearch的数据存储功能。但elasticsearch最擅长的还是搜索和数据分析。
+所以今天，我们研究下elasticsearc...">
+  
+  <!-- 资源预加载 -->
+  <link rel="preload" href="https://code.jquery.com/jquery-3.6.4.min.js" as="script">
+  <link rel="preload" href="https://shenshen6666.GitHub.io/media/js/prism.js" as="script">
+  
+  <!-- 样式资源 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --hover-color: #3498db;
+      --shadow-light: 0 2px 5px rgba(0,0,0,0.1);
+      --shadow-medium: 0 4px 8px rgba(0,0,0,0.15);
+      --transition-fast: all 0.2s ease;
+    }
+
+    /* 增强的浮动窗口样式 */
+    .zhihu-iframe {
+      position: fixed;
+      top: 5px;
+      left: 75%;
+      transform: translateX(-50%);
+      z-index: 999;
+      display: none;
+      resize: both;
+      overflow: auto;
+      min-width: 200px;
+      min-height: 200px;
+      max-width: 90vw;
+      max-height: 90vh;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: var(--shadow-medium);
+      transition: var(--transition-fast);
+    }
+
+    .zhihu-iframe::after {
+      content: '⤢';
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 16px;
+      cursor: se-resize;
+      background: linear-gradient(135deg, transparent 45%, #f0f0f0 45%);
+    }
+
+    /* 按钮组样式优化 */
+    .float-control-group {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .control-btn {
+      cursor: pointer;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--primary-color);
+      border: 1px solid #e0e0e0;
+      border-radius: 50%;
+      box-shadow: var(--shadow-light);
+      transition: var(--transition-fast);
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    /* 设置按钮特殊样式 */
+    .zhihu-iframe .control-btn {
+      width: 28px;
+      height: 28px;
+      padding: 4px;
+      font-size: 14px;
+      position: absolute;
+      left: 10px;
+      bottom: 0;
+      border-radius: 4px;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+
+    .zhihu-iframe .control-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .control-btn:hover {
+      background: #fff;
+      color: var(--hover-color);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    /* 增强的菜单样式 */
+    .url-menu {
+      display: none;
+      position: fixed;
+      right: 90px;
+      bottom: 30px;
+      background: rgba(255, 255, 255, 0.98);
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: var(--shadow-medium);
+      backdrop-filter: blur(8px);
+      min-width: 240px;
+    }
+
+    .url-menu input {
+      width: 100%;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      transition: var(--transition-fast);
+    }
+
+    .url-menu input:focus {
+      border-color: var(--hover-color);
+      outline: none;
+    }
+
+    .url-menu button {
+      padding: 6px 12px;
+      margin: 4px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      background: #f8f9fa;
+      transition: var(--transition-fast);
+    }
+
+    .url-menu button:hover {
+      background: #e9ecef;
+      border-color: var(--hover-color);
+    }
+
+    /* 新增灰色按钮样式 */
+    .quick-urls button.grey-btn {
+      background: #e0e0e0;
+      color: #555;
+      border: 1px solid #ccc;
+    }
+
+    @media (max-width: 768px) {
+      .zhihu-iframe {
+        left: 50%;
+        max-width: 95vw;
+      }
+      
+      .float-control-group {
+        right: 10px;
+        bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 主体结构保持不变 -->
+  <div class="antialiased">
+    <div class="body-width mx-auto px-6 md:px-8">
+      
+<!-- 使用 Map 存储菜单项和对应的图标类名 -->
+
+<div class="flex justify-between items-center mt-10">
+  <!-- 创建顶部导航栏容器 -->
+  <h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-900 font-medium md:font-normal leading-none">
+    <!-- 创建网站标题部分 -->
+    <div class="glitch-wrapper">
+      <!-- 创建标题特效容器 -->
+      <div class="glitch" data-text="申申丫的">
+        <!-- 创建标题特效 -->
+        <a href="https://shenshen6666.GitHub.io">申申丫的</a>
+        <!-- 显示网站标题并设置链接 -->
+      </div>
+    </div>
+  </h1>
+  <div class="block lg:hidden" id="thumb-menu">
+    <!-- 创建移动设备下的菜单按钮容器 -->
+    <button id="thumb-open" type="button" class="block">
+      <!-- 打开菜单的按钮图标 -->
+      <i class="icon icon-menu-close"></i>
+    </button>
+    <button id="thumb-close" type="button" class="hidden">
+      <!-- 关闭菜单的按钮图标 -->
+      <i class="icon icon-menu-open"></i>
+    </button>
+  </div>
+</div>
+
+<div id="nav-list" class="lg:block hidden">
+  <!-- 创建导航列表容器 -->
+  <div class="w-full block lg:flex lg:justify-between border-external-bottom lg:border-gray-400 mt-10 text-gray-700 lg:text-lg">
+    <!-- 创建导航列表 -->
+    <div class="lg:flex -mb-px">
+      <!-- 创建导航项容器 -->
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-home"></i> 
+              <!-- 显示对应图标 -->
+              首页
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/archives" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-archive"></i> 
+              <!-- 显示对应图标 -->
+              归档
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/tags" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-tags"></i> 
+              <!-- 显示对应图标 -->
+              标签
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/post/about" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-user"></i> 
+              <!-- 显示对应图标 -->
+              关于
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/essays" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-"></i> 
+              <!-- 显示对应图标 -->
+              测试菜单
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+      <!-- 循环结束 -->
+      <div class="search-frame pb-4">
+        <!-- 创建搜索框容器 -->
+        <i class="icon icon-search"></i>
+        <!-- 显示搜索图标 -->
+        <form id="search-form" action="https://shenshen6666.GitHub.io/search/">
+          <!-- 创建搜索表单 -->
+          <input name="searchContent" type="text" placeholder="Search..." />
+          <!-- 显示搜索框，并设置占位符 -->
+        </form>
+      </div>
+    </div>
+
+    <div class="lg:flex">
+      <!-- 创建右侧导航项容器 -->
+      <ul>
+        <!-- 创建导航链接列表 -->
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+      </ul>
+      <!-- 社交媒体链接列表结束 -->
+
+      <a href="https://shenshen6666.GitHub.io/atom.xml" class="block mt-4 lg:mt-0 lg:ml-8 align-center hover:text-gray-900" target="_blank">
+        <!-- 创建 RSS 订阅链接 -->
+        <i class="icon icon-rss"></i>
+        <!-- 显示 RSS 图标 -->
+        RSS
+        <!-- 显示 RSS 文字 -->
+      </a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="mb-20 md:flex mt-10 lg:mt-6 md:border-internal md:border-gray-400 md:pt-2 lg:border-t-0 lg:pt-0">
+        <!-- 左侧内容保持不变 -->
+        <div class="w-full md:w-2/3 mt-6">
+          <h1 class="post-title text-3xl">分布式搜索引擎02</h1>
+          
+            <img class="max-w-full mt-6 rounded-sm" src="https://img0.baidu.com/it/u=3179104415,981564947&amp;fm=253&amp;fmt=auto&amp;app=138&amp;f=JPEG?w=500&amp;h=712" alt="">
+          
+          <div class="mt-6 lg:mt-10 post-content">
+            <h1 id="分布式搜索引擎02">分布式搜索引擎02</h1>
+<p>在昨天的学习中，我们已经导入了大量数据到elasticsearch中，实现了elasticsearch的数据存储功能。但elasticsearch最擅长的还是搜索和数据分析。</p>
+<p>所以今天，我们研究下elasticsearch的数据搜索功能。我们会分别使用<strong>DSL</strong>和<strong>RestClient</strong>实现搜索。</p>
+<h1 id="0学习目标">0.学习目标</h1>
+<h1 id="1dsl查询文档">1.DSL查询文档</h1>
+<p>elasticsearch的查询依然是基于JSON风格的DSL来实现的。</p>
+<h2 id="11dsl查询分类">1.1.DSL查询分类</h2>
+<p>Elasticsearch提供了基于JSON的DSL（<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html">Domain Specific Language</a>）来定义查询。常见的查询类型包括：</p>
+<ul>
+<li>
+<p><strong>查询所有</strong>：查询出所有数据，一般测试用。例如：match_all</p>
+</li>
+<li>
+<p><strong>全文检索（full text）查询</strong>：利用分词器对用户输入内容分词，然后去倒排索引库中匹配。例如：</p>
+<ul>
+<li>match_query</li>
+<li>multi_match_query</li>
+</ul>
+</li>
+<li>
+<p><strong>精确查询</strong>：根据精确词条值查找数据，一般是查找keyword、数值、日期、boolean等类型字段。例如：</p>
+<ul>
+<li>ids</li>
+<li>range</li>
+<li>term</li>
+</ul>
+</li>
+<li>
+<p><strong>地理（geo）查询</strong>：根据经纬度查询。例如：</p>
+<ul>
+<li>geo_distance</li>
+<li>geo_bounding_box</li>
+</ul>
+</li>
+<li>
+<p><strong>复合（compound）查询</strong>：复合查询可以将上述各种查询条件组合起来，合并查询条件。例如：</p>
+<ul>
+<li>bool</li>
+<li>function_score</li>
+</ul>
+</li>
+</ul>
+<p>查询的语法基本一致：</p>
+<pre><code class="language-json">GET /indexName/_search
+{
+  &quot;query&quot;: {
+    &quot;查询类型&quot;: {
+      &quot;查询条件&quot;: &quot;条件值&quot;
+    }
+  }
+}
+</code></pre>
+<p>我们以查询所有为例，其中：</p>
+<ul>
+<li>查询类型为match_all</li>
+<li>没有查询条件</li>
+</ul>
+<pre><code class="language-json">// 查询所有
+GET /indexName/_search
+{
+  &quot;query&quot;: {
+    &quot;match_all&quot;: {
+    }
+  }
+}
+</code></pre>
+<p>其它查询无非就是<strong>查询类型</strong>、<strong>查询条件</strong>的变化。</p>
+<h2 id="12全文检索查询">1.2.全文检索查询</h2>
+<h3 id="121使用场景">1.2.1.使用场景</h3>
+<p>全文检索查询的基本流程如下：</p>
+<ul>
+<li>对用户搜索的内容做分词，得到词条</li>
+<li>根据词条去倒排索引库中匹配，得到文档id</li>
+<li>根据文档id找到文档，返回给用户</li>
+</ul>
+<p>比较常用的场景包括：</p>
+<ul>
+<li>商城的输入框搜索</li>
+<li>百度输入框搜索</li>
+</ul>
+<p>例如京东：</p>
+<figure data-type="image" tabindex="1"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721165326938.png" alt="image-20210721165326938" loading="lazy"></figure>
+<p>因为是拿着词条去匹配，因此参与搜索的字段也必须是可分词的text类型的字段。</p>
+<h3 id="122基本语法">1.2.2.基本语法</h3>
+<p>常见的全文检索查询包括：</p>
+<ul>
+<li>match查询：单字段查询</li>
+<li>multi_match查询：多字段查询，任意一个字段符合条件就算符合查询条件</li>
+</ul>
+<p>match查询语法如下：</p>
+<pre><code class="language-json">GET /indexName/_search
+{
+  &quot;query&quot;: {
+    &quot;match&quot;: {
+      &quot;FIELD&quot;: &quot;TEXT&quot;
+    }
+  }
+}
+</code></pre>
+<p>mulit_match语法如下：</p>
+<pre><code class="language-json">GET /indexName/_search
+{
+  &quot;query&quot;: {
+    &quot;multi_match&quot;: {
+      &quot;query&quot;: &quot;TEXT&quot;,
+      &quot;fields&quot;: [&quot;FIELD1&quot;, &quot; FIELD12&quot;]
+    }
+  }
+}
+</code></pre>
+<h3 id="123示例">1.2.3.示例</h3>
+<p>match查询示例：</p>
+<figure data-type="image" tabindex="2"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721170455419.png" alt="image-20210721170455419" loading="lazy"></figure>
+<p>multi_match查询示例：</p>
+<figure data-type="image" tabindex="3"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721170720691.png" alt="image-20210721170720691" loading="lazy"></figure>
+<p>可以看到，两种查询结果是一样的，为什么？</p>
+<p>因为我们将brand、name、business值都利用copy_to复制到了all字段中。因此你根据三个字段搜索，和根据all字段搜索效果当然一样了。</p>
+<p>但是，搜索字段越多，对查询性能影响越大，因此建议采用copy_to，然后单字段查询的方式。</p>
+<h3 id="124总结">1.2.4.总结</h3>
+<p>match和multi_match的区别是什么？</p>
+<ul>
+<li>match：根据一个字段查询</li>
+<li>multi_match：根据多个字段查询，参与查询字段越多，查询性能越差</li>
+</ul>
+<h2 id="13精准查询">1.3.精准查询</h2>
+<p>精确查询一般是查找keyword、数值、日期、boolean等类型字段。所以<strong>不会</strong>对搜索条件分词。常见的有：</p>
+<ul>
+<li>term：根据词条精确值查询</li>
+<li>range：根据值的范围查询</li>
+</ul>
+<h3 id="131term查询">1.3.1.term查询</h3>
+<p>因为精确查询的字段搜是不分词的字段，因此查询的条件也必须是<strong>不分词</strong>的词条。查询时，用户输入的内容跟自动值完全匹配时才认为符合条件。如果用户输入的内容过多，反而搜索不到数据。</p>
+<p>语法说明：</p>
+<pre><code class="language-json">// term查询
+GET /indexName/_search
+{
+  &quot;query&quot;: {
+    &quot;term&quot;: {
+      &quot;FIELD&quot;: {
+        &quot;value&quot;: &quot;VALUE&quot;
+      }
+    }
+  }
+}
+</code></pre>
+<p>示例：</p>
+<p>当我搜索的是精确词条时，能正确查询出结果：</p>
+<figure data-type="image" tabindex="4"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721171655308.png" alt="image-20210721171655308" loading="lazy"></figure>
+<p>但是，当我搜索的内容不是词条，而是多个词语形成的短语时，反而搜索不到：</p>
+<figure data-type="image" tabindex="5"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721171838378.png" alt="image-20210721171838378" loading="lazy"></figure>
+<h3 id="132range查询">1.3.2.range查询</h3>
+<p>范围查询，一般应用在对数值类型做范围过滤的时候。比如做价格范围过滤。</p>
+<p>基本语法：</p>
+<pre><code class="language-json">// range查询
+GET /indexName/_search
+{
+  &quot;query&quot;: {
+    &quot;range&quot;: {
+      &quot;FIELD&quot;: {
+        &quot;gte&quot;: 10, // 这里的gte代表大于等于，gt则代表大于
+        &quot;lte&quot;: 20 // lte代表小于等于，lt则代表小于
+      }
+    }
+  }
+}
+</code></pre>
+<p>示例：</p>
+<figure data-type="image" tabindex="6"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721172307172.png" alt="image-20210721172307172" loading="lazy"></figure>
+<h3 id="133总结">1.3.3.总结</h3>
+<p>精确查询常见的有哪些？</p>
+<ul>
+<li>term查询：根据词条精确匹配，一般搜索keyword类型、数值类型、布尔类型、日期类型字段</li>
+<li>range查询：根据数值范围查询，可以是数值、日期的范围</li>
+</ul>
+<h2 id="14地理坐标查询">1.4.地理坐标查询</h2>
+<p>所谓的地理坐标查询，其实就是根据经纬度查询，官方文档：https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-queries.html</p>
+<p>常见的使用场景包括：</p>
+<ul>
+<li>携程：搜索我附近的酒店</li>
+<li>滴滴：搜索我附近的出租车</li>
+<li>微信：搜索我附近的人</li>
+</ul>
+<p>附近的酒店：</p>
+<figure data-type="image" tabindex="7"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721172645103.png" alt="image-20210721172645103" loading="lazy"></figure>
+<p>附近的车：</p>
+<figure data-type="image" tabindex="8"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721172654880.png" alt="image-20210721172654880" loading="lazy"></figure>
+<h3 id="141矩形范围查询">1.4.1.矩形范围查询</h3>
+<p>矩形范围查询，也就是geo_bounding_box查询，查询坐标落在某个矩形范围的所有文档：</p>
+<figure data-type="image" tabindex="9"><img src="assets/DKV9HZbVS6.gif" alt="DKV9HZbVS6" loading="lazy"></figure>
+<p>查询时，需要指定矩形的<strong>左上</strong>、<strong>右下</strong>两个点的坐标，然后画出一个矩形，落在该矩形内的都是符合条件的点。</p>
+<p>语法如下：</p>
+<pre><code class="language-json">// geo_bounding_box查询
+GET /indexName/_search
+{
+  &quot;query&quot;: {
+    &quot;geo_bounding_box&quot;: {
+      &quot;FIELD&quot;: {
+        &quot;top_left&quot;: { // 左上点
+          &quot;lat&quot;: 31.1,
+          &quot;lon&quot;: 121.5
+        },
+        &quot;bottom_right&quot;: { // 右下点
+          &quot;lat&quot;: 30.9,
+          &quot;lon&quot;: 121.7
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<p>这种并不符合“附近的人”这样的需求，所以我们就不做了。</p>
+<h3 id="142附近查询">1.4.2.附近查询</h3>
+<p>附近查询，也叫做距离查询（geo_distance）：查询到指定中心点小于某个距离值的所有文档。</p>
+<p>换句话来说，在地图上找一个点作为圆心，以指定距离为半径，画一个圆，落在圆内的坐标都算符合条件：</p>
+<figure data-type="image" tabindex="10"><img src="assets/vZrdKAh19C.gif" alt="vZrdKAh19C" loading="lazy"></figure>
+<p>语法说明：</p>
+<pre><code class="language-json">// geo_distance 查询
+GET /indexName/_search
+{
+  &quot;query&quot;: {
+    &quot;geo_distance&quot;: {
+      &quot;distance&quot;: &quot;15km&quot;, // 半径
+      &quot;FIELD&quot;: &quot;31.21,121.5&quot; // 圆心
+    }
+  }
+}
+</code></pre>
+<p>示例：</p>
+<p>我们先搜索陆家嘴附近15km的酒店：</p>
+<figure data-type="image" tabindex="11"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721175443234.png" alt="image-20210721175443234" loading="lazy"></figure>
+<p>发现共有47家酒店。</p>
+<p>然后把半径缩短到3公里：</p>
+<figure data-type="image" tabindex="12"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721182031475.png" alt="image-20210721182031475" loading="lazy"></figure>
+<p>可以发现，搜索到的酒店数量减少到了5家。</p>
+<h2 id="15复合查询">1.5.复合查询</h2>
+<p>复合（compound）查询：复合查询可以将其它简单查询组合起来，实现更复杂的搜索逻辑。常见的有两种：</p>
+<ul>
+<li>fuction score：算分函数查询，可以控制文档相关性算分，控制文档排名</li>
+<li>bool query：布尔查询，利用逻辑关系组合多个其它的查询，实现复杂搜索</li>
+</ul>
+<h3 id="151相关性算分">1.5.1.相关性算分</h3>
+<p>当我们利用match查询时，文档结果会根据与搜索词条的关联度打分（_score），返回结果时按照分值降序排列。</p>
+<p>例如，我们搜索 &quot;虹桥如家&quot;，结果如下：</p>
+<pre><code class="language-json">[
+  {
+    &quot;_score&quot; : 17.850193,
+    &quot;_source&quot; : {
+      &quot;name&quot; : &quot;虹桥如家酒店真不错&quot;,
+    }
+  },
+  {
+    &quot;_score&quot; : 12.259849,
+    &quot;_source&quot; : {
+      &quot;name&quot; : &quot;外滩如家酒店真不错&quot;,
+    }
+  },
+  {
+    &quot;_score&quot; : 11.91091,
+    &quot;_source&quot; : {
+      &quot;name&quot; : &quot;迪士尼如家酒店真不错&quot;,
+    }
+  }
+]
+
+</code></pre>
+<p>在elasticsearch中，早期使用的打分算法是TF-IDF算法，公式如下：</p>
+<figure data-type="image" tabindex="13"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721190152134.png" alt="image-20210721190152134" loading="lazy"></figure>
+<p>在后来的5.1版本升级中，elasticsearch将算法改进为BM25算法，公式如下：</p>
+<figure data-type="image" tabindex="14"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721190416214.png" alt="image-20210721190416214" loading="lazy"></figure>
+<p>TF-IDF算法有一各缺陷，就是词条频率越高，文档得分也会越高，单个词条对文档影响较大。而BM25则会让单个词条的算分有一个上限，曲线更加平滑：</p>
+<figure data-type="image" tabindex="15"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721190907320.png" alt="image-20210721190907320" loading="lazy"></figure>
+<p>小结：elasticsearch会根据词条和文档的相关度做打分，算法由两种：</p>
+<ul>
+<li>TF-IDF算法</li>
+<li>BM25算法，elasticsearch5.1版本后采用的算法</li>
+</ul>
+<h3 id="152算分函数查询">1.5.2.算分函数查询</h3>
+<p>根据相关度打分是比较合理的需求，但<strong>合理的不一定是产品经理需要</strong>的。</p>
+<p>以百度为例，你搜索的结果中，并不是相关度越高排名越靠前，而是谁掏的钱多排名就越靠前。如图：</p>
+<figure data-type="image" tabindex="16"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721191144560.png" alt="image-20210721191144560" loading="lazy"></figure>
+<p>要想认为控制相关性算分，就需要利用elasticsearch中的function score 查询了。</p>
+<h4 id="1语法说明">1）语法说明</h4>
+<figure data-type="image" tabindex="17"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721191544750.png" alt="image-20210721191544750" loading="lazy"></figure>
+<p>function score 查询中包含四部分内容：</p>
+<ul>
+<li><strong>原始查询</strong>条件：query部分，基于这个条件搜索文档，并且基于BM25算法给文档打分，<strong>原始算分</strong>（query score)</li>
+<li><strong>过滤条件</strong>：filter部分，符合该条件的文档才会重新算分</li>
+<li><strong>算分函数</strong>：符合filter条件的文档要根据这个函数做运算，得到的<strong>函数算分</strong>（function score），有四种函数
+<ul>
+<li>weight：函数结果是常量</li>
+<li>field_value_factor：以文档中的某个字段值作为函数结果</li>
+<li>random_score：以随机数作为函数结果</li>
+<li>script_score：自定义算分函数算法</li>
+</ul>
+</li>
+<li><strong>运算模式</strong>：算分函数的结果、原始查询的相关性算分，两者之间的运算方式，包括：
+<ul>
+<li>multiply：相乘</li>
+<li>replace：用function score替换query score</li>
+<li>其它，例如：sum、avg、max、min</li>
+</ul>
+</li>
+</ul>
+<p>function score的运行流程如下：</p>
+<ul>
+<li>1）根据<strong>原始条件</strong>查询搜索文档，并且计算相关性算分，称为<strong>原始算分</strong>（query score）</li>
+<li>2）根据<strong>过滤条件</strong>，过滤文档</li>
+<li>3）符合<strong>过滤条件</strong>的文档，基于<strong>算分函数</strong>运算，得到<strong>函数算分</strong>（function score）</li>
+<li>4）将<strong>原始算分</strong>（query score）和<strong>函数算分</strong>（function score）基于<strong>运算模式</strong>做运算，得到最终结果，作为相关性算分。</li>
+</ul>
+<p>因此，其中的关键点是：</p>
+<ul>
+<li>过滤条件：决定哪些文档的算分被修改</li>
+<li>算分函数：决定函数算分的算法</li>
+<li>运算模式：决定最终算分结果</li>
+</ul>
+<h4 id="2示例">2）示例</h4>
+<p>需求：给“如家”这个品牌的酒店排名靠前一些</p>
+<p>翻译一下这个需求，转换为之前说的四个要点：</p>
+<ul>
+<li>原始条件：不确定，可以任意变化</li>
+<li>过滤条件：brand = &quot;如家&quot;</li>
+<li>算分函数：可以简单粗暴，直接给固定的算分结果，weight</li>
+<li>运算模式：比如求和</li>
+</ul>
+<p>因此最终的DSL语句如下：</p>
+<pre><code class="language-json">GET /hotel/_search
+{
+  &quot;query&quot;: {
+    &quot;function_score&quot;: {
+      &quot;query&quot;: {  .... }, // 原始查询，可以是任意条件
+      &quot;functions&quot;: [ // 算分函数
+        {
+          &quot;filter&quot;: { // 满足的条件，品牌必须是如家
+            &quot;term&quot;: {
+              &quot;brand&quot;: &quot;如家&quot;
+            }
+          },
+          &quot;weight&quot;: 2 // 算分权重为2
+        }
+      ],
+      &quot;boost_mode&quot;: &quot;sum&quot; // 加权模式，求和
+    }
+  }
+}
+
+</code></pre>
+<p>测试，在未添加算分函数时，如家得分如下：</p>
+<figure data-type="image" tabindex="18"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721193152520.png" alt="image-20210721193152520" loading="lazy"></figure>
+<p>添加了算分函数后，如家得分就提升了：</p>
+<figure data-type="image" tabindex="19"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721193458182.png" alt="image-20210721193458182" loading="lazy"></figure>
+<h4 id="3小结">3）小结</h4>
+<p>function score query定义的三要素是什么？</p>
+<ul>
+<li>过滤条件：哪些文档要加分</li>
+<li>算分函数：如何计算function score</li>
+<li>加权方式：function score 与 query score如何运算</li>
+</ul>
+<h3 id="153布尔查询">1.5.3.布尔查询</h3>
+<p>布尔查询是一个或多个查询子句的组合，每一个子句就是一个<strong>子查询</strong>。子查询的组合方式有：</p>
+<ul>
+<li>must：必须匹配每个子查询，类似“与”</li>
+<li>should：选择性匹配子查询，类似“或”</li>
+<li>must_not：必须不匹配，<strong>不参与算分</strong>，类似“非”</li>
+<li>filter：必须匹配，<strong>不参与算分</strong></li>
+</ul>
+<p>比如在搜索酒店时，除了关键字搜索外，我们还可能根据品牌、价格、城市等字段做过滤：</p>
+<figure data-type="image" tabindex="20"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721193822848.png" alt="image-20210721193822848" loading="lazy"></figure>
+<p>每一个不同的字段，其查询的条件、方式都不一样，必须是多个不同的查询，而要组合这些查询，就必须用bool查询了。</p>
+<p>需要注意的是，搜索时，参与<strong>打分的字段越多，查询的性能也越差</strong>。因此这种多条件查询时，建议这样做：</p>
+<ul>
+<li>搜索框的关键字搜索，是全文检索查询，使用must查询，参与算分</li>
+<li>其它过滤条件，采用filter查询。不参与算分</li>
+</ul>
+<h4 id="1语法示例">1）语法示例：</h4>
+<pre><code class="language-json">GET /hotel/_search
+{
+  &quot;query&quot;: {
+    &quot;bool&quot;: {
+      &quot;must&quot;: [
+        {&quot;term&quot;: {&quot;city&quot;: &quot;上海&quot; }}
+      ],
+      &quot;should&quot;: [
+        {&quot;term&quot;: {&quot;brand&quot;: &quot;皇冠假日&quot; }},
+        {&quot;term&quot;: {&quot;brand&quot;: &quot;华美达&quot; }}
+      ],
+      &quot;must_not&quot;: [
+        { &quot;range&quot;: { &quot;price&quot;: { &quot;lte&quot;: 500 } }}
+      ],
+      &quot;filter&quot;: [
+        { &quot;range&quot;: {&quot;score&quot;: { &quot;gte&quot;: 45 } }}
+      ]
+    }
+  }
+}
+
+</code></pre>
+<h4 id="2示例-2">2）示例</h4>
+<p>需求：搜索名字包含“如家”，价格不高于400，在坐标31.21,121.5周围10km范围内的酒店。</p>
+<p>分析：</p>
+<ul>
+<li>名称搜索，属于全文检索查询，应该参与算分。放到must中</li>
+<li>价格不高于400，用range查询，属于过滤条件，不参与算分。放到must_not中</li>
+<li>周围10km范围内，用geo_distance查询，属于过滤条件，不参与算分。放到filter中</li>
+</ul>
+<figure data-type="image" tabindex="21"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721194744183.png" alt="image-20210721194744183" loading="lazy"></figure>
+<h4 id="3小结-2">3）小结</h4>
+<p>bool查询有几种逻辑关系？</p>
+<ul>
+<li>must：必须匹配的条件，可以理解为“与”</li>
+<li>should：选择性匹配的条件，可以理解为“或”</li>
+<li>must_not：必须不匹配的条件，不参与打分</li>
+<li>filter：必须匹配的条件，不参与打分</li>
+</ul>
+<h1 id="2搜索结果处理">2.搜索结果处理</h1>
+<p>搜索的结果可以按照用户指定的方式去处理或展示。</p>
+<h2 id="21排序">2.1.排序</h2>
+<p>elasticsearch默认是根据相关度算分（_score）来排序，但是也支持自定义方式对搜索<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/sort-search-results.html">结果排序</a>。可以排序字段类型有：keyword类型、数值类型、地理坐标类型、日期类型等。</p>
+<h3 id="211普通字段排序">2.1.1.普通字段排序</h3>
+<p>keyword、数值、日期类型排序的语法基本一致。</p>
+<p><strong>语法</strong>：</p>
+<pre><code class="language-json">GET /indexName/_search
+{
+  &quot;query&quot;: {
+    &quot;match_all&quot;: {}
+  },
+  &quot;sort&quot;: [
+    {
+      &quot;FIELD&quot;: &quot;desc&quot;  // 排序字段、排序方式ASC、DESC
+    }
+  ]
+}
+
+</code></pre>
+<p>排序条件是一个数组，也就是可以写多个排序条件。按照声明的顺序，当第一个条件相等时，再按照第二个条件排序，以此类推</p>
+<p><strong>示例</strong>：</p>
+<p>需求描述：酒店数据按照用户评价（score)降序排序，评价相同的按照价格(price)升序排序</p>
+<figure data-type="image" tabindex="22"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721195728306.png" alt="image-20210721195728306" loading="lazy"></figure>
+<h3 id="212地理坐标排序">2.1.2.地理坐标排序</h3>
+<p>地理坐标排序略有不同。</p>
+<p><strong>语法说明</strong>：</p>
+<pre><code class="language-json">GET /indexName/_search
+{
+  &quot;query&quot;: {
+    &quot;match_all&quot;: {}
+  },
+  &quot;sort&quot;: [
+    {
+      &quot;_geo_distance&quot; : {
+          &quot;FIELD&quot; : &quot;纬度，经度&quot;, // 文档中geo_point类型的字段名、目标坐标点
+          &quot;order&quot; : &quot;asc&quot;, // 排序方式
+          &quot;unit&quot; : &quot;km&quot; // 排序的距离单位
+      }
+    }
+  ]
+}
+
+</code></pre>
+<p>这个查询的含义是：</p>
+<ul>
+<li>指定一个坐标，作为目标点</li>
+<li>计算每一个文档中，指定字段（必须是geo_point类型）的坐标 到目标点的距离是多少</li>
+<li>根据距离排序</li>
+</ul>
+<p><strong>示例：</strong></p>
+<p>需求描述：实现对酒店数据按照到你的位置坐标的距离升序排序</p>
+<p>提示：获取你的位置的经纬度的方式：https://lbs.amap.com/demo/jsapi-v2/example/map/click-to-get-lnglat/</p>
+<p>假设我的位置是：31.034661，121.612282，寻找我周围距离最近的酒店。</p>
+<figure data-type="image" tabindex="23"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721200214690.png" alt="image-20210721200214690" loading="lazy"></figure>
+<h2 id="22分页">2.2.分页</h2>
+<p>elasticsearch 默认情况下只返回top10的数据。而如果要查询更多数据就需要修改分页参数了。elasticsearch中通过修改from、size参数来控制要返回的分页结果：</p>
+<ul>
+<li>from：从第几个文档开始</li>
+<li>size：总共查询几个文档</li>
+</ul>
+<p>类似于mysql中的<code>limit ?, ?</code></p>
+<h3 id="221基本的分页">2.2.1.基本的分页</h3>
+<p>分页的基本语法如下：</p>
+<pre><code class="language-json">GET /hotel/_search
+{
+  &quot;query&quot;: {
+    &quot;match_all&quot;: {}
+  },
+  &quot;from&quot;: 0, // 分页开始的位置，默认为0
+  &quot;size&quot;: 10, // 期望获取的文档总数
+  &quot;sort&quot;: [
+    {&quot;price&quot;: &quot;asc&quot;}
+  ]
+}
+
+</code></pre>
+<h3 id="222深度分页问题">2.2.2.深度分页问题</h3>
+<p>现在，我要查询990~1000的数据，查询逻辑要这么写：</p>
+<pre><code class="language-json">GET /hotel/_search
+{
+  &quot;query&quot;: {
+    &quot;match_all&quot;: {}
+  },
+  &quot;from&quot;: 990, // 分页开始的位置，默认为0
+  &quot;size&quot;: 10, // 期望获取的文档总数
+  &quot;sort&quot;: [
+    {&quot;price&quot;: &quot;asc&quot;}
+  ]
+}
+
+</code></pre>
+<p>这里是查询990开始的数据，也就是 第990~第1000条 数据。</p>
+<p>不过，elasticsearch内部分页时，必须先查询 0~1000条，然后截取其中的990 ~ 1000的这10条：</p>
+<figure data-type="image" tabindex="24"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721200643029.png" alt="image-20210721200643029" loading="lazy"></figure>
+<p>查询TOP1000，如果es是单点模式，这并无太大影响。</p>
+<p>但是elasticsearch将来一定是集群，例如我集群有5个节点，我要查询TOP1000的数据，并不是每个节点查询200条就可以了。</p>
+<p>因为节点A的TOP200，在另一个节点可能排到10000名以外了。</p>
+<p>因此要想获取整个集群的TOP1000，必须先查询出每个节点的TOP1000，汇总结果后，重新排名，重新截取TOP1000。</p>
+<figure data-type="image" tabindex="25"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721201003229.png" alt="image-20210721201003229" loading="lazy"></figure>
+<p>那如果我要查询9900~10000的数据呢？是不是要先查询TOP10000呢？那每个节点都要查询10000条？汇总到内存中？</p>
+<p>当查询分页深度较大时，汇总数据过多，对内存和CPU会产生非常大的压力，因此elasticsearch会禁止from+ size 超过10000的请求。</p>
+<p>针对深度分页，ES提供了两种解决方案，<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html">官方文档</a>：</p>
+<ul>
+<li>search after：分页时需要排序，原理是从上一次的排序值开始，查询下一页数据。官方推荐使用的方式。</li>
+<li>scroll：原理将排序后的文档id形成快照，保存在内存。官方已经不推荐使用。</li>
+</ul>
+<h3 id="223小结">2.2.3.小结</h3>
+<p>分页查询的常见实现方案以及优缺点：</p>
+<ul>
+<li>
+<p><code>from + size</code>：</p>
+<ul>
+<li>优点：支持随机翻页</li>
+<li>缺点：深度分页问题，默认查询上限（from + size）是10000</li>
+<li>场景：百度、京东、谷歌、淘宝这样的随机翻页搜索</li>
+</ul>
+</li>
+<li>
+<p><code>after search</code>：</p>
+<ul>
+<li>优点：没有查询上限（单次查询的size不超过10000）</li>
+<li>缺点：只能向后逐页查询，不支持随机翻页</li>
+<li>场景：没有随机翻页需求的搜索，例如手机向下滚动翻页</li>
+</ul>
+</li>
+<li>
+<p><code>scroll</code>：</p>
+<ul>
+<li>优点：没有查询上限（单次查询的size不超过10000）</li>
+<li>缺点：会有额外内存消耗，并且搜索结果是非实时的</li>
+<li>场景：海量数据的获取和迁移。从ES7.1开始不推荐，建议用 after search方案。</li>
+</ul>
+</li>
+</ul>
+<h2 id="23高亮">2.3.高亮</h2>
+<h3 id="231高亮原理">2.3.1.高亮原理</h3>
+<p>什么是高亮显示呢？</p>
+<p>我们在百度，京东搜索时，关键字会变成红色，比较醒目，这叫高亮显示：</p>
+<figure data-type="image" tabindex="26"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721202705030.png" alt="image-20210721202705030" loading="lazy"></figure>
+<p>高亮显示的实现分为两步：</p>
+<ul>
+<li>1）给文档中的所有关键字都添加一个标签，例如<code>&lt;em&gt;</code>标签</li>
+<li>2）页面给<code>&lt;em&gt;</code>标签编写CSS样式</li>
+</ul>
+<h3 id="232实现高亮">2.3.2.实现高亮</h3>
+<p><strong>高亮的语法</strong>：</p>
+<pre><code class="language-json">GET /hotel/_search
+{
+  &quot;query&quot;: {
+    &quot;match&quot;: {
+      &quot;FIELD&quot;: &quot;TEXT&quot; // 查询条件，高亮一定要使用全文检索查询
+    }
+  },
+  &quot;highlight&quot;: {
+    &quot;fields&quot;: { // 指定要高亮的字段
+      &quot;FIELD&quot;: {
+        &quot;pre_tags&quot;: &quot;&lt;em&gt;&quot;,  // 用来标记高亮字段的前置标签
+        &quot;post_tags&quot;: &quot;&lt;/em&gt;&quot; // 用来标记高亮字段的后置标签
+      }
+    }
+  }
+}
+
+</code></pre>
+<p><strong>注意：</strong></p>
+<ul>
+<li>高亮是对关键字高亮，因此<strong>搜索条件必须带有关键字</strong>，而不能是范围这样的查询。</li>
+<li>默认情况下，<strong>高亮的字段，必须与搜索指定的字段一致</strong>，否则无法高亮</li>
+<li>如果要对非搜索字段高亮，则需要添加一个属性：required_field_match=false</li>
+</ul>
+<p><strong>示例</strong>：</p>
+<figure data-type="image" tabindex="27"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721203349633.png" alt="image-20210721203349633" loading="lazy"></figure>
+<h2 id="24总结">2.4.总结</h2>
+<p>查询的DSL是一个大的JSON对象，包含下列属性：</p>
+<ul>
+<li>query：查询条件</li>
+<li>from和size：分页条件</li>
+<li>sort：排序条件</li>
+<li>highlight：高亮条件</li>
+</ul>
+<p>示例：</p>
+<figure data-type="image" tabindex="28"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721203657850.png" alt="image-20210721203657850" loading="lazy"></figure>
+<h1 id="3restclient查询文档">3.RestClient查询文档</h1>
+<p>文档的查询同样适用昨天学习的 RestHighLevelClient对象，基本步骤包括：</p>
+<ul>
+<li>1）准备Request对象</li>
+<li>2）准备请求参数</li>
+<li>3）发起请求</li>
+<li>4）解析响应</li>
+</ul>
+<h2 id="31快速入门">3.1.快速入门</h2>
+<p>我们以match_all查询为例</p>
+<h3 id="311发起查询请求">3.1.1.发起查询请求</h3>
+<figure data-type="image" tabindex="29"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721203950559.png" alt="image-20210721203950559" loading="lazy"></figure>
+<p>代码解读：</p>
+<ul>
+<li>
+<p>第一步，创建<code>SearchRequest</code>对象，指定索引库名</p>
+</li>
+<li>
+<p>第二步，利用<code>request.source()</code>构建DSL，DSL中可以包含查询、分页、排序、高亮等</p>
+<ul>
+<li><code>query()</code>：代表查询条件，利用<code>QueryBuilders.matchAllQuery()</code>构建一个match_all查询的DSL</li>
+</ul>
+</li>
+<li>
+<p>第三步，利用client.search()发送请求，得到响应</p>
+</li>
+</ul>
+<p>这里关键的API有两个，一个是<code>request.source()</code>，其中包含了查询、排序、分页、高亮等所有功能：</p>
+<figure data-type="image" tabindex="30"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721215640790.png" alt="image-20210721215640790" loading="lazy"></figure>
+<p>另一个是<code>QueryBuilders</code>，其中包含match、term、function_score、bool等各种查询：</p>
+<figure data-type="image" tabindex="31"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721215729236.png" alt="image-20210721215729236" loading="lazy"></figure>
+<h3 id="312解析响应">3.1.2.解析响应</h3>
+<p>响应结果的解析：</p>
+<figure data-type="image" tabindex="32"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721214221057.png" alt="image-20210721214221057" loading="lazy"></figure>
+<p>elasticsearch返回的结果是一个JSON字符串，结构包含：</p>
+<ul>
+<li><code>hits</code>：命中的结果
+<ul>
+<li><code>total</code>：总条数，其中的value是具体的总条数值</li>
+<li><code>max_score</code>：所有结果中得分最高的文档的相关性算分</li>
+<li><code>hits</code>：搜索结果的文档数组，其中的每个文档都是一个json对象
+<ul>
+<li><code>_source</code>：文档中的原始数据，也是json对象</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>因此，我们解析响应结果，就是逐层解析JSON字符串，流程如下：</p>
+<ul>
+<li><code>SearchHits</code>：通过response.getHits()获取，就是JSON中的最外层的hits，代表命中的结果
+<ul>
+<li><code>SearchHits#getTotalHits().value</code>：获取总条数信息</li>
+<li><code>SearchHits#getHits()</code>：获取SearchHit数组，也就是文档数组
+<ul>
+<li><code>SearchHit#getSourceAsString()</code>：获取文档结果中的_source，也就是原始的json文档数据</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="313完整代码">3.1.3.完整代码</h3>
+<p>完整代码如下：</p>
+<pre><code class="language-java">@Test
+void testMatchAll() throws IOException {
+    // 1.准备Request
+    SearchRequest request = new SearchRequest(&quot;hotel&quot;);
+    // 2.准备DSL
+    request.source()
+        .query(QueryBuilders.matchAllQuery());
+    // 3.发送请求
+    SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+
+    // 4.解析响应
+    handleResponse(response);
+}
+
+private void handleResponse(SearchResponse response) {
+    // 4.解析响应
+    SearchHits searchHits = response.getHits();
+    // 4.1.获取总条数
+    long total = searchHits.getTotalHits().value;
+    System.out.println(&quot;共搜索到&quot; + total + &quot;条数据&quot;);
+    // 4.2.文档数组
+    SearchHit[] hits = searchHits.getHits();
+    // 4.3.遍历
+    for (SearchHit hit : hits) {
+        // 获取文档source
+        String json = hit.getSourceAsString();
+        // 反序列化
+        HotelDoc hotelDoc = JSON.parseObject(json, HotelDoc.class);
+        System.out.println(&quot;hotelDoc = &quot; + hotelDoc);
+    }
+}
+
+</code></pre>
+<h3 id="314小结">3.1.4.小结</h3>
+<p>查询的基本步骤是：</p>
+<ol>
+<li>
+<p>创建SearchRequest对象</p>
+</li>
+<li>
+<p>准备Request.source()，也就是DSL。</p>
+<p>① QueryBuilders来构建查询条件</p>
+<p>② 传入Request.source() 的 query() 方法</p>
+</li>
+<li>
+<p>发送请求，得到结果</p>
+</li>
+<li>
+<p>解析结果（参考JSON结果，从外到内，逐层解析）</p>
+</li>
+</ol>
+<h2 id="32match查询">3.2.match查询</h2>
+<p>全文检索的match和multi_match查询与match_all的API基本一致。差别是查询条件，也就是query的部分。</p>
+<figure data-type="image" tabindex="33"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721215923060.png" alt="image-20210721215923060" loading="lazy"></figure>
+<p>因此，Java代码上的差异主要是request.source().query()中的参数了。同样是利用QueryBuilders提供的方法：</p>
+<figure data-type="image" tabindex="34"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721215843099.png" alt="image-20210721215843099" loading="lazy"></figure>
+<p>而结果解析代码则完全一致，可以抽取并共享。</p>
+<p>完整代码如下：</p>
+<pre><code class="language-java">@Test
+void testMatch() throws IOException {
+    // 1.准备Request
+    SearchRequest request = new SearchRequest(&quot;hotel&quot;);
+    // 2.准备DSL
+    request.source()
+        .query(QueryBuilders.matchQuery(&quot;all&quot;, &quot;如家&quot;));
+    // 3.发送请求
+    SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+    // 4.解析响应
+    handleResponse(response);
+
+}
+
+</code></pre>
+<h2 id="33精确查询">3.3.精确查询</h2>
+<p>精确查询主要是两者：</p>
+<ul>
+<li>term：词条精确匹配</li>
+<li>range：范围查询</li>
+</ul>
+<p>与之前的查询相比，差异同样在查询条件，其它都一样。</p>
+<p>查询条件构造的API如下：</p>
+<figure data-type="image" tabindex="35"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721220305140.png" alt="image-20210721220305140" loading="lazy"></figure>
+<h2 id="34布尔查询">3.4.布尔查询</h2>
+<p>布尔查询是用must、must_not、filter等方式组合其它查询，代码示例如下：</p>
+<figure data-type="image" tabindex="36"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721220927286.png" alt="image-20210721220927286" loading="lazy"></figure>
+<p>可以看到，API与其它查询的差别同样是在查询条件的构建，QueryBuilders，结果解析等其他代码完全不变。</p>
+<p>完整代码如下：</p>
+<pre><code class="language-java">@Test
+void testBool() throws IOException {
+    // 1.准备Request
+    SearchRequest request = new SearchRequest(&quot;hotel&quot;);
+    // 2.准备DSL
+    // 2.1.准备BooleanQuery
+    BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+    // 2.2.添加term
+    boolQuery.must(QueryBuilders.termQuery(&quot;city&quot;, &quot;杭州&quot;));
+    // 2.3.添加range
+    boolQuery.filter(QueryBuilders.rangeQuery(&quot;price&quot;).lte(250));
+
+    request.source().query(boolQuery);
+    // 3.发送请求
+    SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+    // 4.解析响应
+    handleResponse(response);
+
+}
+
+</code></pre>
+<h2 id="35排序-分页">3.5.排序、分页</h2>
+<p>搜索结果的排序和分页是与query同级的参数，因此同样是使用request.source()来设置。</p>
+<p>对应的API如下：</p>
+<figure data-type="image" tabindex="37"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721221121266.png" alt="image-20210721221121266" loading="lazy"></figure>
+<p>完整代码示例：</p>
+<pre><code class="language-java">@Test
+void testPageAndSort() throws IOException {
+    // 页码，每页大小
+    int page = 1, size = 5;
+
+    // 1.准备Request
+    SearchRequest request = new SearchRequest(&quot;hotel&quot;);
+    // 2.准备DSL
+    // 2.1.query
+    request.source().query(QueryBuilders.matchAllQuery());
+    // 2.2.排序 sort
+    request.source().sort(&quot;price&quot;, SortOrder.ASC);
+    // 2.3.分页 from、size
+    request.source().from((page - 1) * size).size(5);
+    // 3.发送请求
+    SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+    // 4.解析响应
+    handleResponse(response);
+
+}
+
+</code></pre>
+<h2 id="36高亮">3.6.高亮</h2>
+<p>高亮的代码与之前代码差异较大，有两点：</p>
+<ul>
+<li>查询的DSL：其中除了查询条件，还需要添加高亮条件，同样是与query同级。</li>
+<li>结果解析：结果除了要解析_source文档数据，还要解析高亮结果</li>
+</ul>
+<h3 id="361高亮请求构建">3.6.1.高亮请求构建</h3>
+<p>高亮请求的构建API如下：</p>
+<figure data-type="image" tabindex="38"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721221744883.png" alt="image-20210721221744883" loading="lazy"></figure>
+<p>上述代码省略了查询条件部分，但是大家不要忘了：高亮查询必须使用全文检索查询，并且要有搜索关键字，将来才可以对关键字高亮。</p>
+<p>完整代码如下：</p>
+<pre><code class="language-java">@Test
+void testHighlight() throws IOException {
+    // 1.准备Request
+    SearchRequest request = new SearchRequest(&quot;hotel&quot;);
+    // 2.准备DSL
+    // 2.1.query
+    request.source().query(QueryBuilders.matchQuery(&quot;all&quot;, &quot;如家&quot;));
+    // 2.2.高亮
+    request.source().highlighter(new HighlightBuilder().field(&quot;name&quot;).requireFieldMatch(false));
+    // 3.发送请求
+    SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+    // 4.解析响应
+    handleResponse(response);
+
+}
+
+</code></pre>
+<h3 id="362高亮结果解析">3.6.2.高亮结果解析</h3>
+<p>高亮的结果与查询的文档结果默认是分离的，并不在一起。</p>
+<p>因此解析高亮的代码需要额外处理：</p>
+<figure data-type="image" tabindex="39"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721222057212.png" alt="image-20210721222057212" loading="lazy"></figure>
+<p>代码解读：</p>
+<ul>
+<li>第一步：从结果中获取source。hit.getSourceAsString()，这部分是非高亮结果，json字符串。还需要反序列为HotelDoc对象</li>
+<li>第二步：获取高亮结果。hit.getHighlightFields()，返回值是一个Map，key是高亮字段名称，值是HighlightField对象，代表高亮值</li>
+<li>第三步：从map中根据高亮字段名称，获取高亮字段值对象HighlightField</li>
+<li>第四步：从HighlightField中获取Fragments，并且转为字符串。这部分就是真正的高亮字符串了</li>
+<li>第五步：用高亮的结果替换HotelDoc中的非高亮结果</li>
+</ul>
+<p>完整代码如下：</p>
+<pre><code class="language-java">private void handleResponse(SearchResponse response) {
+    // 4.解析响应
+    SearchHits searchHits = response.getHits();
+    // 4.1.获取总条数
+    long total = searchHits.getTotalHits().value;
+    System.out.println(&quot;共搜索到&quot; + total + &quot;条数据&quot;);
+    // 4.2.文档数组
+    SearchHit[] hits = searchHits.getHits();
+    // 4.3.遍历
+    for (SearchHit hit : hits) {
+        // 获取文档source
+        String json = hit.getSourceAsString();
+        // 反序列化
+        HotelDoc hotelDoc = JSON.parseObject(json, HotelDoc.class);
+        // 获取高亮结果
+        Map&lt;String, HighlightField&gt; highlightFields = hit.getHighlightFields();
+        if (!CollectionUtils.isEmpty(highlightFields)) {
+            // 根据字段名获取高亮结果
+            HighlightField highlightField = highlightFields.get(&quot;name&quot;);
+            if (highlightField != null) {
+                // 获取高亮值
+                String name = highlightField.getFragments()[0].string();
+                // 覆盖非高亮结果
+                hotelDoc.setName(name);
+            }
+        }
+        System.out.println(&quot;hotelDoc = &quot; + hotelDoc);
+    }
+}
+
+</code></pre>
+<h1 id="4黑马旅游案例">4.黑马旅游案例</h1>
+<p>下面，我们通过黑马旅游的案例来实战演练下之前学习的知识。</p>
+<p>我们实现四部分功能：</p>
+<ul>
+<li>酒店搜索和分页</li>
+<li>酒店结果过滤</li>
+<li>我周边的酒店</li>
+<li>酒店竞价排名</li>
+</ul>
+<p>启动我们提供的hotel-demo项目，其默认端口是8089，访问http://localhost:8090，就能看到项目页面了：</p>
+<figure data-type="image" tabindex="40"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721223159598.png" alt="image-20210721223159598" loading="lazy"></figure>
+<h2 id="41酒店搜索和分页">4.1.酒店搜索和分页</h2>
+<p>案例需求：实现黑马旅游的酒店搜索功能，完成关键字搜索和分页</p>
+<h3 id="411需求分析">4.1.1.需求分析</h3>
+<p>在项目的首页，有一个大大的搜索框，还有分页按钮：</p>
+<figure data-type="image" tabindex="41"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721223859419.png" alt="image-20210721223859419" loading="lazy"></figure>
+<p>点击搜索按钮，可以看到浏览器控制台发出了请求：</p>
+<figure data-type="image" tabindex="42"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721224033789.png" alt="image-20210721224033789" loading="lazy"></figure>
+<p>请求参数如下：</p>
+<figure data-type="image" tabindex="43"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721224112708.png" alt="image-20210721224112708" loading="lazy"></figure>
+<p>由此可以知道，我们这个请求的信息如下：</p>
+<ul>
+<li>请求方式：POST</li>
+<li>请求路径：/hotel/list</li>
+<li>请求参数：JSON对象，包含4个字段：
+<ul>
+<li>key：搜索关键字</li>
+<li>page：页码</li>
+<li>size：每页大小</li>
+<li>sortBy：排序，目前暂不实现</li>
+</ul>
+</li>
+<li>返回值：分页查询，需要返回分页结果PageResult，包含两个属性：
+<ul>
+<li><code>total</code>：总条数</li>
+<li><code>List&lt;HotelDoc&gt;</code>：当前页的数据</li>
+</ul>
+</li>
+</ul>
+<p>因此，我们实现业务的流程如下：</p>
+<ul>
+<li>步骤一：定义实体类，接收请求参数的JSON对象</li>
+<li>步骤二：编写controller，接收页面的请求</li>
+<li>步骤三：编写业务实现，利用RestHighLevelClient实现搜索、分页</li>
+</ul>
+<h3 id="412定义实体类">4.1.2.定义实体类</h3>
+<p>实体类有两个，一个是前端的请求参数实体，一个是服务端应该返回的响应结果实体。</p>
+<p>1）请求参数</p>
+<p>前端请求的json结构如下：</p>
+<pre><code class="language-json">{
+    &quot;key&quot;: &quot;搜索关键字&quot;,
+    &quot;page&quot;: 1,
+    &quot;size&quot;: 3,
+    &quot;sortBy&quot;: &quot;default&quot;
+}
+
+</code></pre>
+<p>因此，我们在<code>cn.itcast.hotel.pojo</code>包下定义一个实体类：</p>
+<pre><code class="language-java">package cn.itcast.hotel.pojo;
+
+import lombok.Data;
+
+@Data
+public class RequestParams {
+    private String key;
+    private Integer page;
+    private Integer size;
+    private String sortBy;
+}
+
+</code></pre>
+<p>2）返回值</p>
+<p>分页查询，需要返回分页结果PageResult，包含两个属性：</p>
+<ul>
+<li><code>total</code>：总条数</li>
+<li><code>List&lt;HotelDoc&gt;</code>：当前页的数据</li>
+</ul>
+<p>因此，我们在<code>cn.itcast.hotel.pojo</code>中定义返回结果：</p>
+<pre><code class="language-java">package cn.itcast.hotel.pojo;
+
+import lombok.Data;
+
+import java.util.List;
+
+@Data
+public class PageResult {
+    private Long total;
+    private List&lt;HotelDoc&gt; hotels;
+
+    public PageResult() {
+    }
+
+    public PageResult(Long total, List&lt;HotelDoc&gt; hotels) {
+        this.total = total;
+        this.hotels = hotels;
+    }
+}
+
+</code></pre>
+<h3 id="413定义controller">4.1.3.定义controller</h3>
+<p>定义一个HotelController，声明查询接口，满足下列要求：</p>
+<ul>
+<li>请求方式：Post</li>
+<li>请求路径：/hotel/list</li>
+<li>请求参数：对象，类型为RequestParam</li>
+<li>返回值：PageResult，包含两个属性
+<ul>
+<li><code>Long total</code>：总条数</li>
+<li><code>List&lt;HotelDoc&gt; hotels</code>：酒店数据</li>
+</ul>
+</li>
+</ul>
+<p>因此，我们在<code>cn.itcast.hotel.web</code>中定义HotelController：</p>
+<pre><code class="language-java">@RestController
+@RequestMapping(&quot;/hotel&quot;)
+public class HotelController {
+
+    @Autowired
+    private IHotelService hotelService;
+	// 搜索酒店数据
+    @PostMapping(&quot;/list&quot;)
+    public PageResult search(@RequestBody RequestParams params){
+        return hotelService.search(params);
+    }
+}
+
+</code></pre>
+<h3 id="414实现搜索业务">4.1.4.实现搜索业务</h3>
+<p>我们在controller调用了IHotelService，并没有实现该方法，因此下面我们就在IHotelService中定义方法，并且去实现业务逻辑。</p>
+<p>1）在<code>cn.itcast.hotel.service</code>中的<code>IHotelService</code>接口中定义一个方法：</p>
+<pre><code class="language-java">/**
+ * 根据关键字搜索酒店信息
+ * @param params 请求参数对象，包含用户输入的关键字 
+ * @return 酒店文档列表
+ */
+PageResult search(RequestParams params);
+
+</code></pre>
+<p>2）实现搜索业务，肯定离不开RestHighLevelClient，我们需要把它注册到Spring中作为一个Bean。在<code>cn.itcast.hotel</code>中的<code>HotelDemoApplication</code>中声明这个Bean：</p>
+<pre><code class="language-java">@Bean
+public RestHighLevelClient client(){
+    return  new RestHighLevelClient(RestClient.builder(
+        HttpHost.create(&quot;http://192.168.150.101:9200&quot;)
+    ));
+}
+
+</code></pre>
+<p>3）在<code>cn.itcast.hotel.service.impl</code>中的<code>HotelService</code>中实现search方法：</p>
+<pre><code class="language-java">@Override
+public PageResult search(RequestParams params) {
+    try {
+        // 1.准备Request
+        SearchRequest request = new SearchRequest(&quot;hotel&quot;);
+        // 2.准备DSL
+        // 2.1.query
+        String key = params.getKey();
+        if (key == null || &quot;&quot;.equals(key)) {
+            boolQuery.must(QueryBuilders.matchAllQuery());
+        } else {
+            boolQuery.must(QueryBuilders.matchQuery(&quot;all&quot;, key));
+        }
+
+        // 2.2.分页
+        int page = params.getPage();
+        int size = params.getSize();
+        request.source().from((page - 1) * size).size(size);
+
+        // 3.发送请求
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        // 4.解析响应
+        return handleResponse(response);
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+
+// 结果解析
+private PageResult handleResponse(SearchResponse response) {
+    // 4.解析响应
+    SearchHits searchHits = response.getHits();
+    // 4.1.获取总条数
+    long total = searchHits.getTotalHits().value;
+    // 4.2.文档数组
+    SearchHit[] hits = searchHits.getHits();
+    // 4.3.遍历
+    List&lt;HotelDoc&gt; hotels = new ArrayList&lt;&gt;();
+    for (SearchHit hit : hits) {
+        // 获取文档source
+        String json = hit.getSourceAsString();
+        // 反序列化
+        HotelDoc hotelDoc = JSON.parseObject(json, HotelDoc.class);
+		// 放入集合
+        hotels.add(hotelDoc);
+    }
+    // 4.4.封装返回
+    return new PageResult(total, hotels);
+}
+
+</code></pre>
+<h2 id="42酒店结果过滤">4.2.酒店结果过滤</h2>
+<p>需求：添加品牌、城市、星级、价格等过滤功能</p>
+<h3 id="421需求分析">4.2.1.需求分析</h3>
+<p>在页面搜索框下面，会有一些过滤项：</p>
+<figure data-type="image" tabindex="44"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722091940726.png" alt="image-20210722091940726" loading="lazy"></figure>
+<p>传递的参数如图：</p>
+<figure data-type="image" tabindex="45"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722092051994.png" alt="image-20210722092051994" loading="lazy"></figure>
+<p>包含的过滤条件有：</p>
+<ul>
+<li>brand：品牌值</li>
+<li>city：城市</li>
+<li>minPrice~maxPrice：价格范围</li>
+<li>starName：星级</li>
+</ul>
+<p>我们需要做两件事情：</p>
+<ul>
+<li>修改请求参数的对象RequestParams，接收上述参数</li>
+<li>修改业务逻辑，在搜索条件之外，添加一些过滤条件</li>
+</ul>
+<h3 id="422修改实体类">4.2.2.修改实体类</h3>
+<p>修改在<code>cn.itcast.hotel.pojo</code>包下的实体类RequestParams：</p>
+<pre><code class="language-java">@Data
+public class RequestParams {
+    private String key;
+    private Integer page;
+    private Integer size;
+    private String sortBy;
+    // 下面是新增的过滤条件参数
+    private String city;
+    private String brand;
+    private String starName;
+    private Integer minPrice;
+    private Integer maxPrice;
+}
+
+</code></pre>
+<h3 id="423修改搜索业务">4.2.3.修改搜索业务</h3>
+<p>在HotelService的search方法中，只有一个地方需要修改：requet.source().query( ... )其中的查询条件。</p>
+<p>在之前的业务中，只有match查询，根据关键字搜索，现在要添加条件过滤，包括：</p>
+<ul>
+<li>品牌过滤：是keyword类型，用term查询</li>
+<li>星级过滤：是keyword类型，用term查询</li>
+<li>价格过滤：是数值类型，用range查询</li>
+<li>城市过滤：是keyword类型，用term查询</li>
+</ul>
+<p>多个查询条件组合，肯定是boolean查询来组合：</p>
+<ul>
+<li>关键字搜索放到must中，参与算分</li>
+<li>其它过滤条件放到filter中，不参与算分</li>
+</ul>
+<p>因为条件构建的逻辑比较复杂，这里先封装为一个函数：</p>
+<figure data-type="image" tabindex="46"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722092935453.png" alt="image-20210722092935453" loading="lazy"></figure>
+<p>buildBasicQuery的代码如下：</p>
+<pre><code class="language-java">private void buildBasicQuery(RequestParams params, SearchRequest request) {
+    // 1.构建BooleanQuery
+    BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+    // 2.关键字搜索
+    String key = params.getKey();
+    if (key == null || &quot;&quot;.equals(key)) {
+        boolQuery.must(QueryBuilders.matchAllQuery());
+    } else {
+        boolQuery.must(QueryBuilders.matchQuery(&quot;all&quot;, key));
+    }
+    // 3.城市条件
+    if (params.getCity() != null &amp;&amp; !params.getCity().equals(&quot;&quot;)) {
+        boolQuery.filter(QueryBuilders.termQuery(&quot;city&quot;, params.getCity()));
+    }
+    // 4.品牌条件
+    if (params.getBrand() != null &amp;&amp; !params.getBrand().equals(&quot;&quot;)) {
+        boolQuery.filter(QueryBuilders.termQuery(&quot;brand&quot;, params.getBrand()));
+    }
+    // 5.星级条件
+    if (params.getStarName() != null &amp;&amp; !params.getStarName().equals(&quot;&quot;)) {
+        boolQuery.filter(QueryBuilders.termQuery(&quot;starName&quot;, params.getStarName()));
+    }
+	// 6.价格
+    if (params.getMinPrice() != null &amp;&amp; params.getMaxPrice() != null) {
+        boolQuery.filter(QueryBuilders
+                         .rangeQuery(&quot;price&quot;)
+                         .gte(params.getMinPrice())
+                         .lte(params.getMaxPrice())
+                        );
+    }
+	// 7.放入source
+    request.source().query(boolQuery);
+}
+
+</code></pre>
+<h2 id="43我周边的酒店">4.3.我周边的酒店</h2>
+<p>需求：我附近的酒店</p>
+<h3 id="431需求分析">4.3.1.需求分析</h3>
+<p>在酒店列表页的右侧，有一个小地图，点击地图的定位按钮，地图会找到你所在的位置：</p>
+<figure data-type="image" tabindex="47"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722093414542.png" alt="image-20210722093414542" loading="lazy"></figure>
+<p>并且，在前端会发起查询请求，将你的坐标发送到服务端：</p>
+<figure data-type="image" tabindex="48"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722093642382.png" alt="image-20210722093642382" loading="lazy"></figure>
+<p>我们要做的事情就是基于这个location坐标，然后按照距离对周围酒店排序。实现思路如下：</p>
+<ul>
+<li>修改RequestParams参数，接收location字段</li>
+<li>修改search方法业务逻辑，如果location有值，添加根据geo_distance排序的功能</li>
+</ul>
+<h3 id="432修改实体类">4.3.2.修改实体类</h3>
+<p>修改在<code>cn.itcast.hotel.pojo</code>包下的实体类RequestParams：</p>
+<pre><code class="language-java">package cn.itcast.hotel.pojo;
+
+import lombok.Data;
+
+@Data
+public class RequestParams {
+    private String key;
+    private Integer page;
+    private Integer size;
+    private String sortBy;
+    private String city;
+    private String brand;
+    private String starName;
+    private Integer minPrice;
+    private Integer maxPrice;
+    // 我当前的地理坐标
+    private String location;
+}
+
+
+</code></pre>
+<h3 id="433距离排序api">4.3.3.距离排序API</h3>
+<p>我们以前学习过排序功能，包括两种：</p>
+<ul>
+<li>普通字段排序</li>
+<li>地理坐标排序</li>
+</ul>
+<p>我们只讲了普通字段排序对应的java写法。地理坐标排序只学过DSL语法，如下：</p>
+<pre><code class="language-json">GET /indexName/_search
+{
+  &quot;query&quot;: {
+    &quot;match_all&quot;: {}
+  },
+  &quot;sort&quot;: [
+    {
+      &quot;price&quot;: &quot;asc&quot;  
+    },
+    {
+      &quot;_geo_distance&quot; : {
+          &quot;FIELD&quot; : &quot;纬度，经度&quot;,
+          &quot;order&quot; : &quot;asc&quot;,
+          &quot;unit&quot; : &quot;km&quot;
+      }
+    }
+  ]
+}
+
+</code></pre>
+<p>对应的java代码示例：</p>
+<figure data-type="image" tabindex="49"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722095227059.png" alt="image-20210722095227059" loading="lazy"></figure>
+<h3 id="434添加距离排序">4.3.4.添加距离排序</h3>
+<p>在<code>cn.itcast.hotel.service.impl</code>的<code>HotelService</code>的<code>search</code>方法中，添加一个排序功能：</p>
+<figure data-type="image" tabindex="50"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722095902314.png" alt="image-20210722095902314" loading="lazy"></figure>
+<p>完整代码：</p>
+<pre><code class="language-java">@Override
+public PageResult search(RequestParams params) {
+    try {
+        // 1.准备Request
+        SearchRequest request = new SearchRequest(&quot;hotel&quot;);
+        // 2.准备DSL
+        // 2.1.query
+        buildBasicQuery(params, request);
+
+        // 2.2.分页
+        int page = params.getPage();
+        int size = params.getSize();
+        request.source().from((page - 1) * size).size(size);
+
+        // 2.3.排序
+        String location = params.getLocation();
+        if (location != null &amp;&amp; !location.equals(&quot;&quot;)) {
+            request.source().sort(SortBuilders
+                                  .geoDistanceSort(&quot;location&quot;, new GeoPoint(location))
+                                  .order(SortOrder.ASC)
+                                  .unit(DistanceUnit.KILOMETERS)
+                                 );
+        }
+
+        // 3.发送请求
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        // 4.解析响应
+        return handleResponse(response);
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+
+</code></pre>
+<h3 id="435排序距离显示">4.3.5.排序距离显示</h3>
+<p>重启服务后，测试我的酒店功能：</p>
+<figure data-type="image" tabindex="51"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722100040674.png" alt="image-20210722100040674" loading="lazy"></figure>
+<p>发现确实可以实现对我附近酒店的排序，不过并没有看到酒店到底距离我多远，这该怎么办？</p>
+<p>排序完成后，页面还要获取我附近每个酒店的具体<strong>距离</strong>值，这个值在响应结果中是独立的：</p>
+<figure data-type="image" tabindex="52"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722095648542.png" alt="image-20210722095648542" loading="lazy"></figure>
+<p>因此，我们在结果解析阶段，除了解析source部分以外，还要得到sort部分，也就是排序的距离，然后放到响应结果中。</p>
+<p>我们要做两件事：</p>
+<ul>
+<li>修改HotelDoc，添加排序距离字段，用于页面显示</li>
+<li>修改HotelService类中的handleResponse方法，添加对sort值的获取</li>
+</ul>
+<p>1）修改HotelDoc类，添加距离字段</p>
+<pre><code class="language-java">package cn.itcast.hotel.pojo;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+
+@Data
+@NoArgsConstructor
+public class HotelDoc {
+    private Long id;
+    private String name;
+    private String address;
+    private Integer price;
+    private Integer score;
+    private String brand;
+    private String city;
+    private String starName;
+    private String business;
+    private String location;
+    private String pic;
+    // 排序时的 距离值
+    private Object distance;
+
+    public HotelDoc(Hotel hotel) {
+        this.id = hotel.getId();
+        this.name = hotel.getName();
+        this.address = hotel.getAddress();
+        this.price = hotel.getPrice();
+        this.score = hotel.getScore();
+        this.brand = hotel.getBrand();
+        this.city = hotel.getCity();
+        this.starName = hotel.getStarName();
+        this.business = hotel.getBusiness();
+        this.location = hotel.getLatitude() + &quot;, &quot; + hotel.getLongitude();
+        this.pic = hotel.getPic();
+    }
+}
+
+
+</code></pre>
+<p>2）修改HotelService中的handleResponse方法</p>
+<figure data-type="image" tabindex="53"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722100613966.png" alt="image-20210722100613966" loading="lazy"></figure>
+<p>重启后测试，发现页面能成功显示距离了：</p>
+<figure data-type="image" tabindex="54"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722100838604.png" alt="image-20210722100838604" loading="lazy"></figure>
+<h2 id="44酒店竞价排名">4.4.酒店竞价排名</h2>
+<p>需求：让指定的酒店在搜索结果中排名置顶</p>
+<h3 id="441需求分析">4.4.1.需求分析</h3>
+<p>要让指定酒店在搜索结果中排名置顶，效果如图：</p>
+<figure data-type="image" tabindex="55"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722100947292.png" alt="image-20210722100947292" loading="lazy"></figure>
+<p>页面会给指定的酒店添加<strong>广告</strong>标记。</p>
+<p>那怎样才能让指定的酒店排名置顶呢？</p>
+<p>我们之前学习过的function_score查询可以影响算分，算分高了，自然排名也就高了。而function_score包含3个要素：</p>
+<ul>
+<li>过滤条件：哪些文档要加分</li>
+<li>算分函数：如何计算function score</li>
+<li>加权方式：function score 与 query score如何运算</li>
+</ul>
+<p>这里的需求是：让<strong>指定酒店</strong>排名靠前。因此我们需要给这些酒店添加一个标记，这样在过滤条件中就可以<strong>根据这个标记来判断，是否要提高算分</strong>。</p>
+<p>比如，我们给酒店添加一个字段：isAD，Boolean类型：</p>
+<ul>
+<li>true：是广告</li>
+<li>false：不是广告</li>
+</ul>
+<p>这样function_score包含3个要素就很好确定了：</p>
+<ul>
+<li>过滤条件：判断isAD 是否为true</li>
+<li>算分函数：我们可以用最简单暴力的weight，固定加权值</li>
+<li>加权方式：可以用默认的相乘，大大提高算分</li>
+</ul>
+<p>因此，业务的实现步骤包括：</p>
+<ol>
+<li>
+<p>给HotelDoc类添加isAD字段，Boolean类型</p>
+</li>
+<li>
+<p>挑选几个你喜欢的酒店，给它的文档数据添加isAD字段，值为true</p>
+</li>
+<li>
+<p>修改search方法，添加function score功能，给isAD值为true的酒店增加权重</p>
+</li>
+</ol>
+<h3 id="442修改hoteldoc实体">4.4.2.修改HotelDoc实体</h3>
+<p>给<code>cn.itcast.hotel.pojo</code>包下的HotelDoc类添加isAD字段：</p>
+<figure data-type="image" tabindex="56"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722101908062.png" alt="image-20210722101908062" loading="lazy"></figure>
+<h3 id="443添加广告标记">4.4.3.添加广告标记</h3>
+<p>接下来，我们挑几个酒店，添加isAD字段，设置为true：</p>
+<pre><code class="language-json">POST /hotel/_update/1902197537
+{
+    &quot;doc&quot;: {
+        &quot;isAD&quot;: true
+    }
+}
+POST /hotel/_update/2056126831
+{
+    &quot;doc&quot;: {
+        &quot;isAD&quot;: true
+    }
+}
+POST /hotel/_update/1989806195
+{
+    &quot;doc&quot;: {
+        &quot;isAD&quot;: true
+    }
+}
+POST /hotel/_update/2056105938
+{
+    &quot;doc&quot;: {
+        &quot;isAD&quot;: true
+    }
+}
+
+</code></pre>
+<h3 id="444添加算分函数查询">4.4.4.添加算分函数查询</h3>
+<p>接下来我们就要修改查询条件了。之前是用的boolean 查询，现在要改成function_socre查询。</p>
+<p>function_score查询结构如下：</p>
+<figure data-type="image" tabindex="57"><img src="https://shenshen6666.GitHub.io/post-images/image-20210721191544750.png" alt="image-20210721191544750" loading="lazy"></figure>
+<p>对应的JavaAPI如下：</p>
+<figure data-type="image" tabindex="58"><img src="https://shenshen6666.GitHub.io/post-images/image-20210722102850818.png" alt="image-20210722102850818" loading="lazy"></figure>
+<p>我们可以将之前写的boolean查询作为<strong>原始查询</strong>条件放到query中，接下来就是添加<strong>过滤条件</strong>、<strong>算分函数</strong>、<strong>加权模式</strong>了。所以原来的代码依然可以沿用。</p>
+<p>修改<code>cn.itcast.hotel.service.impl</code>包下的<code>HotelService</code>类中的<code>buildBasicQuery</code>方法，添加算分函数查询：</p>
+<pre><code class="language-java">private void buildBasicQuery(RequestParams params, SearchRequest request) {
+    // 1.构建BooleanQuery
+    BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+    // 关键字搜索
+    String key = params.getKey();
+    if (key == null || &quot;&quot;.equals(key)) {
+        boolQuery.must(QueryBuilders.matchAllQuery());
+    } else {
+        boolQuery.must(QueryBuilders.matchQuery(&quot;all&quot;, key));
+    }
+    // 城市条件
+    if (params.getCity() != null &amp;&amp; !params.getCity().equals(&quot;&quot;)) {
+        boolQuery.filter(QueryBuilders.termQuery(&quot;city&quot;, params.getCity()));
+    }
+    // 品牌条件
+    if (params.getBrand() != null &amp;&amp; !params.getBrand().equals(&quot;&quot;)) {
+        boolQuery.filter(QueryBuilders.termQuery(&quot;brand&quot;, params.getBrand()));
+    }
+    // 星级条件
+    if (params.getStarName() != null &amp;&amp; !params.getStarName().equals(&quot;&quot;)) {
+        boolQuery.filter(QueryBuilders.termQuery(&quot;starName&quot;, params.getStarName()));
+    }
+    // 价格
+    if (params.getMinPrice() != null &amp;&amp; params.getMaxPrice() != null) {
+        boolQuery.filter(QueryBuilders
+                         .rangeQuery(&quot;price&quot;)
+                         .gte(params.getMinPrice())
+                         .lte(params.getMaxPrice())
+                        );
+    }
+
+    // 2.算分控制
+    FunctionScoreQueryBuilder functionScoreQuery =
+        QueryBuilders.functionScoreQuery(
+        // 原始查询，相关性算分的查询
+        boolQuery,
+        // function score的数组
+        new FunctionScoreQueryBuilder.FilterFunctionBuilder[]{
+            // 其中的一个function score 元素
+            new FunctionScoreQueryBuilder.FilterFunctionBuilder(
+                // 过滤条件
+                QueryBuilders.termQuery(&quot;isAD&quot;, true),
+                // 算分函数
+                ScoreFunctionBuilders.weightFactorFunction(10)
+            )
+        });
+    request.source().query(functionScoreQuery);
+}
+
+</code></pre>
+
+          </div>
+        </div>
+
+        <!-- 右侧内容优化分组 -->
+        <div class="w-full md:w-1/3 mt-6 md:pl-8" id="additionalContent">
+          <div class="sidebar-section">
+            <!-- 信息模块保持不变 -->
+            
+  <!-- 检查是否存在微信支付二维码 -->
+  <h4 class="text-base font-thin text-gray-700 mb-2 mt-6">
+    <!-- 赞赏标题 -->
+    <i class="icon icon-sponsor"></i>
+    <!-- 赞赏图标 -->
+    赞赏
+    <!-- 赞赏文本 -->
+  </h4>
+  <div class="post-sponsor text-gray-700">
+    <!-- 赞赏内容容器 -->
+    <img class="post-sponsor-img w-32 h-32 md:w-40 md:h-40" src="https://shenshen6666.GitHub.io\media\images\custom-weChatPayQR.png" alt="">
+    <!-- 微信支付二维码 -->
+    <div>
+      <!-- 支付提示 -->
+      <i class="icon icon-wechat"></i>
+      <!-- 微信图标 -->
+      支付宝扫一扫领红包
+      <!-- 支付宝提示 -->
+    </div>
+  </div>
+
+
+          </div>
+
+          <!-- 浮动窗口和控件 -->
+          <style>
+            /* 滑动条样式 */
+            .url-slider {
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              height: 30px;
+              background: rgba(255, 255, 255, 0.95);
+              border-top: 1px solid #e0e0e0;
+              display: flex;
+              align-items: center;
+              padding: 0 10px;
+            }
+          
+            .url-list {
+              width: 100%;
+              overflow-x: auto;
+              white-space: nowrap;
+              scrollbar-width: thin;
+              padding: 5px 0;
+            }
+          
+            .url-item {
+              display: inline-block;
+              padding: 4px 8px;
+              margin: 0 4px;
+              background: #f0f0f0;
+              border-radius: 4px;
+              cursor: pointer;
+            }
+          
+            .url-item.active {
+              background: var(--hover-color);
+              color: white;
+            }
+          </style>
+          
+          <!-- 在 body 中的浮动窗口部分 -->
+                  <div class="zhihu-iframe mt-6">
+                    <iframe src="https://onehu.xyz/" style="width:100%;height:calc(100% - 30px);border:none;"></iframe>
+                    <div class="url-slider">
+                      <div class="url-list" id="urlList"></div>
+                    </div>
+            <button class="control-btn" id="menuButton">⚙️</button>
+            <div class="url-menu">
+              <input type="text" id="customUrl" placeholder="输入自定义网址" class="url-input">
+              <div class="quick-urls">
+                <button class="grey-btn" data-url="https://onehu.xyz/">默认</button>
+                <button class="grey-btn" data-url="https://novelsj.xyz/">盐王</button>
+                <button data-url="https://www.bilibili.com/">哔哩哔哩</button>
+              </div>
+              <button class="confirm-btn" id="applyUrl">确定</button>
+            </div>
+          </div>
+
+          <!-- 控件按钮组 -->
+          <div class="float-control-group">
+            <button class="control-btn" id="toggleButton">↔️</button>
+            <button class="control-btn" id="moveUpButton">↑</button>
+            <button class="control-btn" id="moveDownButton">↓</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer border-gray-400 border-external-top pt-6 mt-6 sm:mt-8 md:mt-10 mb-20 text-gray-700 text-sm sm:text-base lg:text-lg">
+  <!-- 创建页脚容器，设置边框和样式 -->
+  Powered by <a href="https://github.com/shenshen6666/shenshen6666.GitHub.io" target="_blank">我的小屋</a>
+  <!-- 显示页脚信息 -->
+</div>
+
+    </div>
+  </div>
+
+  <!-- 脚本优化 -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="https://shenshen6666.GitHub.io/media/js/prism.js"></script>
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  <script>
+    (function() {
+      'use strict';
+      
+      // 模块初始化
+      const uiModule = (() => {
+        const elements = {
+          iframe: document.querySelector('.zhihu-iframe'),
+          toggleBtn: $('#toggleButton'),
+          moveUpBtn: $('#moveUpButton'),
+          moveDownBtn: $('#moveDownButton'),
+          menu: $('.url-menu'),
+          menuBtn: $('#menuButton')
+        };
+
+        // 位置控制
+        const moveFrame = (direction) => {
+          const current = parseFloat(elements.iframe.style.top) || 5;
+          elements.iframe.style.top = `${current + (direction === 'up' ? -10 : 10)}px`;
+        };
+
+        // URL 控制
+        const updateFrameUrl = (url) => {
+          elements.iframe.querySelector('iframe').src = url;
+        };
+
+        return {
+          init() {
+            // 初始尺寸
+            elements.iframe.style.width = '320px';
+            elements.iframe.style.height = '500px';
+
+            // 事件绑定
+            elements.toggleBtn.on('click', () => {
+              $('.zhihu-iframe, #additionalContent .mt-6').toggle();
+            });
+
+            elements.moveUpBtn.on('click', () => moveFrame('up'));
+            elements.moveDownBtn.on('click', () => moveFrame('down'));
+
+            // 点击菜单按钮时切换显示状态
+            elements.menuBtn.on('click', (e) => {
+              e.stopPropagation();
+              elements.menu.toggle();
+            });
+
+            // “默认”、“盐王”按钮：点击后立即更新 URL 并关闭菜单
+            $('.url-menu button[data-url]').on('click', function(e) {
+              e.stopPropagation();
+              const url = $(this).data('url');
+              const btnText = $(this).text();
+              if (btnText === '默认' || btnText === '盐王') {
+                updateFrameUrl(url);
+                elements.menu.hide();
+              } else if (btnText === '哔哩哔哩') {
+                // 只更新输入框，不关闭菜单
+                $('#customUrl').val(url);
+              }
+            });
+
+            // “确定”按钮：只有点击后才会关闭菜单
+            $('#applyUrl').on('click', (e) => {
+              e.stopPropagation();
+              const url = $('#customUrl').val();
+              if (url) {
+                updateFrameUrl(url);
+                elements.menu.hide();
+              }
+            });
+
+            // 阻止菜单内部点击时冒泡（防止因外部绑定而意外关闭）
+            elements.menu.on('click', (e) => {
+              e.stopPropagation();
+            });
+          }
+        };
+      })();
+
+      // 初始化模块
+      document.addEventListener('DOMContentLoaded', () => {
+        uiModule.init();
+        Prism.highlightAll();
+      });
+    })();
+  </script>
+</body>
+</html>
