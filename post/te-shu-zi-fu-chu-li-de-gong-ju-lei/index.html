@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+  <meta charset="UTF-8">
+<!-- 设置文档字符集为 UTF-8，支持多种语言字符 -->
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 设置视口，使网页在移动设备上显示的宽度等于设备宽度，初始缩放比例为1.0 -->
+
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<!-- 设置 IE 浏览器的兼容性模式，使用最新的浏览器渲染引擎 -->
+
+<title>特殊字符处理的工具类 | 申申丫的</title>
+<!-- 设置网页标题，使用模板引擎输出网站标题 -->
+
+<link rel="stylesheet" href="https://shenshen6666.GitHub.io/styles/main.css">
+<!-- 引入主样式表文件 -->
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 异步加载不蒜子统计的 JavaScript 文件，用于网站访问量统计 -->
+
+
+  <!-- 如果当前页面不是首页 -->
+  <script src="https://shenshen6666.GitHub.io/media/js/page.js"></script>
+  <!-- 引入其他页面特定的 JavaScript 文件 -->
+
+
+    
+
+  <meta name="description" content="Java工具类：特殊字符处理
+本文将介绍一个名为 StringUtils 的工具类，用于处理转义和反转义字符串中的特殊字符。
+StringUtils工具类
+以下是 StringUtils 工具类的完整代码。该类包含两个静态方法：escape...">
+  
+  <!-- 资源预加载 -->
+  <link rel="preload" href="https://code.jquery.com/jquery-3.6.4.min.js" as="script">
+  <link rel="preload" href="https://shenshen6666.GitHub.io/media/js/prism.js" as="script">
+  
+  <!-- 样式资源 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --hover-color: #3498db;
+      --shadow-light: 0 2px 5px rgba(0,0,0,0.1);
+      --shadow-medium: 0 4px 8px rgba(0,0,0,0.15);
+      --transition-fast: all 0.2s ease;
+    }
+
+    /* 增强的浮动窗口样式 */
+    .zhihu-iframe {
+      position: fixed;
+      top: 5px;
+      left: 75%;
+      transform: translateX(-50%);
+      z-index: 999;
+      display: none;
+      resize: both;
+      overflow: auto;
+      min-width: 200px;
+      min-height: 200px;
+      max-width: 90vw;
+      max-height: 90vh;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: var(--shadow-medium);
+      transition: var(--transition-fast);
+    }
+
+    .zhihu-iframe::after {
+      content: '⤢';
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 16px;
+      cursor: se-resize;
+      background: linear-gradient(135deg, transparent 45%, #f0f0f0 45%);
+    }
+
+    /* 按钮组样式优化 */
+    .float-control-group {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .control-btn {
+      cursor: pointer;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--primary-color);
+      border: 1px solid #e0e0e0;
+      border-radius: 50%;
+      box-shadow: var(--shadow-light);
+      transition: var(--transition-fast);
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    /* 设置按钮特殊样式 */
+    .zhihu-iframe .control-btn {
+      width: 28px;
+      height: 28px;
+      padding: 4px;
+      font-size: 14px;
+      position: absolute;
+      left: 10px;
+      bottom: 0;
+      border-radius: 4px;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+
+    .zhihu-iframe .control-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .control-btn:hover {
+      background: #fff;
+      color: var(--hover-color);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    /* 增强的菜单样式 */
+    .url-menu {
+      display: none;
+      position: fixed;
+      right: 90px;
+      bottom: 30px;
+      background: rgba(255, 255, 255, 0.98);
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: var(--shadow-medium);
+      backdrop-filter: blur(8px);
+      min-width: 240px;
+    }
+
+    .url-menu input {
+      width: 100%;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      transition: var(--transition-fast);
+    }
+
+    .url-menu input:focus {
+      border-color: var(--hover-color);
+      outline: none;
+    }
+
+    .url-menu button {
+      padding: 6px 12px;
+      margin: 4px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      background: #f8f9fa;
+      transition: var(--transition-fast);
+    }
+
+    .url-menu button:hover {
+      background: #e9ecef;
+      border-color: var(--hover-color);
+    }
+
+    /* 新增灰色按钮样式 */
+    .quick-urls button.grey-btn {
+      background: #e0e0e0;
+      color: #555;
+      border: 1px solid #ccc;
+    }
+
+    @media (max-width: 768px) {
+      .zhihu-iframe {
+        left: 50%;
+        max-width: 95vw;
+      }
+      
+      .float-control-group {
+        right: 10px;
+        bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 主体结构保持不变 -->
+  <div class="antialiased">
+    <div class="body-width mx-auto px-6 md:px-8">
+      
+<!-- 使用 Map 存储菜单项和对应的图标类名 -->
+
+<div class="flex justify-between items-center mt-10">
+  <!-- 创建顶部导航栏容器 -->
+  <h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-900 font-medium md:font-normal leading-none">
+    <!-- 创建网站标题部分 -->
+    <div class="glitch-wrapper">
+      <!-- 创建标题特效容器 -->
+      <div class="glitch" data-text="申申丫的">
+        <!-- 创建标题特效 -->
+        <a href="https://shenshen6666.GitHub.io">申申丫的</a>
+        <!-- 显示网站标题并设置链接 -->
+      </div>
+    </div>
+  </h1>
+  <div class="block lg:hidden" id="thumb-menu">
+    <!-- 创建移动设备下的菜单按钮容器 -->
+    <button id="thumb-open" type="button" class="block">
+      <!-- 打开菜单的按钮图标 -->
+      <i class="icon icon-menu-close"></i>
+    </button>
+    <button id="thumb-close" type="button" class="hidden">
+      <!-- 关闭菜单的按钮图标 -->
+      <i class="icon icon-menu-open"></i>
+    </button>
+  </div>
+</div>
+
+<div id="nav-list" class="lg:block hidden">
+  <!-- 创建导航列表容器 -->
+  <div class="w-full block lg:flex lg:justify-between border-external-bottom lg:border-gray-400 mt-10 text-gray-700 lg:text-lg">
+    <!-- 创建导航列表 -->
+    <div class="lg:flex -mb-px">
+      <!-- 创建导航项容器 -->
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-home"></i> 
+              <!-- 显示对应图标 -->
+              首页
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/archives" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-archive"></i> 
+              <!-- 显示对应图标 -->
+              归档
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/tags" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-tags"></i> 
+              <!-- 显示对应图标 -->
+              标签
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/post/about" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-user"></i> 
+              <!-- 显示对应图标 -->
+              关于
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/essays" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-"></i> 
+              <!-- 显示对应图标 -->
+              测试菜单
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+      <!-- 循环结束 -->
+      <div class="search-frame pb-4">
+        <!-- 创建搜索框容器 -->
+        <i class="icon icon-search"></i>
+        <!-- 显示搜索图标 -->
+        <form id="search-form" action="https://shenshen6666.GitHub.io/search/">
+          <!-- 创建搜索表单 -->
+          <input name="searchContent" type="text" placeholder="Search..." />
+          <!-- 显示搜索框，并设置占位符 -->
+        </form>
+      </div>
+    </div>
+
+    <div class="lg:flex">
+      <!-- 创建右侧导航项容器 -->
+      <ul>
+        <!-- 创建导航链接列表 -->
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+      </ul>
+      <!-- 社交媒体链接列表结束 -->
+
+      <a href="https://shenshen6666.GitHub.io/atom.xml" class="block mt-4 lg:mt-0 lg:ml-8 align-center hover:text-gray-900" target="_blank">
+        <!-- 创建 RSS 订阅链接 -->
+        <i class="icon icon-rss"></i>
+        <!-- 显示 RSS 图标 -->
+        RSS
+        <!-- 显示 RSS 文字 -->
+      </a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="mb-20 md:flex mt-10 lg:mt-6 md:border-internal md:border-gray-400 md:pt-2 lg:border-t-0 lg:pt-0">
+        <!-- 左侧内容保持不变 -->
+        <div class="w-full md:w-2/3 mt-6">
+          <h1 class="post-title text-3xl">特殊字符处理的工具类</h1>
+          
+          <div class="mt-6 lg:mt-10 post-content">
+            <h1 id="java工具类特殊字符处理">Java工具类：特殊字符处理</h1>
+<p>本文将介绍一个名为 <code>StringUtils</code> 的工具类，用于处理转义和反转义字符串中的特殊字符。</p>
+<h2 id="stringutils工具类">StringUtils工具类</h2>
+<p>以下是 <code>StringUtils</code> 工具类的完整代码。该类包含两个静态方法：<code>escapeSpecialCharacters</code> 和 <code>unescapeSpecialCharacters</code>，分别用于转义和反转义字符串中的特殊字符。</p>
+<pre><code class="language-java">public final class StringUtils {
+
+    // 私有构造函数，防止实例化
+    private StringUtils() {
+        throw new UnsupportedOperationException(&quot;Utility class&quot;);
+    }
+
+    /**
+     * 转义字符串中的特殊字符。
+     * 
+     * @param input 需要转义的原始字符串
+     * @return 转义后的字符串
+     */
+    public static String escapeSpecialCharacters(String input) {
+        if (input == null) {
+            return null;
+        }
+        
+        // 转义特殊字符
+        return input
+            .replace(&quot;\\&quot;, &quot;\\\\&quot;)  // 反斜杠
+            .replace(&quot;\n&quot;, &quot;\\n&quot;)   // 换行符
+            .replace(&quot;\r&quot;, &quot;\\r&quot;)   // 回车符
+            .replace(&quot;\t&quot;, &quot;\\t&quot;)   // 制表符
+            .replace(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;)  // 双引号
+            .replace(&quot;'&quot;, &quot;\\'&quot;);   // 单引号
+    }
+
+    /**
+     * 反转义字符串中的特殊字符。
+     * 
+     * @param input 需要反转义的字符串
+     * @return 反转义后的字符串
+     */
+    public static String unescapeSpecialCharacters(String input) {
+        if (input == null) {
+            return null;
+        }
+        
+        // 反转义特殊字符
+        return input
+            .replace(&quot;\\\\&quot;, &quot;\\&quot;)  // 反斜杠
+            .replace(&quot;\\n&quot;, &quot;\n&quot;)   // 换行符
+            .replace(&quot;\\r&quot;, &quot;\r&quot;)   // 回车符
+            .replace(&quot;\\t&quot;, &quot;\t&quot;)   // 制表符
+            .replace(&quot;\\\&quot;&quot;, &quot;\&quot;&quot;)  // 双引号
+            .replace(&quot;\\'&quot;, &quot;'&quot;);   // 单引号
+    }
+}
+</code></pre>
+<h2 id="使用示例">使用示例</h2>
+<p>以下是一个简单的示例，展示如何使用 <code>StringUtils</code> 类来转义和反转义包含特殊字符的字符串。</p>
+<pre><code class="language-java">public class SpecialCharacterTest {
+    public static void main(String[] args) {
+        String original = &quot;Line1\nLine2\rTab\t\&quot;Quote\&quot;\\Backslash\'&quot;;
+        String escaped = StringUtils.escapeSpecialCharacters(original);
+        String unescaped = StringUtils.unescapeSpecialCharacters(escaped);
+        
+        System.out.println(&quot;Original: &quot; + original);
+        System.out.println(&quot;Escaped: &quot; + escaped);
+        System.out.println(&quot;Unescaped: &quot; + unescaped);
+    }
+}
+</code></pre>
+<p>运行上面的 <code>SpecialCharacterTest</code> 类，你将看到原始字符串、转义后的字符串以及反转义后的字符串输出结果。</p>
+
+          </div>
+        </div>
+
+        <!-- 右侧内容优化分组 -->
+        <div class="w-full md:w-1/3 mt-6 md:pl-8" id="additionalContent">
+          <div class="sidebar-section">
+            <!-- 信息模块保持不变 -->
+            
+  <!-- 检查是否存在微信支付二维码 -->
+  <h4 class="text-base font-thin text-gray-700 mb-2 mt-6">
+    <!-- 赞赏标题 -->
+    <i class="icon icon-sponsor"></i>
+    <!-- 赞赏图标 -->
+    赞赏
+    <!-- 赞赏文本 -->
+  </h4>
+  <div class="post-sponsor text-gray-700">
+    <!-- 赞赏内容容器 -->
+    <img class="post-sponsor-img w-32 h-32 md:w-40 md:h-40" src="https://shenshen6666.GitHub.io\media\images\custom-weChatPayQR.png" alt="">
+    <!-- 微信支付二维码 -->
+    <div>
+      <!-- 支付提示 -->
+      <i class="icon icon-wechat"></i>
+      <!-- 微信图标 -->
+      支付宝扫一扫领红包
+      <!-- 支付宝提示 -->
+    </div>
+  </div>
+
+
+          </div>
+
+          <!-- 浮动窗口和控件 -->
+          <style>
+            /* 滑动条样式 */
+            .url-slider {
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              height: 30px;
+              background: rgba(255, 255, 255, 0.95);
+              border-top: 1px solid #e0e0e0;
+              display: flex;
+              align-items: center;
+              padding: 0 10px;
+            }
+          
+            .url-list {
+              width: 100%;
+              overflow-x: auto;
+              white-space: nowrap;
+              scrollbar-width: thin;
+              padding: 5px 0;
+            }
+          
+            .url-item {
+              display: inline-block;
+              padding: 4px 8px;
+              margin: 0 4px;
+              background: #f0f0f0;
+              border-radius: 4px;
+              cursor: pointer;
+            }
+          
+            .url-item.active {
+              background: var(--hover-color);
+              color: white;
+            }
+          </style>
+          
+          <!-- 在 body 中的浮动窗口部分 -->
+                  <div class="zhihu-iframe mt-6">
+                    <iframe src="https://onehu.xyz/" style="width:100%;height:calc(100% - 30px);border:none;"></iframe>
+                    <div class="url-slider">
+                      <div class="url-list" id="urlList"></div>
+                    </div>
+            <button class="control-btn" id="menuButton">⚙️</button>
+            <div class="url-menu">
+              <input type="text" id="customUrl" placeholder="输入自定义网址" class="url-input">
+              <div class="quick-urls">
+                <button class="grey-btn" data-url="https://onehu.xyz/">默认</button>
+                <button class="grey-btn" data-url="https://novelsj.xyz/">盐王</button>
+                <button data-url="https://www.bilibili.com/">哔哩哔哩</button>
+              </div>
+              <button class="confirm-btn" id="applyUrl">确定</button>
+            </div>
+          </div>
+
+          <!-- 控件按钮组 -->
+          <div class="float-control-group">
+            <button class="control-btn" id="toggleButton">↔️</button>
+            <button class="control-btn" id="moveUpButton">↑</button>
+            <button class="control-btn" id="moveDownButton">↓</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer border-gray-400 border-external-top pt-6 mt-6 sm:mt-8 md:mt-10 mb-20 text-gray-700 text-sm sm:text-base lg:text-lg">
+  <!-- 创建页脚容器，设置边框和样式 -->
+  Powered by <a href="https://github.com/shenshen6666/shenshen6666.GitHub.io" target="_blank">我的小屋</a>
+  <!-- 显示页脚信息 -->
+</div>
+
+    </div>
+  </div>
+
+  <!-- 脚本优化 -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="https://shenshen6666.GitHub.io/media/js/prism.js"></script>
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  <script>
+    (function() {
+      'use strict';
+      
+      // 模块初始化
+      const uiModule = (() => {
+        const elements = {
+          iframe: document.querySelector('.zhihu-iframe'),
+          toggleBtn: $('#toggleButton'),
+          moveUpBtn: $('#moveUpButton'),
+          moveDownBtn: $('#moveDownButton'),
+          menu: $('.url-menu'),
+          menuBtn: $('#menuButton')
+        };
+
+        // 位置控制
+        const moveFrame = (direction) => {
+          const current = parseFloat(elements.iframe.style.top) || 5;
+          elements.iframe.style.top = `${current + (direction === 'up' ? -10 : 10)}px`;
+        };
+
+        // URL 控制
+        const updateFrameUrl = (url) => {
+          elements.iframe.querySelector('iframe').src = url;
+        };
+
+        return {
+          init() {
+            // 初始尺寸
+            elements.iframe.style.width = '320px';
+            elements.iframe.style.height = '500px';
+
+            // 事件绑定
+            elements.toggleBtn.on('click', () => {
+              $('.zhihu-iframe, #additionalContent .mt-6').toggle();
+            });
+
+            elements.moveUpBtn.on('click', () => moveFrame('up'));
+            elements.moveDownBtn.on('click', () => moveFrame('down'));
+
+            // 点击菜单按钮时切换显示状态
+            elements.menuBtn.on('click', (e) => {
+              e.stopPropagation();
+              elements.menu.toggle();
+            });
+
+            // “默认”、“盐王”按钮：点击后立即更新 URL 并关闭菜单
+            $('.url-menu button[data-url]').on('click', function(e) {
+              e.stopPropagation();
+              const url = $(this).data('url');
+              const btnText = $(this).text();
+              if (btnText === '默认' || btnText === '盐王') {
+                updateFrameUrl(url);
+                elements.menu.hide();
+              } else if (btnText === '哔哩哔哩') {
+                // 只更新输入框，不关闭菜单
+                $('#customUrl').val(url);
+              }
+            });
+
+            // “确定”按钮：只有点击后才会关闭菜单
+            $('#applyUrl').on('click', (e) => {
+              e.stopPropagation();
+              const url = $('#customUrl').val();
+              if (url) {
+                updateFrameUrl(url);
+                elements.menu.hide();
+              }
+            });
+
+            // 阻止菜单内部点击时冒泡（防止因外部绑定而意外关闭）
+            elements.menu.on('click', (e) => {
+              e.stopPropagation();
+            });
+          }
+        };
+      })();
+
+      // 初始化模块
+      document.addEventListener('DOMContentLoaded', () => {
+        uiModule.init();
+        Prism.highlightAll();
+      });
+    })();
+  </script>
+</body>
+</html>

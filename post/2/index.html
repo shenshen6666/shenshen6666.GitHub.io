@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+  <meta charset="UTF-8">
+<!-- 设置文档字符集为 UTF-8，支持多种语言字符 -->
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 设置视口，使网页在移动设备上显示的宽度等于设备宽度，初始缩放比例为1.0 -->
+
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<!-- 设置 IE 浏览器的兼容性模式，使用最新的浏览器渲染引擎 -->
+
+<title>SpringCloud02 | 申申丫的</title>
+<!-- 设置网页标题，使用模板引擎输出网站标题 -->
+
+<link rel="stylesheet" href="https://shenshen6666.GitHub.io/styles/main.css">
+<!-- 引入主样式表文件 -->
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- 异步加载不蒜子统计的 JavaScript 文件，用于网站访问量统计 -->
+
+
+  <!-- 如果当前页面不是首页 -->
+  <script src="https://shenshen6666.GitHub.io/media/js/page.js"></script>
+  <!-- 引入其他页面特定的 JavaScript 文件 -->
+
+
+    
+
+  <meta name="description" content="SpringCloud实用篇02
+0.学习目标
+1.Nacos配置管理
+Nacos除了可以做注册中心，同样可以做配置管理来使用。
+1.1.统一配置管理
+当微服务部署的实例越来越多，达到数十、数百时，逐个修改微服务配置就会让人抓狂，而且很容易...">
+  
+  <!-- 资源预加载 -->
+  <link rel="preload" href="https://code.jquery.com/jquery-3.6.4.min.js" as="script">
+  <link rel="preload" href="https://shenshen6666.GitHub.io/media/js/prism.js" as="script">
+  
+  <!-- 样式资源 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --hover-color: #3498db;
+      --shadow-light: 0 2px 5px rgba(0,0,0,0.1);
+      --shadow-medium: 0 4px 8px rgba(0,0,0,0.15);
+      --transition-fast: all 0.2s ease;
+    }
+
+    /* 增强的浮动窗口样式 */
+    .zhihu-iframe {
+      position: fixed;
+      top: 5px;
+      left: 75%;
+      transform: translateX(-50%);
+      z-index: 999;
+      display: none;
+      resize: both;
+      overflow: auto;
+      min-width: 200px;
+      min-height: 200px;
+      max-width: 90vw;
+      max-height: 90vh;
+      border: 1px solid #e0e0e0;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: var(--shadow-medium);
+      transition: var(--transition-fast);
+    }
+
+    .zhihu-iframe::after {
+      content: '⤢';
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 16px;
+      cursor: se-resize;
+      background: linear-gradient(135deg, transparent 45%, #f0f0f0 45%);
+    }
+
+    /* 按钮组样式优化 */
+    .float-control-group {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .control-btn {
+      cursor: pointer;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--primary-color);
+      border: 1px solid #e0e0e0;
+      border-radius: 50%;
+      box-shadow: var(--shadow-light);
+      transition: var(--transition-fast);
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    /* 设置按钮特殊样式 */
+    .zhihu-iframe .control-btn {
+      width: 28px;
+      height: 28px;
+      padding: 4px;
+      font-size: 14px;
+      position: absolute;
+      left: 10px;
+      bottom: 0;
+      border-radius: 4px;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+
+    .zhihu-iframe .control-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .control-btn:hover {
+      background: #fff;
+      color: var(--hover-color);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    /* 增强的菜单样式 */
+    .url-menu {
+      display: none;
+      position: fixed;
+      right: 90px;
+      bottom: 30px;
+      background: rgba(255, 255, 255, 0.98);
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: var(--shadow-medium);
+      backdrop-filter: blur(8px);
+      min-width: 240px;
+    }
+
+    .url-menu input {
+      width: 100%;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      transition: var(--transition-fast);
+    }
+
+    .url-menu input:focus {
+      border-color: var(--hover-color);
+      outline: none;
+    }
+
+    .url-menu button {
+      padding: 6px 12px;
+      margin: 4px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      background: #f8f9fa;
+      transition: var(--transition-fast);
+    }
+
+    .url-menu button:hover {
+      background: #e9ecef;
+      border-color: var(--hover-color);
+    }
+
+    /* 新增灰色按钮样式 */
+    .quick-urls button.grey-btn {
+      background: #e0e0e0;
+      color: #555;
+      border: 1px solid #ccc;
+    }
+
+    @media (max-width: 768px) {
+      .zhihu-iframe {
+        left: 50%;
+        max-width: 95vw;
+      }
+      
+      .float-control-group {
+        right: 10px;
+        bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 主体结构保持不变 -->
+  <div class="antialiased">
+    <div class="body-width mx-auto px-6 md:px-8">
+      
+<!-- 使用 Map 存储菜单项和对应的图标类名 -->
+
+<div class="flex justify-between items-center mt-10">
+  <!-- 创建顶部导航栏容器 -->
+  <h1 class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-900 font-medium md:font-normal leading-none">
+    <!-- 创建网站标题部分 -->
+    <div class="glitch-wrapper">
+      <!-- 创建标题特效容器 -->
+      <div class="glitch" data-text="申申丫的">
+        <!-- 创建标题特效 -->
+        <a href="https://shenshen6666.GitHub.io">申申丫的</a>
+        <!-- 显示网站标题并设置链接 -->
+      </div>
+    </div>
+  </h1>
+  <div class="block lg:hidden" id="thumb-menu">
+    <!-- 创建移动设备下的菜单按钮容器 -->
+    <button id="thumb-open" type="button" class="block">
+      <!-- 打开菜单的按钮图标 -->
+      <i class="icon icon-menu-close"></i>
+    </button>
+    <button id="thumb-close" type="button" class="hidden">
+      <!-- 关闭菜单的按钮图标 -->
+      <i class="icon icon-menu-open"></i>
+    </button>
+  </div>
+</div>
+
+<div id="nav-list" class="lg:block hidden">
+  <!-- 创建导航列表容器 -->
+  <div class="w-full block lg:flex lg:justify-between border-external-bottom lg:border-gray-400 mt-10 text-gray-700 lg:text-lg">
+    <!-- 创建导航列表 -->
+    <div class="lg:flex -mb-px">
+      <!-- 创建导航项容器 -->
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-home"></i> 
+              <!-- 显示对应图标 -->
+              首页
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/archives" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-archive"></i> 
+              <!-- 显示对应图标 -->
+              归档
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/tags" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-tags"></i> 
+              <!-- 显示对应图标 -->
+              标签
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/post/about" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-user"></i> 
+              <!-- 显示对应图标 -->
+              关于
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+        <!-- 遍历导航菜单 -->
+        
+          <!-- 如果是内部链接 -->
+          <div class="pb-4">
+            <!-- 创建内部链接容器 -->
+            <a href="/essays" class="nav-link">
+              <!-- 显示内部链接 -->
+              <i class="icon icon-"></i> 
+              <!-- 显示对应图标 -->
+              测试菜单
+              <!-- 显示菜单项名称 -->
+            </a>
+          </div>
+        
+      
+      <!-- 循环结束 -->
+      <div class="search-frame pb-4">
+        <!-- 创建搜索框容器 -->
+        <i class="icon icon-search"></i>
+        <!-- 显示搜索图标 -->
+        <form id="search-form" action="https://shenshen6666.GitHub.io/search/">
+          <!-- 创建搜索表单 -->
+          <input name="searchContent" type="text" placeholder="Search..." />
+          <!-- 显示搜索框，并设置占位符 -->
+        </form>
+      </div>
+    </div>
+
+    <div class="lg:flex">
+      <!-- 创建右侧导航项容器 -->
+      <ul>
+        <!-- 创建导航链接列表 -->
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+          <!-- 遍历社交媒体链接 -->
+          
+        
+      </ul>
+      <!-- 社交媒体链接列表结束 -->
+
+      <a href="https://shenshen6666.GitHub.io/atom.xml" class="block mt-4 lg:mt-0 lg:ml-8 align-center hover:text-gray-900" target="_blank">
+        <!-- 创建 RSS 订阅链接 -->
+        <i class="icon icon-rss"></i>
+        <!-- 显示 RSS 图标 -->
+        RSS
+        <!-- 显示 RSS 文字 -->
+      </a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="mb-20 md:flex mt-10 lg:mt-6 md:border-internal md:border-gray-400 md:pt-2 lg:border-t-0 lg:pt-0">
+        <!-- 左侧内容保持不变 -->
+        <div class="w-full md:w-2/3 mt-6">
+          <h1 class="post-title text-3xl">SpringCloud02</h1>
+          
+          <div class="mt-6 lg:mt-10 post-content">
+            <h1 id="springcloud实用篇02">SpringCloud实用篇02</h1>
+<h1 id="0学习目标">0.学习目标</h1>
+<h1 id="1nacos配置管理">1.Nacos配置管理</h1>
+<p>Nacos除了可以做注册中心，同样可以做配置管理来使用。</p>
+<h2 id="11统一配置管理">1.1.统一配置管理</h2>
+<p>当微服务部署的实例越来越多，达到数十、数百时，逐个修改微服务配置就会让人抓狂，而且很容易出错。我们需要一种统一配置管理方案，可以集中管理所有实例的配置。</p>
+<figure data-type="image" tabindex="1"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714164426792.png" alt="image-20210714164426792" loading="lazy"></figure>
+<p>Nacos一方面可以将配置集中管理，另一方可以在配置变更时，及时通知微服务，实现配置的热更新。</p>
+<h3 id="111在nacos中添加配置文件">1.1.1.在nacos中添加配置文件</h3>
+<p>如何在nacos中管理配置呢？</p>
+<figure data-type="image" tabindex="2"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714164742924.png" alt="image-20210714164742924" loading="lazy"></figure>
+<p>然后在弹出的表单中，填写配置信息：</p>
+<figure data-type="image" tabindex="3"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714164856664.png" alt="image-20210714164856664" loading="lazy"></figure>
+<blockquote>
+<p>注意：项目的核心配置，需要热更新的配置才有放到nacos管理的必要。基本不会变更的一些配置还是保存在微服务本地比较好。</p>
+</blockquote>
+<h3 id="112从微服务拉取配置">1.1.2.从微服务拉取配置</h3>
+<p>微服务要拉取nacos中管理的配置，并且与本地的application.yml配置合并，才能完成项目启动。</p>
+<p>但如果尚未读取application.yml，又如何得知nacos地址呢？</p>
+<p>因此spring引入了一种新的配置文件：bootstrap.yaml文件，会在application.yml之前被读取，流程如下：</p>
+<figure data-type="image" tabindex="4"><img src="assets/L0iFYNF.png" alt="img" loading="lazy"></figure>
+<p>1）引入nacos-config依赖</p>
+<p>首先，在user-service服务中，引入nacos-config的客户端依赖：</p>
+<pre><code class="language-xml">&lt;!--nacos配置管理依赖--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-config&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>2）添加bootstrap.yaml</p>
+<p>然后，在user-service中添加一个bootstrap.yaml文件，内容如下：</p>
+<pre><code class="language-yaml">spring:
+  application:
+    name: userservice # 服务名称
+  profiles:
+    active: dev #开发环境，这里是dev 
+  cloud:
+    nacos:
+      server-addr: localhost:8848 # Nacos地址
+      config:
+        file-extension: yaml # 文件后缀名
+</code></pre>
+<p>这里会根据spring.cloud.nacos.server-addr获取nacos地址，再根据</p>
+<p><code>${spring.application.name}-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}</code>作为文件id，来读取配置。</p>
+<p>本例中，就是去读取<code>userservice-dev.yaml</code>：</p>
+<figure data-type="image" tabindex="5"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714170845901.png" alt="image-20210714170845901" loading="lazy"></figure>
+<p>3）读取nacos配置</p>
+<p>在user-service中的UserController中添加业务逻辑，读取pattern.dateformat配置：</p>
+<figure data-type="image" tabindex="6"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714170337448.png" alt="image-20210714170337448" loading="lazy"></figure>
+<p>完整代码：</p>
+<pre><code class="language-java">package cn.itcast.user.web;
+
+import cn.itcast.user.pojo.User;
+import cn.itcast.user.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+@Slf4j
+@RestController
+@RequestMapping(&quot;/user&quot;)
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+    @Value(&quot;${pattern.dateformat}&quot;)
+    private String dateformat;
+    
+    @GetMapping(&quot;now&quot;)
+    public String now(){
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern(dateformat));
+    }
+    // ...略
+}
+</code></pre>
+<p>在页面访问，可以看到效果：</p>
+<figure data-type="image" tabindex="7"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714170449612.png" alt="image-20210714170449612" loading="lazy"></figure>
+<h2 id="12配置热更新">1.2.配置热更新</h2>
+<p>我们最终的目的，是修改nacos中的配置后，微服务中无需重启即可让配置生效，也就是<strong>配置热更新</strong>。</p>
+<p>要实现配置热更新，可以使用两种方式：</p>
+<h3 id="121方式一">1.2.1.方式一</h3>
+<p>在@Value注入的变量所在类上添加注解@RefreshScope：</p>
+<figure data-type="image" tabindex="8"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714171036335.png" alt="image-20210714171036335" loading="lazy"></figure>
+<h3 id="122方式二">1.2.2.方式二</h3>
+<p>使用@ConfigurationProperties注解代替@Value注解。</p>
+<p>在user-service服务中，添加一个类，读取patterrn.dateformat属性：</p>
+<pre><code class="language-java">package cn.itcast.user.config;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+@Component
+@Data
+@ConfigurationProperties(prefix = &quot;pattern&quot;)
+public class PatternProperties {
+    private String dateformat;
+}
+</code></pre>
+<p>在UserController中使用这个类代替@Value：</p>
+<figure data-type="image" tabindex="9"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714171316124.png" alt="image-20210714171316124" loading="lazy"></figure>
+<p>完整代码：</p>
+<pre><code class="language-java">package cn.itcast.user.web;
+
+import cn.itcast.user.config.PatternProperties;
+import cn.itcast.user.pojo.User;
+import cn.itcast.user.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+@Slf4j
+@RestController
+@RequestMapping(&quot;/user&quot;)
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private PatternProperties patternProperties;
+
+    @GetMapping(&quot;now&quot;)
+    public String now(){
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern(patternProperties.getDateformat()));
+    }
+
+    // 略
+}
+</code></pre>
+<h2 id="13配置共享">1.3.配置共享</h2>
+<p>其实微服务启动时，会去nacos读取多个配置文件，例如：</p>
+<ul>
+<li>
+<p><code>[spring.application.name]-[spring.profiles.active].yaml</code>，例如：userservice-dev.yaml</p>
+</li>
+<li>
+<p><code>[spring.application.name].yaml</code>，例如：userservice.yaml</p>
+</li>
+</ul>
+<p>而<code>[spring.application.name].yaml</code>不包含环境，因此可以被多个环境共享。</p>
+<p>下面我们通过案例来测试配置共享</p>
+<h3 id="1添加一个环境共享配置">1）添加一个环境共享配置</h3>
+<p>我们在nacos中添加一个userservice.yaml文件：</p>
+<figure data-type="image" tabindex="10"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714173233650.png" alt="image-20210714173233650" loading="lazy"></figure>
+<h3 id="2在user-service中读取共享配置">2）在user-service中读取共享配置</h3>
+<p>在user-service服务中，修改PatternProperties类，读取新添加的属性：</p>
+<figure data-type="image" tabindex="11"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714173324231.png" alt="image-20210714173324231" loading="lazy"></figure>
+<p>在user-service服务中，修改UserController，添加一个方法：</p>
+<figure data-type="image" tabindex="12"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714173721309.png" alt="image-20210714173721309" loading="lazy"></figure>
+<h3 id="3运行两个userapplication使用不同的profile">3）运行两个UserApplication，使用不同的profile</h3>
+<p>修改UserApplication2这个启动项，改变其profile值：</p>
+<figure data-type="image" tabindex="13"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714173538538.png" alt="image-20210714173538538" loading="lazy"></figure>
+<figure data-type="image" tabindex="14"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714173519963.png" alt="image-20210714173519963" loading="lazy"></figure>
+<p>这样，UserApplication(8081)使用的profile是dev，UserApplication2(8082)使用的profile是test。</p>
+<p>启动UserApplication和UserApplication2</p>
+<p>访问http://localhost:8081/user/prop，结果：</p>
+<figure data-type="image" tabindex="15"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714174313344.png" alt="image-20210714174313344" loading="lazy"></figure>
+<p>访问http://localhost:8082/user/prop，结果：</p>
+<figure data-type="image" tabindex="16"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714174424818.png" alt="image-20210714174424818" loading="lazy"></figure>
+<p>可以看出来，不管是dev，还是test环境，都读取到了envSharedValue这个属性的值。</p>
+<h3 id="4配置共享的优先级">4）配置共享的优先级</h3>
+<p>当nacos、服务本地同时出现相同属性时，优先级有高低之分：</p>
+<figure data-type="image" tabindex="17"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714174623557.png" alt="image-20210714174623557" loading="lazy"></figure>
+<h2 id="14搭建nacos集群">1.4.搭建Nacos集群</h2>
+<p>Nacos生产环境下一定要部署为集群状态，部署方式参考课前资料中的文档：</p>
+<figure data-type="image" tabindex="18"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714174728042.png" alt="image-20210714174728042" loading="lazy"></figure>
+<h1 id="2feign远程调用">2.Feign远程调用</h1>
+<p>先来看我们以前利用RestTemplate发起远程调用的代码：</p>
+<figure data-type="image" tabindex="19"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714174814204.png" alt="image-20210714174814204" loading="lazy"></figure>
+<p>存在下面的问题：</p>
+<p>•代码可读性差，编程体验不统一</p>
+<p>•参数复杂URL难以维护</p>
+<p>Feign是一个声明式的http客户端，官方地址：https://github.com/OpenFeign/feign</p>
+<p>其作用就是帮助我们优雅的实现http请求的发送，解决上面提到的问题。</p>
+<figure data-type="image" tabindex="20"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714174918088.png" alt="image-20210714174918088" loading="lazy"></figure>
+<h2 id="21feign替代resttemplate">2.1.Feign替代RestTemplate</h2>
+<p>Fegin的使用步骤如下：</p>
+<h3 id="1引入依赖">1）引入依赖</h3>
+<p>我们在order-service服务的pom文件中引入feign的依赖：</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-openfeign&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="2添加注解">2）添加注解</h3>
+<p>在order-service的启动类添加注解开启Feign的功能：</p>
+<figure data-type="image" tabindex="21"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714175102524.png" alt="image-20210714175102524" loading="lazy"></figure>
+<h3 id="3编写feign的客户端">3）编写Feign的客户端</h3>
+<p>在order-service中新建一个接口，内容如下：</p>
+<pre><code class="language-java">package cn.itcast.order.client;
+
+import cn.itcast.order.pojo.User;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+@FeignClient(&quot;userservice&quot;)
+public interface UserClient {
+    @GetMapping(&quot;/user/{id}&quot;)
+    User findById(@PathVariable(&quot;id&quot;) Long id);
+}
+</code></pre>
+<p>这个客户端主要是基于SpringMVC的注解来声明远程调用的信息，比如：</p>
+<ul>
+<li>服务名称：userservice</li>
+<li>请求方式：GET</li>
+<li>请求路径：/user/{id}</li>
+<li>请求参数：Long id</li>
+<li>返回值类型：User</li>
+</ul>
+<p>这样，Feign就可以帮助我们发送http请求，无需自己使用RestTemplate来发送了。</p>
+<h3 id="4测试">4）测试</h3>
+<p>修改order-service中的OrderService类中的queryOrderById方法，使用Feign客户端代替RestTemplate：</p>
+<figure data-type="image" tabindex="22"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714175415087.png" alt="image-20210714175415087" loading="lazy"></figure>
+<p>是不是看起来优雅多了。</p>
+<h3 id="5总结">5）总结</h3>
+<p>使用Feign的步骤：</p>
+<p>① 引入依赖</p>
+<p>② 添加@EnableFeignClients注解</p>
+<p>③ 编写FeignClient接口</p>
+<p>④ 使用FeignClient中定义的方法代替RestTemplate</p>
+<h2 id="22自定义配置">2.2.自定义配置</h2>
+<p>Feign可以支持很多的自定义配置，如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>作用</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>feign.Logger.Level</strong></td>
+<td>修改日志级别</td>
+<td>包含四种不同的级别：NONE、BASIC、HEADERS、FULL</td>
+</tr>
+<tr>
+<td>feign.codec.Decoder</td>
+<td>响应结果的解析器</td>
+<td>http远程调用的结果做解析，例如解析json字符串为java对象</td>
+</tr>
+<tr>
+<td>feign.codec.Encoder</td>
+<td>请求参数编码</td>
+<td>将请求参数编码，便于通过http请求发送</td>
+</tr>
+<tr>
+<td>feign. Contract</td>
+<td>支持的注解格式</td>
+<td>默认是SpringMVC的注解</td>
+</tr>
+<tr>
+<td>feign. Retryer</td>
+<td>失败重试机制</td>
+<td>请求失败的重试机制，默认是没有，不过会使用Ribbon的重试</td>
+</tr>
+</tbody>
+</table>
+<p>一般情况下，默认值就能满足我们使用，如果要自定义时，只需要创建自定义的@Bean覆盖默认Bean即可。</p>
+<p>下面以日志为例来演示如何自定义配置。</p>
+<h3 id="221配置文件方式">2.2.1.配置文件方式</h3>
+<p>基于配置文件修改feign的日志级别可以针对单个服务：</p>
+<pre><code class="language-yaml">feign:  
+  client:
+    config: 
+      userservice: # 针对某个微服务的配置
+        loggerLevel: FULL #  日志级别 
+</code></pre>
+<p>也可以针对所有服务：</p>
+<pre><code class="language-yaml">feign:  
+  client:
+    config: 
+      default: # 这里用default就是全局配置，如果是写服务名称，则是针对某个微服务的配置
+        loggerLevel: FULL #  日志级别 
+
+</code></pre>
+<p>而日志的级别分为四种：</p>
+<ul>
+<li>NONE：不记录任何日志信息，这是默认值。</li>
+<li>BASIC：仅记录请求的方法，URL以及响应状态码和执行时间</li>
+<li>HEADERS：在BASIC的基础上，额外记录了请求和响应的头信息</li>
+<li>FULL：记录所有请求和响应的明细，包括头信息、请求体、元数据。</li>
+</ul>
+<h3 id="222java代码方式">2.2.2.Java代码方式</h3>
+<p>也可以基于Java代码来修改日志级别，先声明一个类，然后声明一个Logger.Level的对象：</p>
+<pre><code class="language-java">public class DefaultFeignConfiguration  {
+    @Bean
+    public Logger.Level feignLogLevel(){
+        return Logger.Level.BASIC; // 日志级别为BASIC
+    }
+}
+
+</code></pre>
+<p>如果要<strong>全局生效</strong>，将其放到启动类的@EnableFeignClients这个注解中：</p>
+<pre><code class="language-java">@EnableFeignClients(defaultConfiguration = DefaultFeignConfiguration .class) 
+
+</code></pre>
+<p>如果是<strong>局部生效</strong>，则把它放到对应的@FeignClient这个注解中：</p>
+<pre><code class="language-java">@FeignClient(value = &quot;userservice&quot;, configuration = DefaultFeignConfiguration .class) 
+
+</code></pre>
+<h2 id="23feign使用优化">2.3.Feign使用优化</h2>
+<p>Feign底层发起http请求，依赖于其它的框架。其底层客户端实现包括：</p>
+<p>•URLConnection：默认实现，不支持连接池</p>
+<p>•Apache HttpClient ：支持连接池</p>
+<p>•OKHttp：支持连接池</p>
+<p>因此提高Feign的性能主要手段就是使用<strong>连接池</strong>代替默认的URLConnection。</p>
+<p>这里我们用Apache的HttpClient来演示。</p>
+<p>1）引入依赖</p>
+<p>在order-service的pom文件中引入Apache的HttpClient依赖：</p>
+<pre><code class="language-xml">&lt;!--httpClient的依赖 --&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;io.github.openfeign&lt;/groupId&gt;
+    &lt;artifactId&gt;feign-httpclient&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+</code></pre>
+<p>2）配置连接池</p>
+<p>在order-service的application.yml中添加配置：</p>
+<pre><code class="language-yaml">feign:
+  client:
+    config:
+      default: # default全局的配置
+        loggerLevel: BASIC # 日志级别，BASIC就是基本的请求和响应信息
+  httpclient:
+    enabled: true # 开启feign对HttpClient的支持
+    max-connections: 200 # 最大的连接数
+    max-connections-per-route: 50 # 每个路径的最大连接数
+
+</code></pre>
+<p>接下来，在FeignClientFactoryBean中的loadBalance方法中打断点：</p>
+<figure data-type="image" tabindex="23"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714185925910.png" alt="image-20210714185925910" loading="lazy"></figure>
+<p>Debug方式启动order-service服务，可以看到这里的client，底层就是Apache HttpClient：</p>
+<figure data-type="image" tabindex="24"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714190041542.png" alt="image-20210714190041542" loading="lazy"></figure>
+<p>总结，Feign的优化：</p>
+<p>1.日志级别尽量用basic</p>
+<p>2.使用HttpClient或OKHttp代替URLConnection</p>
+<p>①  引入feign-httpClient依赖</p>
+<p>②  配置文件开启httpClient功能，设置连接池参数</p>
+<h2 id="24最佳实践">2.4.最佳实践</h2>
+<p>所谓最近实践，就是使用过程中总结的经验，最好的一种使用方式。</p>
+<p>自习观察可以发现，Feign的客户端与服务提供者的controller代码非常相似：</p>
+<p>feign客户端：</p>
+<figure data-type="image" tabindex="25"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714190542730.png" alt="image-20210714190542730" loading="lazy"></figure>
+<p>UserController：</p>
+<figure data-type="image" tabindex="26"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714190528450.png" alt="image-20210714190528450" loading="lazy"></figure>
+<p>有没有一种办法简化这种重复的代码编写呢？</p>
+<h3 id="241继承方式">2.4.1.继承方式</h3>
+<p>一样的代码可以通过继承来共享：</p>
+<p>1）定义一个API接口，利用定义方法，并基于SpringMVC注解做声明。</p>
+<p>2）Feign客户端和Controller都集成改接口</p>
+<figure data-type="image" tabindex="27"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714190640857.png" alt="image-20210714190640857" loading="lazy"></figure>
+<p>优点：</p>
+<ul>
+<li>简单</li>
+<li>实现了代码共享</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>
+<p>服务提供方、服务消费方紧耦合</p>
+</li>
+<li>
+<p>参数列表中的注解映射并不会继承，因此Controller中必须再次声明方法、参数列表、注解</p>
+</li>
+</ul>
+<h3 id="242抽取方式">2.4.2.抽取方式</h3>
+<p>将Feign的Client抽取为独立模块，并且把接口有关的POJO、默认的Feign配置都放到这个模块中，提供给所有消费者使用。</p>
+<p>例如，将UserClient、User、Feign的默认配置都抽取到一个feign-api包中，所有微服务引用该依赖包，即可直接使用。</p>
+<figure data-type="image" tabindex="28"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714214041796.png" alt="image-20210714214041796" loading="lazy"></figure>
+<h3 id="243实现基于抽取的最佳实践">2.4.3.实现基于抽取的最佳实践</h3>
+<h4 id="1抽取">1）抽取</h4>
+<p>首先创建一个module，命名为feign-api：</p>
+<figure data-type="image" tabindex="29"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714204557771.png" alt="image-20210714204557771" loading="lazy"></figure>
+<p>项目结构：</p>
+<figure data-type="image" tabindex="30"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714204656214.png" alt="image-20210714204656214" loading="lazy"></figure>
+<p>在feign-api中然后引入feign的starter依赖</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-openfeign&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+</code></pre>
+<p>然后，order-service中编写的UserClient、User、DefaultFeignConfiguration都复制到feign-api项目中</p>
+<figure data-type="image" tabindex="31"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714205221970.png" alt="image-20210714205221970" loading="lazy"></figure>
+<h4 id="2在order-service中使用feign-api">2）在order-service中使用feign-api</h4>
+<p>首先，删除order-service中的UserClient、User、DefaultFeignConfiguration等类或接口。</p>
+<p>在order-service的pom文件中中引入feign-api的依赖：</p>
+<pre><code class="language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;cn.itcast.demo&lt;/groupId&gt;
+    &lt;artifactId&gt;feign-api&lt;/artifactId&gt;
+    &lt;version&gt;1.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+</code></pre>
+<p>修改order-service中的所有与上述三个组件有关的导包部分，改成导入feign-api中的包</p>
+<h4 id="3重启测试">3）重启测试</h4>
+<p>重启后，发现服务报错了：</p>
+<figure data-type="image" tabindex="32"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714205623048.png" alt="image-20210714205623048" loading="lazy"></figure>
+<p>这是因为UserClient现在在cn.itcast.feign.clients包下，</p>
+<p>而order-service的@EnableFeignClients注解是在cn.itcast.order包下，不在同一个包，无法扫描到UserClient。</p>
+<h4 id="4解决扫描包问题">4）解决扫描包问题</h4>
+<p>方式一：</p>
+<p>指定Feign应该扫描的包：</p>
+<pre><code class="language-java">@EnableFeignClients(basePackages = &quot;cn.itcast.feign.clients&quot;)
+
+</code></pre>
+<p>方式二：</p>
+<p>指定需要加载的Client接口：</p>
+<pre><code class="language-java">@EnableFeignClients(clients = {UserClient.class})
+
+</code></pre>
+<h1 id="3gateway服务网关">3.Gateway服务网关</h1>
+<p>Spring Cloud Gateway 是 Spring Cloud 的一个全新项目，该项目是基于 Spring 5.0，Spring Boot 2.0 和 Project Reactor 等响应式编程和事件流技术开发的网关，它旨在为微服务架构提供一种简单有效的统一的 API 路由管理方式。</p>
+<h2 id="31为什么需要网关">3.1.为什么需要网关</h2>
+<p>Gateway网关是我们服务的守门神，所有微服务的统一入口。</p>
+<p>网关的<strong>核心功能特性</strong>：</p>
+<ul>
+<li>请求路由</li>
+<li>权限控制</li>
+<li>限流</li>
+</ul>
+<p>架构图：</p>
+<figure data-type="image" tabindex="33"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714210131152.png" alt="image-20210714210131152" loading="lazy"></figure>
+<p><strong>权限控制</strong>：网关作为微服务入口，需要校验用户是是否有请求资格，如果没有则进行拦截。</p>
+<p><strong>路由和负载均衡</strong>：一切请求都必须先经过gateway，但网关不处理业务，而是根据某种规则，把请求转发到某个微服务，这个过程叫做路由。当然路由的目标服务有多个时，还需要做负载均衡。</p>
+<p><strong>限流</strong>：当请求流量过高时，在网关中按照下流的微服务能够接受的速度来放行请求，避免服务压力过大。</p>
+<p>在SpringCloud中网关的实现包括两种：</p>
+<ul>
+<li>gateway</li>
+<li>zuul</li>
+</ul>
+<p>Zuul是基于Servlet的实现，属于阻塞式编程。而SpringCloudGateway则是基于Spring5中提供的WebFlux，属于响应式编程的实现，具备更好的性能。</p>
+<h2 id="32gateway快速入门">3.2.gateway快速入门</h2>
+<p>下面，我们就演示下网关的基本路由功能。基本步骤如下：</p>
+<ol>
+<li>创建SpringBoot工程gateway，引入网关依赖</li>
+<li>编写启动类</li>
+<li>编写基础配置和路由规则</li>
+<li>启动网关服务进行测试</li>
+</ol>
+<h3 id="1创建gateway服务引入依赖">1）创建gateway服务，引入依赖</h3>
+<p>创建服务：</p>
+<figure data-type="image" tabindex="34"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714210919458.png" alt="image-20210714210919458" loading="lazy"></figure>
+<p>引入依赖：</p>
+<pre><code class="language-xml">&lt;!--网关--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!--nacos服务发现依赖--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+</code></pre>
+<h3 id="2编写启动类">2）编写启动类</h3>
+<pre><code class="language-java">package cn.itcast.gateway;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class GatewayApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(GatewayApplication.class, args);
+	}
+}
+
+</code></pre>
+<h3 id="3编写基础配置和路由规则">3）编写基础配置和路由规则</h3>
+<p>创建application.yml文件，内容如下：</p>
+<pre><code class="language-yaml">server:
+  port: 10010 # 网关端口
+spring:
+  application:
+    name: gateway # 服务名称
+  cloud:
+    nacos:
+      server-addr: localhost:8848 # nacos地址
+    gateway:
+      routes: # 网关路由配置
+        - id: user-service # 路由id，自定义，只要唯一即可
+          # uri: http://127.0.0.1:8081 # 路由的目标地址 http就是固定地址
+          uri: lb://userservice # 路由的目标地址 lb就是负载均衡，后面跟服务名称
+          predicates: # 路由断言，也就是判断请求是否符合路由规则的条件
+            - Path=/user/** # 这个是按照路径匹配，只要以/user/开头就符合要求
+
+</code></pre>
+<p>我们将符合<code>Path</code> 规则的一切请求，都代理到 <code>uri</code>参数指定的地址。</p>
+<p>本例中，我们将 <code>/user/**</code>开头的请求，代理到<code>lb://userservice</code>，lb是负载均衡，根据服务名拉取服务列表，实现负载均衡。</p>
+<h3 id="4重启测试">4）重启测试</h3>
+<p>重启网关，访问http://localhost:10010/user/1时，符合<code>/user/**</code>规则，请求转发到uri：http://userservice/user/1，得到了结果：</p>
+<figure data-type="image" tabindex="35"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714211908341.png" alt="image-20210714211908341" loading="lazy"></figure>
+<h3 id="5网关路由的流程图">5）网关路由的流程图</h3>
+<p>整个访问的流程如下：</p>
+<figure data-type="image" tabindex="36"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714211742956.png" alt="image-20210714211742956" loading="lazy"></figure>
+<p>总结：</p>
+<p>网关搭建步骤：</p>
+<ol>
+<li>
+<p>创建项目，引入nacos服务发现和gateway依赖</p>
+</li>
+<li>
+<p>配置application.yml，包括服务基本信息、nacos地址、路由</p>
+</li>
+</ol>
+<p>路由配置包括：</p>
+<ol>
+<li>
+<p>路由id：路由的唯一标示</p>
+</li>
+<li>
+<p>路由目标（uri）：路由的目标地址，http代表固定地址，lb代表根据服务名负载均衡</p>
+</li>
+<li>
+<p>路由断言（predicates）：判断路由的规则，</p>
+</li>
+<li>
+<p>路由过滤器（filters）：对请求或响应做处理</p>
+</li>
+</ol>
+<p>接下来，就重点来学习路由断言和路由过滤器的详细知识</p>
+<h2 id="33断言工厂">3.3.断言工厂</h2>
+<p>我们在配置文件中写的断言规则只是字符串，这些字符串会被Predicate Factory读取并处理，转变为路由判断的条件</p>
+<p>例如Path=/user/**是按照路径匹配，这个规则是由</p>
+<p><code>org.springframework.cloud.gateway.handler.predicate.PathRoutePredicateFactory</code>类来</p>
+<p>处理的，像这样的断言工厂在SpringCloudGateway还有十几个:</p>
+<table>
+<thead>
+<tr>
+<th><strong>名称</strong></th>
+<th><strong>说明</strong></th>
+<th><strong>示例</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>After</td>
+<td>是某个时间点后的请求</td>
+<td>-  After=2037-01-20T17:42:47.789-07:00[America/Denver]</td>
+</tr>
+<tr>
+<td>Before</td>
+<td>是某个时间点之前的请求</td>
+<td>-  Before=2031-04-13T15:14:47.433+08:00[Asia/Shanghai]</td>
+</tr>
+<tr>
+<td>Between</td>
+<td>是某两个时间点之前的请求</td>
+<td>-  Between=2037-01-20T17:42:47.789-07:00[America/Denver],  2037-01-21T17:42:47.789-07:00[America/Denver]</td>
+</tr>
+<tr>
+<td>Cookie</td>
+<td>请求必须包含某些cookie</td>
+<td>- Cookie=chocolate, ch.p</td>
+</tr>
+<tr>
+<td>Header</td>
+<td>请求必须包含某些header</td>
+<td>- Header=X-Request-Id, \d+</td>
+</tr>
+<tr>
+<td>Host</td>
+<td>请求必须是访问某个host（域名）</td>
+<td>-  Host=<strong>.somehost.org,</strong>.anotherhost.org</td>
+</tr>
+<tr>
+<td>Method</td>
+<td>请求方式必须是指定方式</td>
+<td>- Method=GET,POST</td>
+</tr>
+<tr>
+<td>Path</td>
+<td>请求路径必须符合指定规则</td>
+<td>- Path=/red/{segment},/blue/**</td>
+</tr>
+<tr>
+<td>Query</td>
+<td>请求参数必须包含指定参数</td>
+<td>- Query=name, Jack或者-  Query=name</td>
+</tr>
+<tr>
+<td>RemoteAddr</td>
+<td>请求者的ip必须是指定范围</td>
+<td>- RemoteAddr=192.168.1.1/24</td>
+</tr>
+<tr>
+<td>Weight</td>
+<td>权重处理</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>我们只需要掌握Path这种路由工程就可以了。</p>
+<h2 id="34过滤器工厂">3.4.过滤器工厂</h2>
+<p>GatewayFilter是网关中提供的一种过滤器，可以对进入网关的请求和微服务返回的响应做处理：</p>
+<figure data-type="image" tabindex="37"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714212312871.png" alt="image-20210714212312871" loading="lazy"></figure>
+<h3 id="341路由过滤器的种类">3.4.1.路由过滤器的种类</h3>
+<p>Spring提供了31种不同的路由过滤器工厂。例如：</p>
+<table>
+<thead>
+<tr>
+<th><strong>名称</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AddRequestHeader</td>
+<td>给当前请求添加一个请求头</td>
+</tr>
+<tr>
+<td>RemoveRequestHeader</td>
+<td>移除请求中的一个请求头</td>
+</tr>
+<tr>
+<td>AddResponseHeader</td>
+<td>给响应结果中添加一个响应头</td>
+</tr>
+<tr>
+<td>RemoveResponseHeader</td>
+<td>从响应结果中移除有一个响应头</td>
+</tr>
+<tr>
+<td>RequestRateLimiter</td>
+<td>限制请求的流量</td>
+</tr>
+</tbody>
+</table>
+<h3 id="342请求头过滤器">3.4.2.请求头过滤器</h3>
+<p>下面我们以AddRequestHeader 为例来讲解。</p>
+<blockquote>
+<p><strong>需求</strong>：给所有进入userservice的请求添加一个请求头：Truth=itcast is freaking awesome!</p>
+</blockquote>
+<p>只需要修改gateway服务的application.yml文件，添加路由过滤即可：</p>
+<pre><code class="language-yaml">spring:
+  cloud:
+    gateway:
+      routes:
+      - id: user-service 
+        uri: lb://userservice 
+        predicates: 
+        - Path=/user/** 
+        filters: # 过滤器
+        - AddRequestHeader=Truth, Itcast is freaking awesome! # 添加请求头
+
+</code></pre>
+<p>当前过滤器写在userservice路由下，因此仅仅对访问userservice的请求有效。</p>
+<h3 id="343默认过滤器">3.4.3.默认过滤器</h3>
+<p>如果要对所有的路由都生效，则可以将过滤器工厂写到default下。格式如下：</p>
+<pre><code class="language-yaml">spring:
+  cloud:
+    gateway:
+      routes:
+      - id: user-service 
+        uri: lb://userservice 
+        predicates: 
+        - Path=/user/**
+      default-filters: # 默认过滤项
+      - AddRequestHeader=Truth, Itcast is freaking awesome! 
+
+</code></pre>
+<h3 id="344总结">3.4.4.总结</h3>
+<p>过滤器的作用是什么？</p>
+<p>① 对路由的请求或响应做加工处理，比如添加请求头</p>
+<p>② 配置在路由下的过滤器只对当前路由的请求生效</p>
+<p>defaultFilters的作用是什么？</p>
+<p>① 对所有路由都生效的过滤器</p>
+<h2 id="35全局过滤器">3.5.全局过滤器</h2>
+<p>上一节学习的过滤器，网关提供了31种，但每一种过滤器的作用都是固定的。如果我们希望拦截请求，做自己的业务逻辑则没办法实现。</p>
+<h3 id="351全局过滤器作用">3.5.1.全局过滤器作用</h3>
+<p>全局过滤器的作用也是处理一切进入网关的请求和微服务响应，与GatewayFilter的作用一样。区别在于GatewayFilter通过配置定义，处理逻辑是固定的；而GlobalFilter的逻辑需要自己写代码实现。</p>
+<p>定义方式是实现GlobalFilter接口。</p>
+<pre><code class="language-java">public interface GlobalFilter {
+    /**
+     *  处理当前请求，有必要的话通过{@link GatewayFilterChain}将请求交给下一个过滤器处理
+     *
+     * @param exchange 请求上下文，里面可以获取Request、Response等信息
+     * @param chain 用来把请求委托给下一个过滤器 
+     * @return {@code Mono&lt;Void&gt;} 返回标示当前过滤器业务结束
+     */
+    Mono&lt;Void&gt; filter(ServerWebExchange exchange, GatewayFilterChain chain);
+}
+
+</code></pre>
+<p>在filter中编写自定义逻辑，可以实现下列功能：</p>
+<ul>
+<li>登录状态判断</li>
+<li>权限校验</li>
+<li>请求限流等</li>
+</ul>
+<h3 id="352自定义全局过滤器">3.5.2.自定义全局过滤器</h3>
+<p>需求：定义全局过滤器，拦截请求，判断请求的参数是否满足下面条件：</p>
+<ul>
+<li>
+<p>参数中是否有authorization，</p>
+</li>
+<li>
+<p>authorization参数值是否为admin</p>
+</li>
+</ul>
+<p>如果同时满足则放行，否则拦截</p>
+<p>实现：</p>
+<p>在gateway中定义一个过滤器：</p>
+<pre><code class="language-java">package cn.itcast.gateway.filters;
+
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
+
+@Order(-1)
+@Component
+public class AuthorizeFilter implements GlobalFilter {
+    @Override
+    public Mono&lt;Void&gt; filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        // 1.获取请求参数
+        MultiValueMap&lt;String, String&gt; params = exchange.getRequest().getQueryParams();
+        // 2.获取authorization参数
+        String auth = params.getFirst(&quot;authorization&quot;);
+        // 3.校验
+        if (&quot;admin&quot;.equals(auth)) {
+            // 放行
+            return chain.filter(exchange);
+        }
+        // 4.拦截
+        // 4.1.禁止访问，设置状态码
+        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+        // 4.2.结束处理
+        return exchange.getResponse().setComplete();
+    }
+}
+
+</code></pre>
+<h3 id="353过滤器执行顺序">3.5.3.过滤器执行顺序</h3>
+<p>请求进入网关会碰到三类过滤器：当前路由的过滤器、DefaultFilter、GlobalFilter</p>
+<p>请求路由后，会将当前路由过滤器和DefaultFilter、GlobalFilter，合并到一个过滤器链（集合）中，排序后依次执行每个过滤器：</p>
+<figure data-type="image" tabindex="38"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714214228409.png" alt="image-20210714214228409" loading="lazy"></figure>
+<p>排序的规则是什么呢？</p>
+<ul>
+<li>每一个过滤器都必须指定一个int类型的order值，<strong>order值越小，优先级越高，执行顺序越靠前</strong>。</li>
+<li>GlobalFilter通过实现Ordered接口，或者添加@Order注解来指定order值，由我们自己指定</li>
+<li>路由过滤器和defaultFilter的order由Spring指定，默认是按照声明顺序从1递增。</li>
+<li>当过滤器的order值一样时，会按照 defaultFilter &gt; 路由过滤器 &gt; GlobalFilter的顺序执行。</li>
+</ul>
+<p>详细内容，可以查看源码：</p>
+<p><code>org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator#getFilters()</code>方法是先加载defaultFilters，然后再加载某个route的filters，然后合并。</p>
+<p><code>org.springframework.cloud.gateway.handler.FilteringWebHandler#handle()</code>方法会加载全局过滤器，与前面的过滤器合并后根据order排序，组织过滤器链</p>
+<h2 id="36跨域问题">3.6.跨域问题</h2>
+<h3 id="361什么是跨域问题">3.6.1.什么是跨域问题</h3>
+<p>跨域：域名不一致就是跨域，主要包括：</p>
+<ul>
+<li>
+<p>域名不同： www.taobao.com 和 www.taobao.org 和 www.jd.com 和 miaosha.jd.com</p>
+</li>
+<li>
+<p>域名相同，端口不同：localhost:8080和localhost8081</p>
+</li>
+</ul>
+<p>跨域问题：浏览器禁止请求的发起者与服务端发生跨域ajax请求，请求被浏览器拦截的问题</p>
+<p>解决方案：CORS，这个以前应该学习过，这里不再赘述了。不知道的小伙伴可以查看https://www.ruanyifeng.com/blog/2016/04/cors.html</p>
+<h3 id="362模拟跨域问题">3.6.2.模拟跨域问题</h3>
+<p>找到课前资料的页面文件：</p>
+<figure data-type="image" tabindex="39"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714215713563.png" alt="image-20210714215713563" loading="lazy"></figure>
+<p>放入tomcat或者nginx这样的web服务器中，启动并访问。</p>
+<p>可以在浏览器控制台看到下面的错误：</p>
+<figure data-type="image" tabindex="40"><img src="https://shenshen6666.GitHub.io/post-images/image-20210714215832675.png" alt="image-20210714215832675" loading="lazy"></figure>
+<p>从localhost:8090访问localhost:10010，端口不同，显然是跨域的请求。</p>
+<h3 id="363解决跨域问题">3.6.3.解决跨域问题</h3>
+<p>在gateway服务的application.yml文件中，添加下面的配置：</p>
+<pre><code class="language-yaml">spring:
+  cloud:
+    gateway:
+      # 。。。
+      globalcors: # 全局的跨域处理
+        add-to-simple-url-handler-mapping: true # 解决options请求被拦截问题
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: # 允许哪些网站的跨域请求 
+              - &quot;http://localhost:8090&quot;
+            allowedMethods: # 允许的跨域ajax的请求方式
+              - &quot;GET&quot;
+              - &quot;POST&quot;
+              - &quot;DELETE&quot;
+              - &quot;PUT&quot;
+              - &quot;OPTIONS&quot;
+            allowedHeaders: &quot;*&quot; # 允许在请求中携带的头信息
+            allowCredentials: true # 是否允许携带cookie
+            maxAge: 360000 # 这次跨域检测的有效期
+
+</code></pre>
+
+          </div>
+        </div>
+
+        <!-- 右侧内容优化分组 -->
+        <div class="w-full md:w-1/3 mt-6 md:pl-8" id="additionalContent">
+          <div class="sidebar-section">
+            <!-- 信息模块保持不变 -->
+            
+  <!-- 检查是否存在微信支付二维码 -->
+  <h4 class="text-base font-thin text-gray-700 mb-2 mt-6">
+    <!-- 赞赏标题 -->
+    <i class="icon icon-sponsor"></i>
+    <!-- 赞赏图标 -->
+    赞赏
+    <!-- 赞赏文本 -->
+  </h4>
+  <div class="post-sponsor text-gray-700">
+    <!-- 赞赏内容容器 -->
+    <img class="post-sponsor-img w-32 h-32 md:w-40 md:h-40" src="https://shenshen6666.GitHub.io\media\images\custom-weChatPayQR.png" alt="">
+    <!-- 微信支付二维码 -->
+    <div>
+      <!-- 支付提示 -->
+      <i class="icon icon-wechat"></i>
+      <!-- 微信图标 -->
+      支付宝扫一扫领红包
+      <!-- 支付宝提示 -->
+    </div>
+  </div>
+
+
+          </div>
+
+          <!-- 浮动窗口和控件 -->
+          <style>
+            /* 滑动条样式 */
+            .url-slider {
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              height: 30px;
+              background: rgba(255, 255, 255, 0.95);
+              border-top: 1px solid #e0e0e0;
+              display: flex;
+              align-items: center;
+              padding: 0 10px;
+            }
+          
+            .url-list {
+              width: 100%;
+              overflow-x: auto;
+              white-space: nowrap;
+              scrollbar-width: thin;
+              padding: 5px 0;
+            }
+          
+            .url-item {
+              display: inline-block;
+              padding: 4px 8px;
+              margin: 0 4px;
+              background: #f0f0f0;
+              border-radius: 4px;
+              cursor: pointer;
+            }
+          
+            .url-item.active {
+              background: var(--hover-color);
+              color: white;
+            }
+          </style>
+          
+          <!-- 在 body 中的浮动窗口部分 -->
+                  <div class="zhihu-iframe mt-6">
+                    <iframe src="https://onehu.xyz/" style="width:100%;height:calc(100% - 30px);border:none;"></iframe>
+                    <div class="url-slider">
+                      <div class="url-list" id="urlList"></div>
+                    </div>
+            <button class="control-btn" id="menuButton">⚙️</button>
+            <div class="url-menu">
+              <input type="text" id="customUrl" placeholder="输入自定义网址" class="url-input">
+              <div class="quick-urls">
+                <button class="grey-btn" data-url="https://onehu.xyz/">默认</button>
+                <button class="grey-btn" data-url="https://novelsj.xyz/">盐王</button>
+                <button data-url="https://www.bilibili.com/">哔哩哔哩</button>
+              </div>
+              <button class="confirm-btn" id="applyUrl">确定</button>
+            </div>
+          </div>
+
+          <!-- 控件按钮组 -->
+          <div class="float-control-group">
+            <button class="control-btn" id="toggleButton">↔️</button>
+            <button class="control-btn" id="moveUpButton">↑</button>
+            <button class="control-btn" id="moveDownButton">↓</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer border-gray-400 border-external-top pt-6 mt-6 sm:mt-8 md:mt-10 mb-20 text-gray-700 text-sm sm:text-base lg:text-lg">
+  <!-- 创建页脚容器，设置边框和样式 -->
+  Powered by <a href="https://github.com/shenshen6666/shenshen6666.GitHub.io" target="_blank">我的小屋</a>
+  <!-- 显示页脚信息 -->
+</div>
+
+    </div>
+  </div>
+
+  <!-- 脚本优化 -->
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="https://shenshen6666.GitHub.io/media/js/prism.js"></script>
+  <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+  <script>
+    (function() {
+      'use strict';
+      
+      // 模块初始化
+      const uiModule = (() => {
+        const elements = {
+          iframe: document.querySelector('.zhihu-iframe'),
+          toggleBtn: $('#toggleButton'),
+          moveUpBtn: $('#moveUpButton'),
+          moveDownBtn: $('#moveDownButton'),
+          menu: $('.url-menu'),
+          menuBtn: $('#menuButton')
+        };
+
+        // 位置控制
+        const moveFrame = (direction) => {
+          const current = parseFloat(elements.iframe.style.top) || 5;
+          elements.iframe.style.top = `${current + (direction === 'up' ? -10 : 10)}px`;
+        };
+
+        // URL 控制
+        const updateFrameUrl = (url) => {
+          elements.iframe.querySelector('iframe').src = url;
+        };
+
+        return {
+          init() {
+            // 初始尺寸
+            elements.iframe.style.width = '320px';
+            elements.iframe.style.height = '500px';
+
+            // 事件绑定
+            elements.toggleBtn.on('click', () => {
+              $('.zhihu-iframe, #additionalContent .mt-6').toggle();
+            });
+
+            elements.moveUpBtn.on('click', () => moveFrame('up'));
+            elements.moveDownBtn.on('click', () => moveFrame('down'));
+
+            // 点击菜单按钮时切换显示状态
+            elements.menuBtn.on('click', (e) => {
+              e.stopPropagation();
+              elements.menu.toggle();
+            });
+
+            // “默认”、“盐王”按钮：点击后立即更新 URL 并关闭菜单
+            $('.url-menu button[data-url]').on('click', function(e) {
+              e.stopPropagation();
+              const url = $(this).data('url');
+              const btnText = $(this).text();
+              if (btnText === '默认' || btnText === '盐王') {
+                updateFrameUrl(url);
+                elements.menu.hide();
+              } else if (btnText === '哔哩哔哩') {
+                // 只更新输入框，不关闭菜单
+                $('#customUrl').val(url);
+              }
+            });
+
+            // “确定”按钮：只有点击后才会关闭菜单
+            $('#applyUrl').on('click', (e) => {
+              e.stopPropagation();
+              const url = $('#customUrl').val();
+              if (url) {
+                updateFrameUrl(url);
+                elements.menu.hide();
+              }
+            });
+
+            // 阻止菜单内部点击时冒泡（防止因外部绑定而意外关闭）
+            elements.menu.on('click', (e) => {
+              e.stopPropagation();
+            });
+          }
+        };
+      })();
+
+      // 初始化模块
+      document.addEventListener('DOMContentLoaded', () => {
+        uiModule.init();
+        Prism.highlightAll();
+      });
+    })();
+  </script>
+</body>
+</html>
